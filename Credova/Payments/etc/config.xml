@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Configuration
+ *
+ * @category  Credova
+ * @package   Credova_Payments
+ * @author    Credova <info@credova.com>
+ * @copyright 2024 Credova
+ * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
+ * @link https://credova.com/
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
+    <default>
+        <payment>
+            <credovapayments>
+                <active>0</active>
+                <title>Credova Payments</title>
+                <environment>0</environment>                
+                <model>Credova\Payments\Model\PaymentMethod</model>
+            </credovapayments>
+        </payment>
+    </default>
+</config>

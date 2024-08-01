@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * DI File
+ *
+ * @category  Credova
+ * @package   Credova_Payments
+ * @author    Credova <info@credova.com>
+ * @copyright 2024 Credova
+ * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
+ * @link https://credova.com/
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- <type name="Credova\Payments\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Credova\Payments\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">credovalog</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Credova\Payments\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Credova\Payments\Logger\Handler\Financial" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/credova-debug.log</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="Credova\Payments\Logger\Financial" type="Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">credovaLogger</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Credova\Payments\Logger\Handler\Financial</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Credova\Payments\Api\RequestAbstract">
+        <arguments>
+            <argument name="logger" xsi:type="object">Credova\Payments\Logger\Financial</argument>
+        </arguments>
+    </type>
+
+    <preference for="Credova\Payments\Api\Data\ApplicationInfoInterface" type="Credova\Payments\Model\Data\Application" />
+    <preference for="Credova\Payments\Api\Data\FederalLicenseInterface" type="Credova\Payments\Model\Data\FederalLicense"/>
+
+    <preference for="Credova\Payments\Api\ApplicationInterface" type="Credova\Payments\Model\Api\Application" />
+    <preference for="Credova\Payments\Api\FederalLicenseRepositoryInterface" type="Credova\Payments\Model\Api\FederalLicenseRepository"/>
+    <preference for="Credova\Payments\Api\ReturnInterface" type="Credova\Payments\Model\Api\ReturnRequest" />
+
+    <virtualType name="Credova\Payments\Model\ResourceModel\Grid\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">sales_order_grid</argument>
+            <argument name="resourceModel" xsi:type="string">Credova\Payments\Model\ResourceModel\Grid</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="grid_record_grid_list_data_source" xsi:type="string">Credova\Payments\Model\ResourceModel\Grid\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="persist_credova_extension_attributes" type="Credova\Payments\Plugin\Sales\OrderRepository"/>
+    </type> -->
+    <!-- <type name="Credova\Payments\Model\PaymentMethod">
+        <plugin name="credovaplug" type="Credova\Payments\Plugin\Credovaplug" disabled="false" sortOrder="10"/>
+    </type> -->
+
+</config>
