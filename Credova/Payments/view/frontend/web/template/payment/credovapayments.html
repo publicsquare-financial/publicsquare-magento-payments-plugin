@@ -22,16 +22,10 @@
                name="payment[method]"
                class="radio"
                data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
-        <label data-bind="attr: {'for': getCode()}" class="label">
-            <span  class="aslow-as-checkoutpayment" data-bind="afterRender: getCredovaPrice()" data-amount="" data-type="text"></span>
-            <!-- ko if: showCredovaText() -->
-            <!-- <span data-bind="text: getTitle()"></span> -->
-            <!-- /ko -->
-
-        </label>
+        <label data-bind="attr: {'for': getCode()}" class="label"><span data-bind="text: getTitle()"></span></label>
     </div>
     <div class="payment-method-content">
-        <!-- ko foreach: getRegion('messages') -->
+     <!-- ko foreach: getRegion('messages') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
         <div class="payment-method-billing-address">
@@ -39,19 +33,11 @@
             <!-- ko template: getTemplate() --><!-- /ko -->
             <!--/ko-->
         </div>
-
         <div class="checkout-agreements-block">
             <!-- ko foreach: $parent.getRegion('before-place-order') -->
                 <!-- ko template: getTemplate() --><!-- /ko -->
             <!--/ko-->
         </div>
-        <!-- ko if: applicationRequestProcessing() -->
-        <div class="loading-mask" data-role="loader">
-            <div class="loader">
-                <!-- TODO: generate proper fully qualified image URL above -->
-                <p>Please wait...</p></div>
-        </div>
-        <!-- /ko -->
         <div class="actions-toolbar">
             <div class="primary">
                 <button class="action primary checkout"
@@ -69,5 +55,4 @@
         </div>
     </div>
 </div>
-<!--placeOrder authorizeCredovaFinancing-->
         

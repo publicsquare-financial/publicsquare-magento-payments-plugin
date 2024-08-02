@@ -16,8 +16,7 @@ define(
 
         return Component.extend({
             defaults: {
-                template: 'Credova_Payments/payment/credovapayments',
-                preQualificationId: null
+                template: 'Credova_Payments/payment/credovapayments'
             }
         });
     });
