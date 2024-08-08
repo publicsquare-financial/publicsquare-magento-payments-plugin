@@ -19,7 +19,7 @@
         </group>
     </groups>
     <methods>
-        <method name="credovapayments">
+        <method name="credova_payments">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
         

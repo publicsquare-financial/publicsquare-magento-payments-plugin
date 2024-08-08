@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+
+        <policy id="frame-src">
+            <values>
+                <value id="credova-iframe" type="host">*.credova.com</value>
+                <value id="credova-sa-iframe" type="host">*.credova.com</value>
+                <value id="credova-3ds" type="host">*</value>
+                <value id="credova-script" type="host">*.credova.com</value>
+                <value id="bt-script" type="host">*.basistheory.com</value>
+            </values>
+        </policy>
+
+        <policy id="frame-ancestors">
+            <values>
+                <value id="credova-iframe3" type="host">*.credova.com</value>
+            </values>
+        </policy>
+            <policy id="script-src">
+            <values>
+                <value id="credova-script-src" type="host">*.credova.com</value>
+                <value id="bt-script-src" type="host">*.basistheory.com</value>
+            </values>
+        </policy>
+         <policy id="connect-src">
+               <values>
+                   <value id="credova-api" type="host">*.credova.com</value>
+                   <value id="bt-api" type="host">*.basistheory.com</value>
+               </values>
+           </policy>
+
+    </policies>
+</csp_whitelist>

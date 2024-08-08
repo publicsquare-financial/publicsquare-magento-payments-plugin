@@ -17,7 +17,7 @@
             <label>Credova</label>
         </tab>
         <section id="payment">
-            <group id="credovapayments" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="credova_payments" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label><![CDATA[<div class="credova-financial-tagline"><span>Credova Payment Services</span><br/>Accept popular credit/debit cards from brands such as VISA, Mastercard, Discover & American Express.</div>]]></label>
                 <fieldset_css>complex credova-financial-section</fieldset_css>
                 <frontend_model>Credova\Payments\Block\Adminhtml\System\Config\Fieldset\Payment</frontend_model>

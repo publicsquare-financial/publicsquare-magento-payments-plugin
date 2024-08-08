@@ -14,9 +14,9 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
     <default>
         <payment>
-            <credovapayments>
+            <credova_payments>
                 <active>0</active>
-                <title>Credit/Debit Card Payment</title>
+                <title>Credit/Debit Card</title>
                 <environment>1</environment>                
                 <model>Credova\Payments\Model\PaymentMethod</model>
                 <security_type>iframe</security_type>
@@ -25,7 +25,7 @@
                 <three_d_secure_authentiation>0</three_d_secure_authentiation>
                 <card_types>amex,visa,mastercard,discover</card_types>
                 <capture_action>authorize</capture_action>
-            </credovapayments>
+            </credova_payments>
         </payment>
     </default>
 </config>

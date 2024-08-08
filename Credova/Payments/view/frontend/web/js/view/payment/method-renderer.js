@@ -10,8 +10,8 @@ define(
         'use strict';
         rendererList.push(
             {
-                type: 'credovapayments',
-                component: 'Credova_Payments/js/view/payment/method-renderer/credovapayments-method'
+                type: 'credova_payments',
+                component: 'Credova_Payments/js/view/payment/method-renderer/credova_payments-method'
             }
         );
         /**

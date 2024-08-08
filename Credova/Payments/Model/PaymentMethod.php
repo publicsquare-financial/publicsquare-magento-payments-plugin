@@ -1,6 +1,6 @@
 <?php
 /**
- * CredovaPayments
+ * Credova_Payments
  *
  * @category  Credova
  * @package   Credova_Payments
@@ -22,7 +22,7 @@ class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod
     /**
      * Constant variable
      */
-    const METHOD_CODE = 'credovapayments';
+    const METHOD_CODE = 'credova_payments';
 
     /**
      * Payment code
