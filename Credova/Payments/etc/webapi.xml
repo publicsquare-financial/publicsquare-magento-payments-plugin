@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Web API
+ *
+ * @category  Credova
+ * @package   Credova_Payments
+ * @author    Credova <info@credova.com>
+ * @copyright 2024 Credova
+ * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
+ * @link https://credova.com/
+ */
+ -->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/credova/createApplication" method="POST">
+        <service class="Credova\Payments\Api\OrdersInterface" method="placeOrder"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+    <route url="/V1/credova/returnRequest" method="POST">
+        <service class="Credova\Payments\Api\ReturnsInterface" method="returnRequest"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+</routes>

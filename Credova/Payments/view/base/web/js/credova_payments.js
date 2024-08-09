@@ -23,11 +23,27 @@ define(
           const _credova = await credovajs.init(params.apiKey)
           this.credovaJs = _credova
           this.cardElement = _credova.createCardElement({})
-          this.cardElement.mount('#credova-elements-form')
+          this.cardElement.mount(params.selector)
 
           if (typeof callback === 'function') {
             callback(this)
           }
+        }
+      },
+      /**
+       * Creates a card object in Credova
+       * @param {string} cardHolderName
+       * @param {HTMLDivElement} card
+       */
+      createCard: async function (cardholder_name, card) {
+        if (!this.credovaJs) {
+          throw new Error('Credova not initialized yet')
+        } else {
+          const newCard = await this.credovaJs.cards.create({
+            cardholder_name,
+            card
+          })
+          return newCard
         }
       }
     });
