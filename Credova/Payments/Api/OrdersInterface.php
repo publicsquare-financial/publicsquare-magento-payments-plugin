@@ -17,7 +17,7 @@ interface OrdersInterface
      /**
       * Creates a payment in Credova and returns the public id
       *
-      * @param  \Credova\Payments\Api\Data\ApplicationInfoInterface $applicationInfo
+      * @param  \Credova\Payments\Api\Data\CustomerInterface $applicationInfo
       * @return string
       * @throws \Magento\Framework\Exception\LocalizedException
       */

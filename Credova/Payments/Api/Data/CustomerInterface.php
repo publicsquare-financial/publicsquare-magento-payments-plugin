@@ -12,7 +12,7 @@
 
 namespace Credova\Payments\Api\Data;
 
-interface ApplicationInfoInterface extends \Magento\Framework\Api\CustomAttributesDataInterface
+interface CustomerInterface extends \Magento\Framework\Api\CustomAttributesDataInterface
 {
     /**
 * #@+

@@ -31,7 +31,7 @@ class Orders implements OrdersInterface
     protected $urlBuilder;
 
     /**
-     * @var \Credova\Payments\Api\Authenticated\ApplicationFactory
+     * @var \Credova\Payments\Api\Authenticated\PaymentsFactory
      */
     private $applicationRequestFactory;
 
@@ -71,7 +71,7 @@ class Orders implements OrdersInterface
     ];
 
     public function __construct(
-        \Credova\Payments\Api\Authenticated\ApplicationFactory $applicationRequestFactory,
+        \Credova\Payments\Api\Authenticated\PaymentsFactory $applicationRequestFactory,
         Config $configHelper,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\UrlInterface $urlBuilder,
@@ -219,7 +219,7 @@ class Orders implements OrdersInterface
         }
 
         /*
-        @var \Credova\Payments\Api\Authenticated\Application $request
+        @var \Credova\Payments\Api\Authenticated\Payment $request
          */
         $request  = $this->applicationRequestFactory->create(['payments' => $data]);
         $response = $request->getResponseData();

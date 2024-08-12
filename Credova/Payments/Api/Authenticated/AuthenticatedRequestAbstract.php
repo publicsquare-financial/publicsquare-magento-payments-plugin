@@ -3,28 +3,28 @@
  * AuthenticatedRequestAbstract
  *
  * @category  Credova
- * @package   Credova_Financial
+ * @package   Credova_Payments
  * @author    Credova <info@credova.com>
- * @copyright 2019 Credova
+ * @copyright 2024 Credova
  * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
  * @link      https://credova.com/
  */
 
-namespace Credova\Financial\Api\Authenticated;
+namespace Credova\Payments\Api\Authenticated;
 
-abstract class AuthenticatedRequestAbstract extends \Credova\Financial\Api\RequestAbstract
+abstract class AuthenticatedRequestAbstract extends \Credova\Payments\Api\RequestAbstract
 {
     /**
-     * @var \Credova\Financial\Helper\Api
+     * @var \Credova\Payments\Helper\Api
      */
     protected $apiHelper;
     /**
      * AuthenticatedRequestAbstract constructor.
      *
      * @param \Laminas\Http\ClientFactory         $clientFactory
-     * @param \Credova\Financial\Helper\Config $configHelper
+     * @param \Credova\Payments\Helper\Config $configHelper
      * @param \Psr\Log\LoggerInterface         $logger
-     * @param \Credova\Financial\Helper\Api    $apiHelper
+     * @param \Credova\Payments\Helper\Api    $apiHelper
      */
 
      protected $clientFactory;
@@ -33,7 +33,7 @@ abstract class AuthenticatedRequestAbstract extends \Credova\Financial\Api\Reque
 
     public function __construct(
         \Laminas\Http\ClientFactory $clientFactory,
-        \Credova\Financial\Helper\Config $configHelper,
+        \Credova\Payments\Helper\Config $configHelper,
         \Psr\Log\LoggerInterface $logger,
         \Credova\Payments\Helper\Api $apiHelper
     ) {

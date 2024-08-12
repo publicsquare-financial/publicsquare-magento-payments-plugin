@@ -30,9 +30,9 @@ class Application extends AuthenticatedRequestAbstract
 
     public function __construct(
         \Laminas\Http\ClientFactory $clientFactory,
-        \Credova\Financial\Helper\Config $configHelper,
+        \Credova\Payments\Helper\Config $configHelper,
         \Psr\Log\LoggerInterface $logger,
-        \Credova\Financial\Helper\Api $apiHelper,
+        \Credova\Payments\Helper\Api $apiHelper,
         array $applicationInfo = []
     ) {
         parent::__construct($clientFactory, $configHelper, $logger, $apiHelper);
