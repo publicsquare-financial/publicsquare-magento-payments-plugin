@@ -18,9 +18,9 @@ interface ReturnsInterface
      /**
       * Returns an application in Credova and returns the public id
       *
-      * @param  \Credova\Payments\Api\Data\ApplicationInfoInterface $applicationInfo
+      * @param  \Credova\Payments\Api\Data\CustomerInterface $customer
       * @return string
       * @throws \Magento\Framework\Exception\LocalizedException
       */
-    public function returnRequest($applicationInfo);
+    public function returnRequest($customer);
 }//end interface

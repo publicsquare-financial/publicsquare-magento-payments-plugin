@@ -19,7 +19,7 @@ class Api extends \Magento\Framework\App\Helper\AbstractHelper
     protected $apiToken = null;
 
     /**
-     * @var \Credova\Financial\Api\AuthTokenRequest
+     * @var \Credova\Payments\Api\AuthTokenRequest
      */
     protected $authTokenRequest;
 
@@ -29,12 +29,12 @@ class Api extends \Magento\Framework\App\Helper\AbstractHelper
      * Api constructor.
      *
      * @param Context                                 $context
-     * @param \Credova\Financial\Api\AuthTokenRequest $authTokenRequest
+     * @param \Credova\Payments\Api\AuthTokenRequest $authTokenRequest
      */
     public function __construct(
         Context $context,
         // End parent parameters
-        \Credova\Financial\Api\AuthTokenRequest $authTokenRequest
+        \Credova\Payments\Api\AuthTokenRequest $authTokenRequest
     ) {
         parent::__construct($context);
         $this->authTokenRequest = $authTokenRequest;
@@ -44,7 +44,7 @@ class Api extends \Magento\Framework\App\Helper\AbstractHelper
      * Get auth token singleton
      *
      * @return string
-     * @throws \Credova\Financial\Exception\ApiException
+     * @throws \Credova\Payments\Exception\ApiException
      */
     public function getAuthToken() : string
     {

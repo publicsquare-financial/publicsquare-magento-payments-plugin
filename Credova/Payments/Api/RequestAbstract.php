@@ -180,7 +180,7 @@ abstract class RequestAbstract
      * Make request and get response
      *
      * @return \Laminas\Http\Response
-     * @throws \Credova\Financial\Exception\ApiException
+     * @throws \Credova\Payments\Exception\ApiException
      */
     public function getResponse(): \Laminas\Http\Response
     {
@@ -228,7 +228,7 @@ abstract class RequestAbstract
      * Get decoded response data
      *
      * @return array
-     * @throws \Credova\Financial\Exception\ApiException
+     * @throws \Credova\Payments\Exception\ApiException
      */
     public function getResponseData(): array
     {

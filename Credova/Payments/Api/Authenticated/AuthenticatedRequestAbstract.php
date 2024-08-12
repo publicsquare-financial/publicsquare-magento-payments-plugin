@@ -49,7 +49,7 @@ abstract class AuthenticatedRequestAbstract extends \Credova\Payments\Api\Reques
      *
      * {@inheritdoc}
      *
-     * @throws \Credova\Financial\Exception\ApiException
+     * @throws \Credova\Payments\Exception\ApiException
      */
     protected function getHeaders() : array
     {

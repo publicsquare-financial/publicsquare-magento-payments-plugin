@@ -13,7 +13,7 @@
 
 namespace Credova\Payments\Model\Api;
 
-use Credova\Payments\Api\OrdersInterface;
+use Credova\Payments\Api\PaymentsInterface;
 use Credova\Payments\Api\Data;
 use Credova\Payments\Helper\Config;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -22,7 +22,7 @@ use Magento\Quote\Api\Data\TotalsInterface;
 use Magento\CatalogInventory\Api\StockRegistryInterface;
 use Magento\CatalogInventory\Api\Data\StockItemInterface;
 
-class Orders implements OrdersInterface
+class Payments implements PaymentsInterface
 {
 
     /**
@@ -91,14 +91,14 @@ class Orders implements OrdersInterface
     /**
      * Creates an application in Financial and returns the public id
      *
-     * @param  Data\CustomerInterface $applicationInfo
+     * @param  Data\CustomerInterface $customer
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function placeOrder($applicationInfo)
+    public function createPayment($customer)
     {
 
-        $phoneNumber = $applicationInfo->getPhoneNumber();
+        $phoneNumber = $customer->getPhoneNumber();
 
         $phoneNumber = str_replace(' ', '-', $phoneNumber);
         $phoneNumber = preg_replace('/\D+/', '', $phoneNumber);
@@ -113,7 +113,8 @@ class Orders implements OrdersInterface
             $phoneNumber = substr($phoneNumber, strpos($phoneNumber, "-") + 1);
         }
 
-        $quote = $this->quoteRepository->get($this->checkoutSession->getQuoteId());
+        $quoteId = $this->checkoutSession->getQuoteId();
+        $quote = $this->quoteRepository->get($quoteId);
         $publicId = '';
 
         $data = [
@@ -126,9 +127,9 @@ class Orders implements OrdersInterface
             'customer'  => [
                 'id'            => '',
                 'business_name' => '',
-                'first_name'    => $applicationInfo->getFirstName(),
-                'last_name'     => $applicationInfo->getLastName(),
-                'email'         => $applicationInfo->getEmail(),
+                'first_name'    => $customer->getFirstName(),
+                'last_name'     => $customer->getLastName(),
+                'email'         => $customer->getEmail(),
                 'phone'         => $phoneNumber
             ],
             'billing_details' => [
@@ -149,7 +150,7 @@ class Orders implements OrdersInterface
             ]
         ];
 
-        $cartTotal = $this->cartTotalRepository->get($this->checkoutSession->getQuoteId());
+        $cartTotal = $this->cartTotalRepository->get($quoteId);
 
         foreach ($cartTotal->getItems() as $item) {
             $data['products'][] = [

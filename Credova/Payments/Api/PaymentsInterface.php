@@ -1,6 +1,6 @@
 <?php
 /**
- * Orders Interface
+ * Payments Interface
  *
  * @category  Credova
  * @package   Credova_Payments
@@ -12,14 +12,14 @@
 
 namespace Credova\Payments\Api;
 
-interface OrdersInterface
+interface PaymentsInterface
 {
      /**
       * Creates a payment in Credova and returns the public id
       *
-      * @param  \Credova\Payments\Api\Data\CustomerInterface $applicationInfo
+      * @param  \Credova\Payments\Api\Data\CustomerInterface $customer
       * @return string
       * @throws \Magento\Framework\Exception\LocalizedException
       */
-    public function placeOrder($applicationInfo);
+    public function createPayment($customer);
 }//end interface

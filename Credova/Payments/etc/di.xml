@@ -40,7 +40,7 @@
                 <item name="system" xsi:type="object">Credova\Payments\Logger\Handler\Financial</item>
             </argument>
         </arguments>
-    </virtualType>
+    </virtualType> -->
 
     <type name="Credova\Payments\Api\RequestAbstract">
         <arguments>
@@ -48,14 +48,14 @@
         </arguments>
     </type>
 
-    <preference for="Credova\Payments\Api\Data\ApplicationInfoInterface" type="Credova\Payments\Model\Data\Application" />
-    <preference for="Credova\Payments\Api\Data\FederalLicenseInterface" type="Credova\Payments\Model\Data\FederalLicense"/>
+    <preference for="Credova\Payments\Api\Data\CustomerInterface" type="Credova\Payments\Model\Data\Customer" />
+    <!-- <preference for="Credova\Payments\Api\Data\FederalLicenseInterface" type="Credova\Payments\Model\Data\FederalLicense"/> -->
 
-    <preference for="Credova\Payments\Api\ApplicationInterface" type="Credova\Payments\Model\Api\Application" />
-    <preference for="Credova\Payments\Api\FederalLicenseRepositoryInterface" type="Credova\Payments\Model\Api\FederalLicenseRepository"/>
-    <preference for="Credova\Payments\Api\ReturnInterface" type="Credova\Payments\Model\Api\ReturnRequest" />
+    <preference for="Credova\Payments\Api\PaymentsInterface" type="Credova\Payments\Model\Api\Payments" />
+    <!-- <preference for="Credova\Payments\Api\FederalLicenseRepositoryInterface" type="Credova\Payments\Model\Api\FederalLicenseRepository"/> -->
+    <preference for="Credova\Payments\Api\ReturnsInterface" type="Credova\Payments\Model\Api\ReturnRequest" />
 
-    <virtualType name="Credova\Payments\Model\ResourceModel\Grid\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+    <!-- <virtualType name="Credova\Payments\Model\ResourceModel\Grid\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>
             <argument name="mainTable" xsi:type="string">sales_order_grid</argument>
             <argument name="resourceModel" xsi:type="string">Credova\Payments\Model\ResourceModel\Grid</argument>
@@ -67,13 +67,13 @@
                 <item name="grid_record_grid_list_data_source" xsi:type="string">Credova\Payments\Model\ResourceModel\Grid\Grid\Collection</item>
             </argument>
         </arguments>
-    </type>
+    </type> -->
 
-    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+    <!-- <type name="Magento\Sales\Api\OrderRepositoryInterface">
         <plugin name="persist_credova_extension_attributes" type="Credova\Payments\Plugin\Sales\OrderRepository"/>
     </type> -->
-    <!-- <type name="Credova\Payments\Model\PaymentMethod">
-        <plugin name="credovaplug" type="Credova\Payments\Plugin\Credovaplug" disabled="false" sortOrder="10"/>
-    </type> -->
+    <type name="Credova\Payments\Model\PaymentMethod">
+        <!-- <plugin name="credovaplug" type="Credova\Payments\Plugin\Credovaplug" disabled="false" sortOrder="10"/> -->
+    </type>
 
 </config>

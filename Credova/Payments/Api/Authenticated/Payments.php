@@ -12,7 +12,7 @@
 
 namespace Credova\Payments\Api\Authenticated;
 
-use Credova\Payments\Api\Data\ApplicationInfoInterface;
+// use Credova\Payments\Api\Data\ApplicationInfoInterface;
 
 class Application extends AuthenticatedRequestAbstract
 {
@@ -33,10 +33,10 @@ class Application extends AuthenticatedRequestAbstract
         \Credova\Payments\Helper\Config $configHelper,
         \Psr\Log\LoggerInterface $logger,
         \Credova\Payments\Helper\Api $apiHelper,
-        array $applicationInfo = []
+        array $customer = []
     ) {
         parent::__construct($clientFactory, $configHelper, $logger, $apiHelper);
-        $this->data = $applicationInfo;
+        $this->data = $customer;
     }//end __construct()
 
     /**
