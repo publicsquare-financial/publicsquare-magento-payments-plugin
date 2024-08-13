@@ -91,14 +91,18 @@ class Payments implements PaymentsInterface
     /**
      * Creates an application in Financial and returns the public id
      *
-     * @param  Data\CustomerInterface $customer
+     * @param string $card
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function createPayment($customer)
+    public function createPayment($card)
     {
-
-        $phoneNumber = $customer->getPhoneNumber();
+        $quoteId = $this->checkoutSession->getQuoteId();
+        $quote = $this->quoteRepository->get($quoteId);
+        $billingAddress = $quote->getBillingAddress();
+        $shippingAddress = $billingAddress;
+        $customer = $quote->getCustomer();
+        $phoneNumber = $billingAddress->getTelephone();
 
         $phoneNumber = str_replace(' ', '-', $phoneNumber);
         $phoneNumber = preg_replace('/\D+/', '', $phoneNumber);
@@ -113,16 +117,12 @@ class Payments implements PaymentsInterface
             $phoneNumber = substr($phoneNumber, strpos($phoneNumber, "-") + 1);
         }
 
-        $quoteId = $this->checkoutSession->getQuoteId();
-        $quote = $this->quoteRepository->get($quoteId);
-        $publicId = '';
-
         $data = [
             'amount'    => 0,
             'currency'  => 'USD',
             'capture'   => true,
             'payment_method' => [
-                'card'          => 'card_id'
+                'card'          => $card
             ],
             'customer'  => [
                 'id'            => '',
@@ -133,25 +133,27 @@ class Payments implements PaymentsInterface
                 'phone'         => $phoneNumber
             ],
             'billing_details' => [
-                'address_line_1'    => '',
-                'address_line_2'    => '',
-                'city'              => '',
-                'state'             => '',
-                'postal_code'       => '',
-                'country'           => 'US'
+                'address_line_1'    => $billingAddress->getStreet()[0],
+                'address_line_2'    => $billingAddress->getStreet()[1],
+                'city'              => $billingAddress->getCity(),
+                'state'             => $billingAddress->getRegion(),
+                'postal_code'       => $billingAddress->getPostcode(),
+                'country'           => $billingAddress->getCountryId(),
             ],
             'shipping_address' => [
-                'address_line_1'    => '',
-                'address_line_2'    => '',
-                'city'              => '',
-                'state'             => '',
-                'postal_code'       => '',
-                'country'           => 'US'
-            ]
+                'address_line_1'    => $shippingAddress->getStreet()[0],
+                'address_line_2'    => $shippingAddress->getStreet()[1],
+                'city'              => $shippingAddress->getCity(),
+                'state'             => $shippingAddress->getRegion(),
+                'postal_code'       => $shippingAddress->getPostcode(),
+                'country'           => $shippingAddress->getCountryId(),
+            ],
+            'checkout_session' => $this->checkoutSession,
+            'customer_' => $customer
         ];
-
+        
         $cartTotal = $this->cartTotalRepository->get($quoteId);
-
+        
         foreach ($cartTotal->getItems() as $item) {
             $data['products'][] = [
                 'id'          => $item->getItemId(),
@@ -159,7 +161,9 @@ class Payments implements PaymentsInterface
                 'quantity'    => $item->getQty(),
                 'value'       => (float) $item->getBaseRowTotal(), // price * qty
             ];
+            $data['amount'] += $item->getBaseRowTotal();
         }
+        return [$data];
 
         if ($this->checkoutSession->getCheckoutState() == 'multishipping_overview') {
             $shipping_amount = $tax_amount = $discount_amount = 0;
@@ -220,7 +224,7 @@ class Payments implements PaymentsInterface
         }
 
         /*
-        @var \Credova\Payments\Api\Authenticated\Payment $request
+        @var \Credova\Payments\Api\Authenticated\Payments $request
          */
         $request  = $this->applicationRequestFactory->create(['payments' => $data]);
         $response = $request->getResponseData();
@@ -287,27 +291,14 @@ class Payments implements PaymentsInterface
 
     protected function getUrii(): string
     {
-        if ($this->configHelper->getCredovaEnvironment() == 1) {
-            $host = rtrim('https://sandbox-lending-api.credova.com/', '/');
+        if ($this->configHelper->getEnvironment() == 1) {
+            $host = rtrim('https://api-staging.credova.com/', '/');
         } else {
-            $host = rtrim('https://lending-api.credova.com/', '/');
+            $host = rtrim('https://api.credova.com/', '/');
         }
 
         return $host;
     } //end getUrii()
-
-    protected function getApiusername(): string
-    {
-        $apiusername = $this->configHelper->getApiUsername();
-
-        return $apiusername;
-    } //end getApiusername()
-
-    protected function getApipassword(): string
-    {
-        $apipassword = $this->configHelper->getApiPassword();
-        return $apipassword;
-    } //end getApiusername()
 
     /**
      * get stock status

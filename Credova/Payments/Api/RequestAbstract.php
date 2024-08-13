@@ -82,7 +82,7 @@ abstract class RequestAbstract
      */
     protected function getUri(): string
     {
-        if ($this->configHelper->getCredovaEnvironment() == 1) {
+        if ($this->configHelper->getEnvironment() == 1) {
             $host = rtrim('https://api-staging.credova.com/', '/');
         } else {
             $host = rtrim('https://api.credova.com/', '/');
@@ -95,7 +95,7 @@ abstract class RequestAbstract
     
     protected function getUrii(): string
     {
-        if ($this->configHelper->getCredovaEnvironment() == 1) {
+        if ($this->configHelper->getEnvironment() == 1) {
             $host = rtrim('https://api-staging.credova.com/', '/');
         } else {
             $host = rtrim('https://api.credova.com/', '/');
@@ -103,20 +103,6 @@ abstract class RequestAbstract
 
         return $host;
     } //end getUrii()
-
-    protected function getApiusername(): string
-    {
-        $apiusername = $this->configHelper->getApiUsername();
-
-        return $apiusername;
-    } //end getApiusername()
-
-    protected function getApipassword(): string
-    {
-        $apipassword = $this->configHelper->getApiPassword();
-
-        return $apipassword;
-    } //end getApiusername()
 
     /**
      * Get request data, if applicable
@@ -213,7 +199,9 @@ abstract class RequestAbstract
         $response = $client->send();
 
         $data = json_decode($response->getBody(), true);
-        if (array_key_exists("publicId", $data)) {
+        if (is_null($data)) {
+            throw new \Exception("Something went wrong with the Credova api. Status code: ".$response->getStatusCode()." ".$data);
+        } else if (array_key_exists("publicId", $data)) {
             $crdvLog["response_code"] = $response->getStatusCode();
             $crdvLog["response_data"] = $data;
             if (isset($crdvLog["step"])) {
@@ -265,7 +253,7 @@ abstract class RequestAbstract
      */
     protected function debugLog(string $message)
     {
-        if (!$this->configHelper->getCredovaLoggingEnabled()) {
+        if (!$this->configHelper->getLoggingEnabled()) {
             return;
         }
 

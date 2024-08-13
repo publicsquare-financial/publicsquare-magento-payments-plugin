@@ -13,14 +13,14 @@
  -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
-    <!-- <type name="Credova\Payments\Logger\Handler">
+    <type name="Credova\Payments\Logger\Handler">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
         </arguments>
     </type>
     <type name="Credova\Payments\Logger\Logger">
         <arguments>
-            <argument name="name" xsi:type="string">credovalog</argument>
+            <argument name="name" xsi:type="string">credova_payments_log</argument>
             <argument name="handlers" xsi:type="array">
                 <item name="system" xsi:type="object">Credova\Payments\Logger\Handler</item>
             </argument>
@@ -35,12 +35,12 @@
 
     <virtualType name="Credova\Payments\Logger\Financial" type="Monolog\Logger">
         <arguments>
-            <argument name="name" xsi:type="string">credovaLogger</argument>
+            <argument name="name" xsi:type="string">credova_payments_logger</argument>
             <argument name="handlers" xsi:type="array">
                 <item name="system" xsi:type="object">Credova\Payments\Logger\Handler\Financial</item>
             </argument>
         </arguments>
-    </virtualType> -->
+    </virtualType>
 
     <type name="Credova\Payments\Api\RequestAbstract">
         <arguments>

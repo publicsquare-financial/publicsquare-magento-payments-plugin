@@ -14,7 +14,7 @@ namespace Credova\Payments\Api\Authenticated;
 
 // use Credova\Payments\Api\Data\ApplicationInfoInterface;
 
-class Application extends AuthenticatedRequestAbstract
+class Payments extends AuthenticatedRequestAbstract
 {
     const PATH = 'payments';
 
@@ -32,10 +32,9 @@ class Application extends AuthenticatedRequestAbstract
         \Laminas\Http\ClientFactory $clientFactory,
         \Credova\Payments\Helper\Config $configHelper,
         \Psr\Log\LoggerInterface $logger,
-        \Credova\Payments\Helper\Api $apiHelper,
         array $customer = []
     ) {
-        parent::__construct($clientFactory, $configHelper, $logger, $apiHelper);
+        parent::__construct($clientFactory, $configHelper, $logger);
         $this->data = $customer;
     }//end __construct()
 

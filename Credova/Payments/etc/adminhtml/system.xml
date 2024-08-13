@@ -40,6 +40,14 @@
                     <label>Credova Public API key</label>
                     <comment>You can find your API key by visiting the API Keys page in your Credova Portal: <![CDATA[<a href="https://portal.credova.com/developers/api-keys" target="_blank">https://portal.credova.com/developers/api-keys</a>]]></comment>
                 </field>
+                <field id="credova_api_public_key" translate="label comment" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Credova Public API key</label>
+                    <comment>You can find your API key by visiting the API Keys page in your Credova Portal: <![CDATA[<a href="https://portal.credova.com/developers/api-keys" target="_blank">https://portal.credova.com/developers/api-keys</a>]]></comment>
+                </field>
+                <field id="credova_api_secret_key" translate="label comment" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Credova Secret API key</label>
+                    <comment>You can find your API key by visiting the API Keys page in your Credova Portal: <![CDATA[<a href="https://portal.credova.com/developers/api-keys" target="_blank">https://portal.credova.com/developers/api-keys</a>]]></comment>
+                </field>
                 <field id="security_type" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Security type</label>
                     <source_model>Credova\Payments\Model\Adminhtml\Inputs\SecurityType</source_model>

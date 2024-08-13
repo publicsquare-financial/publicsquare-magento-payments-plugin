@@ -18,27 +18,23 @@ interface CustomerInterface extends \Magento\Framework\Api\CustomAttributesDataI
 * #@+
      * Constants defined for keys of the data array. Identical to the name of the getter in snake case
      */
-    const PUBLIC_ID     = 'public_id';
+    const ID            = 'id';
     const FIRST_NAME    = 'first_name';
     const LAST_NAME     = 'last_name';
     const PHONE_NUMBER  = 'phone_number';
     const EMAIL         = 'email';
-    const NEEDED_AMOUNT = 'needed_amount';
     const ERROR         = 'error';
 
     /**
-     * #@-
-     */
-    /**
      * @return string|null
      */
-    public function getPublicId();
+    public function getId();
 
     /**
-     * @param  string $publicId
+     * @param  string $id
      * @return $this
      */
-    public function setPublicId($publicId);
+    public function setId($id);
 
     /**
      * @return string|null
@@ -83,17 +79,6 @@ interface CustomerInterface extends \Magento\Framework\Api\CustomAttributesDataI
      * @return $this
      */
     public function setEmail($email);
-
-    /**
-     * @return float|null
-     */
-    public function getNeededAmount();
-
-    /**
-     * @param  float $neededAmount
-     * @return $this
-     */
-    public function setNeededAmount($neededAmount);
 
     /**
      * @return string|null

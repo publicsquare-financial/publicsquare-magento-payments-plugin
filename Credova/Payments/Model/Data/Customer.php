@@ -19,18 +19,18 @@ class Customer extends \Magento\Framework\Api\AbstractExtensibleObject implement
     /**
      * @return string|null
      */
-    public function getPublicId()
+    public function getId()
     {
-        return $this->_get(self::PUBLIC_ID);
+        return $this->_get(self::ID);
     }//end getPublicId()
 
     /**
      * @param  string $publicId
      * @return $this
      */
-    public function setPublicId($publicId)
+    public function setId($id)
     {
-        return $this->setData(self::PUBLIC_ID, $publicId);
+        return $this->setData(self::ID, $id);
     }//end setPublicId()
 
     /**
@@ -117,21 +117,4 @@ class Customer extends \Magento\Framework\Api\AbstractExtensibleObject implement
     {
         return $this->setData(self::ERROR, $error);
     }//end setEmail()
-
-    /**
-     * @return float|null
-     */
-    public function getNeededAmount()
-    {
-        return $this->_get(self::NEEDED_AMOUNT);
-    }//end getNeededAmount()
-    
-    /**
-     * @param  float $neededAmount
-     * @return $this
-     */
-    public function setNeededAmount($neededAmount)
-    {
-        return $this->setData(self::NEEDED_AMOUNT, $neededAmount);
-    }//end setNeededAmount()
 }//end class

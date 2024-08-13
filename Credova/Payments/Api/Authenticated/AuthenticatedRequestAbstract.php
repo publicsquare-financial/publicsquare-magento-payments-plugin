@@ -15,18 +15,12 @@ namespace Credova\Payments\Api\Authenticated;
 abstract class AuthenticatedRequestAbstract extends \Credova\Payments\Api\RequestAbstract
 {
     /**
-     * @var \Credova\Payments\Helper\Api
-     */
-    protected $apiHelper;
-    /**
      * AuthenticatedRequestAbstract constructor.
      *
      * @param \Laminas\Http\ClientFactory         $clientFactory
      * @param \Credova\Payments\Helper\Config $configHelper
      * @param \Psr\Log\LoggerInterface         $logger
-     * @param \Credova\Payments\Helper\Api    $apiHelper
      */
-
      protected $clientFactory;
      protected $configHelper;
      protected $logger;
@@ -35,14 +29,12 @@ abstract class AuthenticatedRequestAbstract extends \Credova\Payments\Api\Reques
         \Laminas\Http\ClientFactory $clientFactory,
         \Credova\Payments\Helper\Config $configHelper,
         \Psr\Log\LoggerInterface $logger,
-        \Credova\Payments\Helper\Api $apiHelper
     ) {
         parent::__construct(
             $clientFactory,
             $configHelper,
             $logger
         );
-        $this->apiHelper = $apiHelper;
     }//end __construct()
     /**
      * Add authentication header
@@ -55,9 +47,7 @@ abstract class AuthenticatedRequestAbstract extends \Credova\Payments\Api\Reques
     {
         $headers = parent::getHeaders();
 
-        $authToken = $this->apiHelper->getAuthToken();
-
-        $headers['X-API-KEY'] = $authToken;
+        $headers['X-API-KEY'] = $this->configHelper->getSecretAPIKey();
 
         return $headers;
     }//end getHeaders()

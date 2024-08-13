@@ -17,9 +17,9 @@ interface PaymentsInterface
      /**
       * Creates a payment in Credova and returns the public id
       *
-      * @param  \Credova\Payments\Api\Data\CustomerInterface $customer
+      * @param string $card
       * @return string
       * @throws \Magento\Framework\Exception\LocalizedException
       */
-    public function createPayment($customer);
+    public function createPayment($card);
 }//end interface

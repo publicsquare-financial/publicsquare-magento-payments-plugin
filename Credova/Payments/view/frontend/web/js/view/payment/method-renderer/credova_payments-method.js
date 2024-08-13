@@ -29,44 +29,55 @@ define(
             },
             apiKey: null,
             elementsFormSelector: '#credova-elements-form',
-            onContainerRendered: async function () {
-                this.apiKey = ''
+            onContainerRendered: function () {
+                this.apiKey = 'pk_test_PZ1VnynckiokKR2TyZ8wCY'
                 // This runs when the container div on the checkout page renders
                 credova.initElements({
                     apiKey: this.apiKey,
                     selector: this.elementsFormSelector
                 }, () => { })
             },
-            createCard: async function (cardholder_name, card) {
-                const card = credova.createCard(cardholder_name, card)
+            createCard: function (cardholder_name) {
+                console.log('calling createCard', credova, cardholder_name, credova.cardElement)
+                return credova.createCard(cardholder_name, credova.cardElement)
             },
             placeOrderCredovaPayments: async function () {
                 fullScreenLoader.startLoader()
                 if (this.validate() && additionalValidators.validate()) {
-                    const url = urlBuilder.createUrl('/credova_payments/placeOrder', {})
+                    const url = urlBuilder.createUrl('/credova_payments/payments', {})
                     const billingAddress = quote.billingAddress();
-                    const card = this.createCard(
-                        `${billingAddress.firstname} ${billingAddress.lastname}`,
-                        document.querySelector(this.elementsFormSelector)
-                    )
-                    console.log(card)
-                    fullScreenLoader.stopLoader()
+                    console.log(url, billingAddress)
+                    try {
+                        const card = await this.createCard(
+                            `${billingAddress.firstname} ${billingAddress.lastname}`
+                        )
+                        console.log(card)
+                        fullScreenLoader.stopLoader()
 
-                    // const response = await storage.post(url, JSON.stringify({
-                    //     customer: {
-                    //         first_name: billingAddress.firstname,
-                    //         last_name: billingAddress.lastname,
-                    //         phone_number: billingAddress.telephone,
-                    //         email: billingAddress.guestEmail
-                    //     }
-                    // }), false)
+                        const response = await storage.post(url, JSON.stringify({
+                            // customer: {
+                            //     first_name: billingAddress.firstname,
+                            //     last_name: billingAddress.lastname,
+                            //     phone_number: billingAddress.telephone,
+                            //     email: billingAddress.guestEmail
+                            // }
+                            card: card.id
+                        }), false)
+                        console.log(response)
+                        return true
+                    } catch (error) {
+                        console.log(error)
+                        messageList.addErrorMessage({
+                            message: $t(error)
+                        });
+                    }
                 } else {
-                    fullScreenLoader.stopLoader();
                     messageList.addErrorMessage({
                         message: $t('Please check your checkout details.')
                     });
-                    return false;
                 }
+                fullScreenLoader.stopLoader();
+                return false
             }
         });
     });
