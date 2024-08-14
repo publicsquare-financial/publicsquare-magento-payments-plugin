@@ -33,7 +33,7 @@ class Payments implements PaymentsInterface
     /**
      * @var \Credova\Payments\Api\Authenticated\PaymentsFactory
      */
-    private $applicationRequestFactory;
+    private $paymentsRequestFactory;
 
     /**
      * @var Config
@@ -71,7 +71,7 @@ class Payments implements PaymentsInterface
     ];
 
     public function __construct(
-        \Credova\Payments\Api\Authenticated\PaymentsFactory $applicationRequestFactory,
+        \Credova\Payments\Api\Authenticated\PaymentsFactory $paymentsRequestFactory,
         Config $configHelper,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\UrlInterface $urlBuilder,
@@ -79,7 +79,7 @@ class Payments implements PaymentsInterface
         CartRepositoryInterface $quoteRepository,
         StockRegistryInterface $stockRegistry
     ) {
-        $this->applicationRequestFactory = $applicationRequestFactory;
+        $this->paymentsRequestFactory = $paymentsRequestFactory;
         $this->configHelper              = $configHelper;
         $this->checkoutSession           = $checkoutSession;
         $this->urlBuilder                = $urlBuilder;
@@ -100,8 +100,7 @@ class Payments implements PaymentsInterface
         $quoteId = $this->checkoutSession->getQuoteId();
         $quote = $this->quoteRepository->get($quoteId);
         $billingAddress = $quote->getBillingAddress();
-        $shippingAddress = $billingAddress;
-        $customer = $quote->getCustomer();
+        $shippingAddress = $quote->getShippingAddress();
         $phoneNumber = $billingAddress->getTelephone();
 
         $phoneNumber = str_replace(' ', '-', $phoneNumber);
@@ -127,47 +126,45 @@ class Payments implements PaymentsInterface
             'customer'  => [
                 'id'            => '',
                 'business_name' => '',
-                'first_name'    => $customer->getFirstName(),
-                'last_name'     => $customer->getLastName(),
-                'email'         => $customer->getEmail(),
+                'first_name'    => $billingAddress->getFirstName(),
+                'last_name'     => $billingAddress->getLastName(),
+                'email'         => $billingAddress->getEmail(),
                 'phone'         => $phoneNumber
             ],
             'billing_details' => [
                 'address_line_1'    => $billingAddress->getStreet()[0],
-                'address_line_2'    => $billingAddress->getStreet()[1],
+                'address_line_2'    => array_key_exists(1, $billingAddress->getStreet()) ? $billingAddress->getStreet()[1] : '',
                 'city'              => $billingAddress->getCity(),
-                'state'             => $billingAddress->getRegion(),
+                'state'             => $billingAddress->getRegionId(),
                 'postal_code'       => $billingAddress->getPostcode(),
                 'country'           => $billingAddress->getCountryId(),
             ],
             'shipping_address' => [
                 'address_line_1'    => $shippingAddress->getStreet()[0],
-                'address_line_2'    => $shippingAddress->getStreet()[1],
+                'address_line_2'    => array_key_exists(1, $shippingAddress->getStreet()) ? $shippingAddress->getStreet()[1] : '',
                 'city'              => $shippingAddress->getCity(),
-                'state'             => $shippingAddress->getRegion(),
+                'state'             => $shippingAddress->getRegionId(),
                 'postal_code'       => $shippingAddress->getPostcode(),
                 'country'           => $shippingAddress->getCountryId(),
-            ],
-            'checkout_session' => $this->checkoutSession,
-            'customer_' => $customer
+            ]
         ];
         
         $cartTotal = $this->cartTotalRepository->get($quoteId);
         
         foreach ($cartTotal->getItems() as $item) {
-            $data['products'][] = [
-                'id'          => $item->getItemId(),
-                'description' => $item->getName(),
-                'quantity'    => $item->getQty(),
-                'value'       => (float) $item->getBaseRowTotal(), // price * qty
-            ];
+            // $data['products'][] = [
+            //     'id'          => $item->getItemId(),
+            //     'description' => $item->getName(),
+            //     'quantity'    => $item->getQty(),
+            //     'value'       => (float) $item->getBaseRowTotal(), // price * qty
+            // ];
             $data['amount'] += $item->getBaseRowTotal();
         }
-        return [$data];
+        $data['amount'] += $shippingAddress->getShippingRateByCode($shippingAddress->getShippingMethod())->getData('price');
 
         if ($this->checkoutSession->getCheckoutState() == 'multishipping_overview') {
             $shipping_amount = $tax_amount = $discount_amount = 0;
-            foreach ($this->checkoutSession->getQuote()->getAllShippingAddresses() as $address) {
+            foreach ($quote->getAllShippingAddresses() as $address) {
                 $addressValidation = $address->validate();
                 if ($addressValidation !== true) {
                     throw new \Magento\Framework\Exception\LocalizedException(
@@ -185,49 +182,54 @@ class Payments implements PaymentsInterface
                 $discount_amount += $item->getDiscountAmount();
             }
             if ($shipping_amount != 0) {
-                $data['products'][] = [
-                    'id'          => 'shipping',
-                    'description' => 'Shipping & Handling',
-                    'quantity'    => '1',
-                    'value'       => (float) $shipping_amount, // price * qty
-                ];
+                // $data['products'][] = [
+                //     'id'          => 'shipping',
+                //     'description' => 'Shipping & Handling',
+                //     'quantity'    => '1',
+                //     'value'       => (float) $shipping_amount, // price * qty
+                // ];
+                $data['amount'] += $shipping_amount;
             }
             if ($tax_amount != 0) {
-                $data['products'][] = [
-                    'id'          => 'tax',
-                    'description' => 'Tax',
-                    'quantity'    => '1',
-                    'value'       => (float) $tax_amount, // price * qty
-                ];
+                // $data['products'][] = [
+                //     'id'          => 'tax',
+                //     'description' => 'Tax',
+                //     'quantity'    => '1',
+                //     'value'       => (float) $tax_amount, // price * qty
+                // ];
+                $data['amount'] += $tax_amount;
             }
             if ($discount_amount != 0) {
-                $data['products'][] = [
-                    'id'          => 'discount',
-                    'description' => 'Discount',
-                    'quantity'    => '1',
-                    'value'       => (float)  -$discount_amount, // price * qty
-                ];
+                // $data['products'][] = [
+                //     'id'          => 'discount',
+                //     'description' => 'Discount',
+                //     'quantity'    => '1',
+                //     'value'       => (float)  -$discount_amount, // price * qty
+                // ];
+                $data['amount'] -= $discount_amount;
             }
         } else {
             foreach ($cartTotal->getTotalSegments() as $segment) {
                 if (!in_array($segment->getCode(), $this->getExcludeSegments())) {
                     if ($segment->getValue() != 0) {
-                        $data['products'][] = [
-                            'id'          => $segment->getCode(),
-                            'description' => $segment->getTitle() ? $segment->getTitle() : $segment->getCode(),
-                            'quantity'    => 1,
-                            'value'       => (float) $segment->getValue(),
-                        ];
+                        // $data['products'][] = [
+                        //     'id'          => $segment->getCode(),
+                        //     'description' => $segment->getTitle() ? $segment->getTitle() : $segment->getCode(),
+                        //     'quantity'    => 1,
+                        //     'value'       => (float) $segment->getValue(),
+                        // ];
                     }
                 }
             }
         }
+        $data['amount'] = $data['amount'] * 100;
 
         /*
         @var \Credova\Payments\Api\Authenticated\Payments $request
          */
-        $request  = $this->applicationRequestFactory->create(['payments' => $data]);
+        $request  = $this->paymentsRequestFactory->create(['payment' => $data]);
         $response = $request->getResponseData();
+
 
         if (!array_key_exists('id', $response)) {
             // TODO: Properly handle API errors
@@ -237,8 +239,6 @@ class Payments implements PaymentsInterface
                     implode(",", $response['errors'])
                 )
             );
-
-            return false;
         }
 
 
@@ -246,7 +246,7 @@ class Payments implements PaymentsInterface
         $quote->save();
 
 
-        return $response;
+        return json_encode($response);
     } //end createApplication()
 
     /**
@@ -291,13 +291,7 @@ class Payments implements PaymentsInterface
 
     protected function getUrii(): string
     {
-        if ($this->configHelper->getEnvironment() == 1) {
-            $host = rtrim('https://api-staging.credova.com/', '/');
-        } else {
-            $host = rtrim('https://api.credova.com/', '/');
-        }
-
-        return $host;
+        return rtrim('https://api.credova.com/', '/');
     } //end getUrii()
 
     /**

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Routes File
+ *
+ * @category  Credova
+ * @package   Credova_Payments
+ * @author    Credova <info@credova.com>
+ * @copyright 2024 Credova
+ * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
+ * @link https://credova.com/
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="standard">
+        <route id="credova-payments" frontName="credova-payments">
+            <module name="Credova_Payments" />
+        </route>
+    </router>
+</config>

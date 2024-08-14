@@ -11,6 +11,7 @@
 /* @api */
 define(
     [
+        'jquery',
         'Magento_Checkout/js/view/payment/default',
         'Credova_Payments/js/credova_payments',
         'Magento_Checkout/js/model/url-builder',
@@ -20,17 +21,16 @@ define(
         'Magento_Checkout/js/model/full-screen-loader',
         'mage/translate'
     ],
-    function (Component, credova, urlBuilder, storage, quote, additionalValidators, fullScreenLoader, $t) {
+    function ($, Component, credova, urlBuilder, storage, quote, additionalValidators, fullScreenLoader, $t) {
         'use strict';
 
         return Component.extend({
             defaults: {
                 template: 'Credova_Payments/payment/credova_payments'
             },
-            apiKey: null,
+            apiKey: window.checkoutConfig.payment.credova_payments.pk,
             elementsFormSelector: '#credova-elements-form',
             onContainerRendered: function () {
-                this.apiKey = 'pk_test_PZ1VnynckiokKR2TyZ8wCY'
                 // This runs when the container div on the checkout page renders
                 credova.initElements({
                     apiKey: this.apiKey,
@@ -38,7 +38,6 @@ define(
                 }, () => { })
             },
             createCard: function (cardholder_name) {
-                console.log('calling createCard', credova, cardholder_name, credova.cardElement)
                 return credova.createCard(cardholder_name, credova.cardElement)
             },
             placeOrderCredovaPayments: async function () {
@@ -46,27 +45,21 @@ define(
                 if (this.validate() && additionalValidators.validate()) {
                     const url = urlBuilder.createUrl('/credova_payments/payments', {})
                     const billingAddress = quote.billingAddress();
-                    console.log(url, billingAddress)
                     try {
+                        // Tokenize the card in Credova
                         const card = await this.createCard(
                             `${billingAddress.firstname} ${billingAddress.lastname}`
                         )
-                        console.log(card)
-                        fullScreenLoader.stopLoader()
-
+                        // Submit the payment
                         const response = await storage.post(url, JSON.stringify({
-                            // customer: {
-                            //     first_name: billingAddress.firstname,
-                            //     last_name: billingAddress.lastname,
-                            //     phone_number: billingAddress.telephone,
-                            //     email: billingAddress.guestEmail
-                            // }
                             card: card.id
-                        }), false)
+                        }), false).then((res) => JSON.parse(res))
                         console.log(response)
-                        return true
+                        $.mage.redirect(window.checkoutConfig.payment.credova_payments.successUrl);
+                        return false;
                     } catch (error) {
                         console.log(error)
+                        fullScreenLoader.stopLoader();
                         messageList.addErrorMessage({
                             message: $t(error)
                         });

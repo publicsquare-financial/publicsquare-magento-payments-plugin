@@ -82,11 +82,7 @@ abstract class RequestAbstract
      */
     protected function getUri(): string
     {
-        if ($this->configHelper->getEnvironment() == 1) {
-            $host = rtrim('https://api-staging.credova.com/', '/');
-        } else {
-            $host = rtrim('https://api.credova.com/', '/');
-        }
+        $host = rtrim('https://api.credova.com/', '/');
 
         $path = ltrim($this->getPath());
 
@@ -95,13 +91,7 @@ abstract class RequestAbstract
     
     protected function getUrii(): string
     {
-        if ($this->configHelper->getEnvironment() == 1) {
-            $host = rtrim('https://api-staging.credova.com/', '/');
-        } else {
-            $host = rtrim('https://api.credova.com/', '/');
-        }
-
-        return $host;
+        return rtrim('https://api.credova.com/', '/');
     } //end getUrii()
 
     /**
@@ -200,7 +190,7 @@ abstract class RequestAbstract
 
         $data = json_decode($response->getBody(), true);
         if (is_null($data)) {
-            throw new \Exception("Something went wrong with the Credova api. Status code: ".$response->getStatusCode()." ".$data);
+            throw new \Exception("Something went wrong with the Credova api. Status code: ".$response->getStatusCode()." ".implode(',', $this->getHeaders()));
         } else if (array_key_exists("publicId", $data)) {
             $crdvLog["response_code"] = $response->getStatusCode();
             $crdvLog["response_data"] = $data;

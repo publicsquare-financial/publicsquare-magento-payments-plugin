@@ -119,12 +119,7 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
 
     public function getUrii(): string
     {
-        if ($this->getCredovaEnvironment() == 1) {
-            $host = rtrim('https://api-staging.credova.com/', '/');
-        } else {
-            $host = rtrim('https://api.credova.com/', '/');
-        }
-        return $host;
+        return rtrim('https://api.credova.com/', '/');
     } //end getUrii()
 
     public function getReturnReasons()

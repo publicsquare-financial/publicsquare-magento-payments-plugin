@@ -32,10 +32,10 @@ class Payments extends AuthenticatedRequestAbstract
         \Laminas\Http\ClientFactory $clientFactory,
         \Credova\Payments\Helper\Config $configHelper,
         \Psr\Log\LoggerInterface $logger,
-        array $customer = []
+        array $payment = []
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
-        $this->data = $customer;
+        $this->data = $payment;
     }//end __construct()
 
     /**
