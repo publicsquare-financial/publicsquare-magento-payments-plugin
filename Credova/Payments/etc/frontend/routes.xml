@@ -13,7 +13,7 @@
  -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="standard">
-        <route id="credova-payments" frontName="credova-payments">
+        <route id="credova_payments" frontName="credova-payments">
             <module name="Credova_Payments" />
         </route>
     </router>
