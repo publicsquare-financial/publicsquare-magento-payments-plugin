@@ -55,7 +55,9 @@ define(
                             card: card.id
                         }), false).then((res) => JSON.parse(res))
                         console.log(response)
-                        $.mage.redirect(window.checkoutConfig.payment.credova_payments.successUrl);
+                        const maskId = window.checkoutConfig.quoteData.entity_id;
+                        const successUrl = `${window.checkoutConfig.payment.credova_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? 'refercust' : 'refergues'}=${maskId}`
+                        $.mage.redirect(successUrl);
                         return false;
                     } catch (error) {
                         console.log(error)

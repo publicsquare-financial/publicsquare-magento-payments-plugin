@@ -14,31 +14,22 @@
 namespace Credova\Payments\Model\Api;
 
 use Credova\Payments\Api\PaymentsInterface;
-use Credova\Payments\Api\Data;
-use Credova\Payments\Helper\Config;
-use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\CartTotalRepositoryInterface;
 use Magento\Quote\Api\Data\TotalsInterface;
-use Magento\CatalogInventory\Api\StockRegistryInterface;
-use Magento\CatalogInventory\Api\Data\StockItemInterface;
+use Magento\Quote\Api\CartManagementInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Customer\Model\CustomerFactory;
+use Magento\Quote\Model\QuoteFactory;
 
 class Payments implements PaymentsInterface
 {
-
-    /**
-     * @var \Magento\Framework\UrlInterface
-     */
-    protected $urlBuilder;
+    const PAYMENT_METHOD = "checkmo";
 
     /**
      * @var \Credova\Payments\Api\Authenticated\PaymentsFactory
      */
     private $paymentsRequestFactory;
-
-    /**
-     * @var Config
-     */
-    private $configHelper;
 
     /**
      * @var \Magento\Checkout\Model\Session
@@ -51,14 +42,29 @@ class Payments implements PaymentsInterface
     protected $cartTotalRepository;
 
     /**
-     * @var CartRepositoryInterface
+     * @var CartManagementInterface
      */
-    public $quoteRepository;
+    protected $cartManagement;
 
     /**
-     * @var StockRegistryInterface|null
+     * @var CustomerRepositoryInterface
      */
-    private $stockRegistry;
+    protected $customerRepository;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+
+    /**
+     * @var CustomerFactory
+     */
+    protected $customerFactory;
+
+    /**
+     * @var QuoteFactory
+     */
+    protected $quoteFactory;
 
     /**
      * Exclude segment from CartTotal
@@ -72,20 +78,22 @@ class Payments implements PaymentsInterface
 
     public function __construct(
         \Credova\Payments\Api\Authenticated\PaymentsFactory $paymentsRequestFactory,
-        Config $configHelper,
         \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Framework\UrlInterface $urlBuilder,
         CartTotalRepositoryInterface $cartTotalRepository,
-        CartRepositoryInterface $quoteRepository,
-        StockRegistryInterface $stockRegistry
+        CartManagementInterface $cartManagement,
+        CustomerRepositoryInterface $customerRepository,
+        StoreManagerInterface $storeManager,
+        CustomerFactory $customerFactory,
+        QuoteFactory $quoteFactory
     ) {
-        $this->paymentsRequestFactory = $paymentsRequestFactory;
-        $this->configHelper              = $configHelper;
+        $this->paymentsRequestFactory    = $paymentsRequestFactory;
         $this->checkoutSession           = $checkoutSession;
-        $this->urlBuilder                = $urlBuilder;
         $this->cartTotalRepository       = $cartTotalRepository;
-        $this->quoteRepository           = $quoteRepository;
-        $this->stockRegistry = $stockRegistry;
+        $this->cartManagement            = $cartManagement;
+        $this->customerRepository        = $customerRepository;
+        $this->storeManager              = $storeManager;
+        $this->customerFactory           = $customerFactory;
+        $this->quoteFactory              = $quoteFactory;
     } //end __construct()
 
     /**
@@ -98,10 +106,26 @@ class Payments implements PaymentsInterface
     public function createPayment($card)
     {
         $quoteId = $this->checkoutSession->getQuoteId();
-        $quote = $this->quoteRepository->get($quoteId);
+        $quote = $this->quoteFactory->create()->load($quoteId);
         $billingAddress = $quote->getBillingAddress();
         $shippingAddress = $quote->getShippingAddress();
         $phoneNumber = $billingAddress->getTelephone();
+        $firstName = $billingAddress->getFirstName();
+        $lastName = $billingAddress->getLastName();
+        $email = $billingAddress->getEmail();
+
+        // Find or create new customer
+        $customer = $this->customerFactory->create();
+        $store = $this->storeManager->getStore();
+        $websiteId = $this->storeManager->getStore()->getWebsiteId();
+        $customer->setWebsiteId($websiteId);
+        $customer->loadByEmail($email);
+        if (!$customer->getEntityId()) {
+            $customer->setWebsiteId($websiteId)->setStore($store)->setFirstname($firstName)->setLastname($lastName)->setEmail($email)->setPassword($email);
+            $customer->save();
+        }
+        $customer = $this->customerRepository->getById($customer->getEntityId());
+        $quote->assignCustomer($customer);
 
         $phoneNumber = str_replace(' ', '-', $phoneNumber);
         $phoneNumber = preg_replace('/\D+/', '', $phoneNumber);
@@ -128,7 +152,7 @@ class Payments implements PaymentsInterface
                 'business_name' => '',
                 'first_name'    => $billingAddress->getFirstName(),
                 'last_name'     => $billingAddress->getLastName(),
-                'email'         => $billingAddress->getEmail(),
+                'email'         => $email,
                 'phone'         => $phoneNumber
             ],
             'billing_details' => [
@@ -209,18 +233,18 @@ class Payments implements PaymentsInterface
                 $data['amount'] -= $discount_amount;
             }
         } else {
-            foreach ($cartTotal->getTotalSegments() as $segment) {
-                if (!in_array($segment->getCode(), $this->getExcludeSegments())) {
-                    if ($segment->getValue() != 0) {
-                        // $data['products'][] = [
-                        //     'id'          => $segment->getCode(),
-                        //     'description' => $segment->getTitle() ? $segment->getTitle() : $segment->getCode(),
-                        //     'quantity'    => 1,
-                        //     'value'       => (float) $segment->getValue(),
-                        // ];
-                    }
-                }
-            }
+            // foreach ($cartTotal->getTotalSegments() as $segment) {
+            //     if (!in_array($segment->getCode(), $this->getExcludeSegments())) {
+            //         if ($segment->getValue() != 0) {
+            //             $data['products'][] = [
+            //                 'id'          => $segment->getCode(),
+            //                 'description' => $segment->getTitle() ? $segment->getTitle() : $segment->getCode(),
+            //                 'quantity'    => 1,
+            //                 'value'       => (float) $segment->getValue(),
+            //             ];
+            //         }
+            //     }
+            // }
         }
         $data['amount'] = $data['amount'] * 100;
 
@@ -241,70 +265,25 @@ class Payments implements PaymentsInterface
             );
         }
 
-
+        $quote->setPaymentMethod(static::PAYMENT_METHOD);
         $quote->setCredovaPublicId($response['id']);
+        $quote->setInventoryProcessed(false);
         $quote->save();
 
+        // Set Sales Order Payment
+        $quote->getPayment()->importData(['method' => static::PAYMENT_METHOD]);
 
-        return json_encode($response);
+        // Collect Totals & Save Quote
+        $quote->collectTotals()->save();
+
+        // Create Order From Quote
+        $orderId = $this->cartManagement->placeOrder($quote->getId());
+
+        if ($orderId) {
+            $result['order_id'] = $orderId;
+        } else {
+            $result = ['error' => 1, 'msg' => 'Your custom message'];
+        }
+        return $result;
     } //end createApplication()
-
-    /**
-     * Return callback url
-     *
-     * @return string
-     */
-    public function getCallbackUrl()
-    {
-        return $this->urlBuilder->getRouteUrl('credova/standard/response');
-    }
-
-    /**
-     * Return redirect url
-     *
-     * @return string
-     */
-    public function getRedirectUrl()
-    {
-        return $this->urlBuilder->getRouteUrl('credova/standard/redirect');
-    }
-
-    /**
-     * Return redirect url
-     *
-     * @return string
-     */
-    public function getCancelUrl()
-    {
-        return $this->urlBuilder->getRouteUrl('credova/standard/cancel');
-    }
-
-    /**
-     * Exclude segments
-     *
-     * @return string[]
-     */
-    public function getExcludeSegments()
-    {
-        return $this->excludeTotalSegments;
-    }
-
-    protected function getUrii(): string
-    {
-        return rtrim('https://api.credova.com/', '/');
-    } //end getUrii()
-
-    /**
-     * get stock status
-     *
-     * @param int $productId
-     * @return bool
-     */
-    public function getStockStatus($productId)
-    {
-        /** @var StockItemInterface $stockItem */
-        $stockItem = $this->stockRegistry->getStockItem($productId);
-        $isInStock = $stockItem ? $stockItem->getIsInStock() : false;
-        return $isInStock;
-    }
 } //end class
