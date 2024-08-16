@@ -117,6 +117,21 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
             ->getValue(self::CREDOVA_LOGGING_CONFIG_PATH, $scopeType, $scopeCode);
     } //end getCredovaLoggingEnabled()
 
+    /**
+     * Get credova payment capture action
+     *
+     * @param  string $scopeType
+     * @param  null   $scopeCode
+     * @return string
+     */
+    public function getCaptureAction(
+        $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+        $scopeCode = null
+    ): string {
+        return (string) $this->scopeConfig
+            ->getValue(self::CREDOVA_CAPTURE_ACTION, $scopeType, $scopeCode);
+    } //end getCaptureAction()
+
     public function getUrii(): string
     {
         return rtrim('https://api.credova.com/', '/');

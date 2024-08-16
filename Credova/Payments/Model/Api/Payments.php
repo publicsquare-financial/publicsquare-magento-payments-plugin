@@ -21,10 +21,11 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Quote\Model\QuoteFactory;
+use Credova\Payments\Helper\Config;
 
 class Payments implements PaymentsInterface
 {
-    const PAYMENT_METHOD = "checkmo";
+    const PAYMENT_METHOD = "credova_payments";
 
     /**
      * @var \Credova\Payments\Api\Authenticated\PaymentsFactory
@@ -67,6 +68,11 @@ class Payments implements PaymentsInterface
     protected $quoteFactory;
 
     /**
+     * @var Config
+     */
+    private $configHelper;
+
+    /**
      * Exclude segment from CartTotal
      *
      * @var string[]
@@ -84,7 +90,8 @@ class Payments implements PaymentsInterface
         CustomerRepositoryInterface $customerRepository,
         StoreManagerInterface $storeManager,
         CustomerFactory $customerFactory,
-        QuoteFactory $quoteFactory
+        QuoteFactory $quoteFactory,
+        Config $configHelper
     ) {
         $this->paymentsRequestFactory    = $paymentsRequestFactory;
         $this->checkoutSession           = $checkoutSession;
@@ -94,6 +101,7 @@ class Payments implements PaymentsInterface
         $this->storeManager              = $storeManager;
         $this->customerFactory           = $customerFactory;
         $this->quoteFactory              = $quoteFactory;
+        $this->configHelper              = $configHelper;
     } //end __construct()
 
     /**
@@ -143,7 +151,7 @@ class Payments implements PaymentsInterface
         $data = [
             'amount'    => 0,
             'currency'  => 'USD',
-            'capture'   => true,
+            'capture'   => $this->configHelper->getCaptureAction() === 'authorize',
             'payment_method' => [
                 'card'          => $card
             ],

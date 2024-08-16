@@ -65,7 +65,7 @@ class CredovaPaymentConfigProvider implements \Magento\Checkout\Model\ConfigProv
                 'credova_payments' => [
                     'pk'         => $this->credovaConfig->getPublicAPIKey(),
                     'cancelUrl'     => $this->urlBuilder->getUrl('credova_payments/checkout/cancel', ['_secure' => true]),
-                    'successUrl'    => $this->urlBuilder->getUrl('credova_payments/checkout/complete', ['_secure' => true]),
+                    'successUrl'    => $this->urlBuilder->getUrl('credova_payments/checkout/complete', ['_secure' => true])
                 ],
             ],
         ];

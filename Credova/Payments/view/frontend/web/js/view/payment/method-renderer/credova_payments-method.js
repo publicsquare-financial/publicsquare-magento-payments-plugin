@@ -54,7 +54,6 @@ define(
                         const response = await storage.post(url, JSON.stringify({
                             card: card.id
                         }), false).then((res) => JSON.parse(res))
-                        console.log(response)
                         const maskId = window.checkoutConfig.quoteData.entity_id;
                         const successUrl = `${window.checkoutConfig.payment.credova_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? 'refercust' : 'refergues'}=${maskId}`
                         $.mage.redirect(successUrl);
