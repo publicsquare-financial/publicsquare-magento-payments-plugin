@@ -22,6 +22,11 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Quote\Model\QuoteFactory;
 use Credova\Payments\Helper\Config;
+use Magento\Sales\Model\Service\InvoiceService;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Api\InvoiceRepositoryInterface;
+use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
+use Magento\Sales\Model\Order\Payment\Transaction\Builder;
 
 class Payments implements PaymentsInterface
 {
@@ -73,6 +78,31 @@ class Payments implements PaymentsInterface
     private $configHelper;
 
     /**
+     * @var InvoiceService
+     */
+    protected $invoiceService;
+
+    /**
+     * @var OrderRepositoryInterface
+     */
+    protected $orderRepository;
+
+    /**
+     * @var InvoiceRepositoryInterface
+     */
+    protected $invoiceRepository;
+
+    /**
+     * @var InvoiceSender
+     */
+    protected $invoiceSender;
+
+    /**
+     * @var Builder
+     */
+    protected $transactionBuilder;
+
+    /**
      * Exclude segment from CartTotal
      *
      * @var string[]
@@ -91,17 +121,27 @@ class Payments implements PaymentsInterface
         StoreManagerInterface $storeManager,
         CustomerFactory $customerFactory,
         QuoteFactory $quoteFactory,
-        Config $configHelper
+        Config $configHelper,
+        InvoiceService $invoiceService,
+        OrderRepositoryInterface $orderRepository,
+        InvoiceRepositoryInterface $invoiceRepository,
+        InvoiceSender $invoiceSender,
+        Builder $transactionBuilder
     ) {
-        $this->paymentsRequestFactory    = $paymentsRequestFactory;
-        $this->checkoutSession           = $checkoutSession;
-        $this->cartTotalRepository       = $cartTotalRepository;
-        $this->cartManagement            = $cartManagement;
-        $this->customerRepository        = $customerRepository;
-        $this->storeManager              = $storeManager;
-        $this->customerFactory           = $customerFactory;
-        $this->quoteFactory              = $quoteFactory;
-        $this->configHelper              = $configHelper;
+        $this->paymentsRequestFactory = $paymentsRequestFactory;
+        $this->checkoutSession = $checkoutSession;
+        $this->cartTotalRepository = $cartTotalRepository;
+        $this->cartManagement = $cartManagement;
+        $this->customerRepository = $customerRepository;
+        $this->storeManager = $storeManager;
+        $this->customerFactory = $customerFactory;
+        $this->quoteFactory = $quoteFactory;
+        $this->configHelper = $configHelper;
+        $this->invoiceService = $invoiceService;
+        $this->orderRepository = $orderRepository;
+        $this->invoiceRepository = $invoiceRepository;
+        $this->invoiceSender = $invoiceSender;
+        $this->transactionBuilder = $transactionBuilder;
     } //end __construct()
 
     /**
@@ -121,6 +161,8 @@ class Payments implements PaymentsInterface
         $firstName = $billingAddress->getFirstName();
         $lastName = $billingAddress->getLastName();
         $email = $billingAddress->getEmail();
+        $captureOrderImmediately =
+            $this->configHelper->getCaptureAction() === "authorize_capture";
 
         // Find or create new customer
         $customer = $this->customerFactory->create();
@@ -129,60 +171,78 @@ class Payments implements PaymentsInterface
         $customer->setWebsiteId($websiteId);
         $customer->loadByEmail($email);
         if (!$customer->getEntityId()) {
-            $customer->setWebsiteId($websiteId)->setStore($store)->setFirstname($firstName)->setLastname($lastName)->setEmail($email)->setPassword($email);
+            $customer
+                ->setWebsiteId($websiteId)
+                ->setStore($store)
+                ->setFirstname($firstName)
+                ->setLastname($lastName)
+                ->setEmail($email)
+                ->setPassword($email);
             $customer->save();
         }
-        $customer = $this->customerRepository->getById($customer->getEntityId());
+        $customer = $this->customerRepository->getById(
+            $customer->getEntityId()
+        );
         $quote->assignCustomer($customer);
 
-        $phoneNumber = str_replace(' ', '-', $phoneNumber);
-        $phoneNumber = preg_replace('/\D+/', '', $phoneNumber);
+        $phoneNumber = str_replace(" ", "-", $phoneNumber);
+        $phoneNumber = preg_replace("/\D+/", "", $phoneNumber);
 
         if (preg_match('/(\d{3})(\d{3})(\d{4})$/', $phoneNumber, $matches)) {
-            $phoneNumber = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+            $phoneNumber = $matches[1] . "-" . $matches[2] . "-" . $matches[3];
         } else {
             $phoneNumber = $phoneNumber;
         }
 
-        if (substr_count($phoneNumber, '-') == 3) {
+        if (substr_count($phoneNumber, "-") == 3) {
             $phoneNumber = substr($phoneNumber, strpos($phoneNumber, "-") + 1);
         }
 
         $data = [
-            'amount'    => 0,
-            'currency'  => 'USD',
-            'capture'   => $this->configHelper->getCaptureAction() === 'authorize',
-            'payment_method' => [
-                'card'          => $card
+            "amount" => 0,
+            "currency" => "USD",
+            "capture" => $captureOrderImmediately,
+            "payment_method" => [
+                "card" => $card,
             ],
-            'customer'  => [
-                'id'            => '',
-                'business_name' => '',
-                'first_name'    => $billingAddress->getFirstName(),
-                'last_name'     => $billingAddress->getLastName(),
-                'email'         => $email,
-                'phone'         => $phoneNumber
+            "customer" => [
+                "id" => "",
+                "business_name" => "",
+                "first_name" => $billingAddress->getFirstName(),
+                "last_name" => $billingAddress->getLastName(),
+                "email" => $email,
+                "phone" => $phoneNumber,
             ],
-            'billing_details' => [
-                'address_line_1'    => $billingAddress->getStreet()[0],
-                'address_line_2'    => array_key_exists(1, $billingAddress->getStreet()) ? $billingAddress->getStreet()[1] : '',
-                'city'              => $billingAddress->getCity(),
-                'state'             => $billingAddress->getRegionId(),
-                'postal_code'       => $billingAddress->getPostcode(),
-                'country'           => $billingAddress->getCountryId(),
+            "billing_details" => [
+                "address_line_1" => $billingAddress->getStreet()[0],
+                "address_line_2" => array_key_exists(
+                    1,
+                    $billingAddress->getStreet()
+                )
+                    ? $billingAddress->getStreet()[1]
+                    : "",
+                "city" => $billingAddress->getCity(),
+                "state" => $billingAddress->getRegionId(),
+                "postal_code" => $billingAddress->getPostcode(),
+                "country" => $billingAddress->getCountryId(),
             ],
-            'shipping_address' => [
-                'address_line_1'    => $shippingAddress->getStreet()[0],
-                'address_line_2'    => array_key_exists(1, $shippingAddress->getStreet()) ? $shippingAddress->getStreet()[1] : '',
-                'city'              => $shippingAddress->getCity(),
-                'state'             => $shippingAddress->getRegionId(),
-                'postal_code'       => $shippingAddress->getPostcode(),
-                'country'           => $shippingAddress->getCountryId(),
-            ]
+            "shipping_address" => [
+                "address_line_1" => $shippingAddress->getStreet()[0],
+                "address_line_2" => array_key_exists(
+                    1,
+                    $shippingAddress->getStreet()
+                )
+                    ? $shippingAddress->getStreet()[1]
+                    : "",
+                "city" => $shippingAddress->getCity(),
+                "state" => $shippingAddress->getRegionId(),
+                "postal_code" => $shippingAddress->getPostcode(),
+                "country" => $shippingAddress->getCountryId(),
+            ],
         ];
-        
+
         $cartTotal = $this->cartTotalRepository->get($quoteId);
-        
+
         foreach ($cartTotal->getItems() as $item) {
             // $data['products'][] = [
             //     'id'          => $item->getItemId(),
@@ -190,23 +250,30 @@ class Payments implements PaymentsInterface
             //     'quantity'    => $item->getQty(),
             //     'value'       => (float) $item->getBaseRowTotal(), // price * qty
             // ];
-            $data['amount'] += $item->getBaseRowTotal();
+            $data["amount"] += $item->getBaseRowTotal();
         }
-        $data['amount'] += $shippingAddress->getShippingRateByCode($shippingAddress->getShippingMethod())->getData('price');
+        $data["amount"] += $shippingAddress
+            ->getShippingRateByCode($shippingAddress->getShippingMethod())
+            ->getData("price");
 
-        if ($this->checkoutSession->getCheckoutState() == 'multishipping_overview') {
+        if (
+            $this->checkoutSession->getCheckoutState() ==
+            "multishipping_overview"
+        ) {
             $shipping_amount = $tax_amount = $discount_amount = 0;
             foreach ($quote->getAllShippingAddresses() as $address) {
                 $addressValidation = $address->validate();
                 if ($addressValidation !== true) {
                     throw new \Magento\Framework\Exception\LocalizedException(
-                        __('Verify the shipping address information and continue.')
+                        __(
+                            "Verify the shipping address information and continue."
+                        )
                     );
                 }
                 $method = $address->getShippingMethod();
-                $rate   = $address->getShippingRateByCode($method);
+                $rate = $address->getShippingRateByCode($method);
 
-                $shipping_amount += $rate->getData('price');
+                $shipping_amount += $rate->getData("price");
             }
 
             foreach ($cartTotal->getItems() as $item) {
@@ -220,7 +287,7 @@ class Payments implements PaymentsInterface
                 //     'quantity'    => '1',
                 //     'value'       => (float) $shipping_amount, // price * qty
                 // ];
-                $data['amount'] += $shipping_amount;
+                $data["amount"] += $shipping_amount;
             }
             if ($tax_amount != 0) {
                 // $data['products'][] = [
@@ -229,7 +296,7 @@ class Payments implements PaymentsInterface
                 //     'quantity'    => '1',
                 //     'value'       => (float) $tax_amount, // price * qty
                 // ];
-                $data['amount'] += $tax_amount;
+                $data["amount"] += $tax_amount;
             }
             if ($discount_amount != 0) {
                 // $data['products'][] = [
@@ -238,7 +305,7 @@ class Payments implements PaymentsInterface
                 //     'quantity'    => '1',
                 //     'value'       => (float)  -$discount_amount, // price * qty
                 // ];
-                $data['amount'] -= $discount_amount;
+                $data["amount"] -= $discount_amount;
             }
         } else {
             // foreach ($cartTotal->getTotalSegments() as $segment) {
@@ -254,44 +321,146 @@ class Payments implements PaymentsInterface
             //     }
             // }
         }
-        $data['amount'] = $data['amount'] * 100;
+        $data["amount"] = $data["amount"] * 100;
 
         /*
         @var \Credova\Payments\Api\Authenticated\Payments $request
          */
-        $request  = $this->paymentsRequestFactory->create(['payment' => $data]);
+        $request = $this->paymentsRequestFactory->create(["payment" => $data]);
         $response = $request->getResponseData();
 
-
-        if (!array_key_exists('id', $response)) {
+        if (!array_key_exists("id", $response)) {
             // TODO: Properly handle API errors
             // throw new \Exception($response);
             throw new \Magento\Framework\Exception\CouldNotSaveException(
-                __(
-                    implode(",", $response['errors'])
-                )
+                __(implode(",", $response["errors"]))
             );
         }
 
         $quote->setPaymentMethod(static::PAYMENT_METHOD);
-        $quote->setCredovaPublicId($response['id']);
+        $quote->setCredovaPublicId($response["id"]);
         $quote->setInventoryProcessed(false);
         $quote->save();
 
         // Set Sales Order Payment
-        $quote->getPayment()->importData(['method' => static::PAYMENT_METHOD]);
+        $quote->getPayment()->importData(["method" => static::PAYMENT_METHOD]);
 
         // Collect Totals & Save Quote
         $quote->collectTotals()->save();
 
         // Create Order From Quote
         $orderId = $this->cartManagement->placeOrder($quote->getId());
+        $order = $this->orderRepository->get($orderId);
+
+        // Create transaction
+        $transactionType = $captureOrderImmediately ? \Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE : \Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH;
+        $transactionId = $this->createTransaction($order, $response, $transactionType);
+
+        $this->invoiceOrder($order, $transactionId, $captureOrderImmediately, $data['amount'], $transactionType, true);
 
         if ($orderId) {
-            $result['order_id'] = $orderId;
+            $result["order_id"] = $orderId;
         } else {
-            $result = ['error' => 1, 'msg' => 'Your custom message'];
+            $result = ["error" => 1, "msg" => "Your custom message"];
         }
         return $result;
     } //end createApplication()
+
+    private function invoiceOrder(
+        $order,
+        $transactionId,
+        $captureCase,
+        $amount,
+        $transactionType,
+        $save = true
+    ) {
+        $invoice = $this->invoiceService->prepareInvoice($order);
+        $captureType = $captureCase ? \Magento\Sales\Model\Order\Invoice::STATE_PAID : \Magento\Sales\Model\Order\Invoice::STATE_OPEN;
+        $invoice->setRequestedCaptureCase($captureType);
+
+        if ($transactionId) {
+            $invoice->setTransactionId($transactionId);
+            $order->getPayment()->setLastTransId($transactionId);
+        }
+
+        // $this->adjustInvoiceAmounts($invoice, $amount);
+
+        $invoice->register();
+
+        // $comment = __(
+        //     $captureCase ? "Captured payment of %1 through Credova." : "Authorized payment of %1 through Credova",
+        //     $order->formatPrice($amount)
+        // );
+        // $order->addStatusToHistory(
+        //     $captureCase ? "processing" : "authorized",
+        //     $comment,
+        //     $isCustomerNotified = false
+        // );
+        // $action = $captureCase ? "Captured" : "Authorized";
+        // $state = \Magento\Sales\Model\Order::STATE_PROCESSING;
+        // $status = $order->getConfig()->getStateDefaultStatus($state);
+        // $humanReadableAmount = $order->formatPrice($amount);
+        // $comment = __("%1 amount of %2 via Stripe. Transaction ID: %3", $action, $humanReadableAmount, $transactionId);
+        // $order->setState($state)->addStatusToHistory($status, $comment, $isCustomerNotified = false);
+
+        if ($save) {
+            $this->invoiceRepository->save($invoice);
+            $this->orderRepository->save($order);
+            $this->sendInvoiceEmail($invoice);
+        }
+
+        return $invoice;
+    }
+
+    private function sendInvoiceEmail($invoice) {
+        try
+        {
+            $this->invoiceSender->send($invoice);
+            return true;
+        }
+        catch (\Exception $e)
+        {
+            // $this->logError($e->getMessage(), $e->getTraceAsString());
+        }
+
+        return false;
+    }
+
+    public function createTransaction($order = null, $paymentData = array(), $transactionType = string)
+    {
+        try {
+            //get payment object from order object
+            $payment = $order->getPayment();
+            $payment->setLastTransId($paymentData['id']);
+            $payment->setTransactionId($paymentData['id']);
+            $payment->setAdditionalInformation(
+                [\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array) $paymentData]
+            );
+            $formatedPrice = $order->getBaseCurrency()->formatTxt(
+                $order->getGrandTotal()
+            );
+            $message = __('The authorized amount is %1.', $formatedPrice);
+            //get the object of builder class
+            $trans = $this->transactionBuilder;
+            $transaction = $trans->setPayment($payment)
+            ->setOrder($order)
+            ->setTransactionId($paymentData['id'])
+            ->setAdditionalInformation(
+                [\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array) $paymentData]
+            )
+            ->setFailSafe(true)
+            //build method creates the transaction and returns the object
+            ->build($transactionType);
+            $payment->addTransactionCommentsToOrder(
+                $transaction,
+                $message
+            );
+            $payment->setParentTransactionId(null);
+            $payment->save();
+            $order->save();
+            return  $transaction->save()->getTransactionId();
+        } catch (Exception $e) {
+            //log errors here
+        }
+    }
 } //end class
