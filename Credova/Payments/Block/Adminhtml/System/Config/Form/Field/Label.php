@@ -32,7 +32,7 @@ class Label extends \Magento\Config\Block\System\Config\Form\Field
 
     public function getModuleVersion()
     {
-        $moduleInfo = $this->moduleInfoProvider->getModuleInfo('Credova_Financial');
+        $moduleInfo = $this->moduleInfoProvider->getModuleInfo('Credova_Payments');
 
         return $moduleInfo['version'];
     }

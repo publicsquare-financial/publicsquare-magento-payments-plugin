@@ -18,7 +18,7 @@
         </tab>
         <section id="payment">
             <group id="credova_payments" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label><![CDATA[<div class="credova-financial-tagline"><span>Credova Payment Services</span><br/>Accept popular credit/debit cards from brands such as VISA, Mastercard, Discover & American Express.</div>]]></label>
+                <label><![CDATA[<div class="credova-financial-tagline"><span>Credova Credit/Debit Payments</span><br/>Accept popular credit/debit cards from brands such as VISA, Mastercard, Discover & American Express.</div>]]></label>
                 <fieldset_css>complex credova-financial-section</fieldset_css>
                 <frontend_model>Credova\Payments\Block\Adminhtml\System\Config\Fieldset\Payment</frontend_model>
                 <field id="plugin_version" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -32,41 +32,43 @@
                 <field id="title" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Checkout page payment method title</label>
                 </field>
-                <field id="environment" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
-                    <label>Sandbox mode</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="credova_api_public_key" translate="label comment" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="credova_api_public_key" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Credova Public API key</label>
-                    <comment>You can find your API key by visiting the API Keys page in your Credova Portal: <![CDATA[<a href="https://portal.credova.com/developers/api-keys" target="_blank">https://portal.credova.com/developers/api-keys</a>]]></comment>
+                    <comment><![CDATA[You can find your Public key by visiting the <a href="https://portal.credova.com/developers/api-keys" target="_blank">API keys page</a> in your Credova Portal.]]></comment>
                 </field>
-                <field id="credova_api_secret_key" translate="label comment" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="credova_api_secret_key" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Credova Secret API key</label>
-                    <comment>You can find your API key by visiting the API Keys page in your Credova Portal: <![CDATA[<a href="https://portal.credova.com/developers/api-keys" target="_blank">https://portal.credova.com/developers/api-keys</a>]]></comment>
+                    <comment><![CDATA[You can find your Secret/Restricted key by visiting the <a href="https://portal.credova.com/developers/api-keys" target="_blank">API keys page</a> in your Credova Portal. Restricted keys need "transaction:write" permissions.]]></comment>
                 </field>
-                <field id="security_type" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="security_type" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Security type</label>
                     <source_model>Credova\Payments\Model\Adminhtml\Inputs\SecurityType</source_model>
                 </field>
-                <field id="pre_authorization_type" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="pre_authorization_type" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Pre-Authorization type</label>
                     <source_model>Credova\Payments\Model\Adminhtml\Inputs\PreAuthorizationType</source_model>
                 </field>
-                <field id="cvv_verification" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="cvv_verification" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>CVV verification</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="three_d_secure_authentication" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="three_d_secure_authentication" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>3D secure authentication</label>
                     <source_model>Credova\Payments\Model\Adminhtml\Inputs\ThreeDSecureAuthentication</source_model>
                 </field>
-                <field id="card_types" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Allowed credit card types</label>
+                <field id="card_types" translate="label" type="multiselect" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Allowed card types</label>
                     <source_model>Credova\Payments\Model\Adminhtml\Inputs\CardTypes</source_model>
                 </field>
-                <field id="capture_action" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="capture_action" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Payment capture action</label>
                     <source_model>Credova\Payments\Model\Adminhtml\Inputs\CaptureAction</source_model>
+                </field>
+                <field id="avs_check" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>AVS Check</label>
+                    <comment><![CDATA[AVS check happens automatically if an address and phone number is included in the payments creation request to Credova.]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <attribute type="disabled">1</attribute>
                 </field>
             </group>
         </section>

@@ -12,15 +12,15 @@
 
 namespace Credova\Payments\Api;
 
-interface ReturnsInterface
+interface RefundsInterface
 {
      
      /**
       * Returns an application in Credova and returns the public id
       *
-      * @param  \Credova\Payments\Api\Data\CustomerInterface $customer
+      * @param  string $transactionId
       * @return string
       * @throws \Magento\Framework\Exception\LocalizedException
       */
-    public function returnRequest($customer);
+    public function refundOrder($transactionId);
 }//end interface

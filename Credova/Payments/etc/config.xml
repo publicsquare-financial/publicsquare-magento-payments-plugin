@@ -17,7 +17,6 @@
             <credova_payments>
                 <active>0</active>
                 <title>Credit/Debit Card</title>
-                <environment>1</environment>                
                 <model>Credova\Payments\Model\PaymentMethod</model>
                 <security_type>iframe</security_type>
                 <pre_authorization_type>test</pre_authorization_type>
@@ -25,6 +24,7 @@
                 <three_d_secure_authentiation>0</three_d_secure_authentiation>
                 <card_types>amex,visa,mastercard,discover</card_types>
                 <capture_action>authorize</capture_action>
+                <avs_check>1</avs_check>
             </credova_payments>
         </payment>
     </default>

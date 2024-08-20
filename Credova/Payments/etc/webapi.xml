@@ -20,7 +20,7 @@
         </resources>
     </route>
     <route url="/V1/credova_payments/returns" method="POST">
-        <service class="Credova\Payments\Api\ReturnsInterface" method="returnRequest"/>
+        <service class="Credova\Payments\Api\ReturnsInterface" method="refundOrder"/>
         <resources>
             <resource ref="anonymous"/>
         </resources>
