@@ -59,15 +59,15 @@ class Refunds implements RefundsInterface
      */
     public function refundOrder($transactionId)
     {
-        $data['payment_id'] = $transactionId;
-        $data['amount'] = 100;
-        $data['currency'] = 'USD';
-        $data['reason'] = '';
-        /*
-            @var \Credova\Payments\Api\Authenticated\Refunds $request
-        */
-        $request  = $this->returnRequestFactory->create(['refund' => $data]);
-        $response = $request->getResponseData();
-        return $response['id'];
+        // $data['payment_id'] = $transactionId;
+        // $data['amount'] = 100;
+        // $data['currency'] = 'USD';
+        // $data['reason'] = '';
+        // /*
+        //     @var \Credova\Payments\Api\Authenticated\Refunds $request
+        // */
+        // $request  = $this->returnRequestFactory->create(['refund' => $data]);
+        // $response = $request->getResponseData();
+        // return $response['id'];
     }//end returnRequest()
 }//end class

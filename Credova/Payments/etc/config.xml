@@ -25,6 +25,21 @@
                 <card_types>amex,visa,mastercard,discover</card_types>
                 <capture_action>authorize</capture_action>
                 <avs_check>1</avs_check>
+                
+                <!-- What can we do? -->
+                <is_gateway>1</is_gateway>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_capture_partial>1</can_capture_partial>
+                <can_capture_once>1</can_capture_once>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_void>1</can_void>
+                <can_cancel>1</can_cancel>
+                <can_use_internal>1</can_use_internal>
+                <can_use_checkout>1</can_use_checkout>
+                <can_save_cc>0</can_save_cc>
+                <can_use_for_multishipping>0</can_use_for_multishipping>
             </credova_payments>
         </payment>
     </default>

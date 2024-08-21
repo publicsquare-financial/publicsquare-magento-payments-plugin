@@ -1,0 +1,17 @@
+/**
+ * Styles
+ *
+ * @category  Credova
+ * @package   Credova_Payments
+ * @author    Credova <info@credova.com>
+ * @copyright 2024 Credova
+ * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
+ * @link https://credova.com/
+ */
+ 
+#credova-elements-form {
+    margin-bottom: 1em;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    padding: 4px 4px 4px 12px;
+}

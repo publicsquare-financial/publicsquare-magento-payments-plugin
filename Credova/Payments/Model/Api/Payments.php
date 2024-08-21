@@ -443,14 +443,14 @@ class Payments implements PaymentsInterface
             //get the object of builder class
             $trans = $this->transactionBuilder;
             $transaction = $trans->setPayment($payment)
-            ->setOrder($order)
-            ->setTransactionId($paymentData['id'])
-            ->setAdditionalInformation(
-                [\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array) $paymentData]
-            )
-            ->setFailSafe(true)
-            //build method creates the transaction and returns the object
-            ->build($transactionType);
+                ->setOrder($order)
+                ->setTransactionId($paymentData['id'])
+                ->setAdditionalInformation(
+                    [\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array) $paymentData]
+                )
+                ->setFailSafe(true)
+                //build method creates the transaction and returns the object
+                ->build($transactionType);
             $payment->addTransactionCommentsToOrder(
                 $transaction,
                 $message
