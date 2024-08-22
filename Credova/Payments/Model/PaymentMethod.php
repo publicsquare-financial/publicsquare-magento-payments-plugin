@@ -88,6 +88,6 @@ class PaymentMethod extends Adapter
 
     private function executeCommand($commandCode, array $arguments = [])
     {
-        $this->commandPool->get($commandCode)->execute($arguments);
+        // $this->commandPool->get($commandCode)->execute($arguments);
     }
 }

@@ -433,6 +433,7 @@ class Payments implements PaymentsInterface
             $payment = $order->getPayment();
             $payment->setLastTransId($paymentData['id']);
             $payment->setTransactionId($paymentData['id']);
+            $payment->setIsTransactionClosed(false);
             $payment->setAdditionalInformation(
                 [\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array) $paymentData]
             );
