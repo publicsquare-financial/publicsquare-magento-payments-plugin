@@ -12,7 +12,10 @@
 
 namespace Credova\Payments\Api;
 
-interface PaymentsInterface
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\CsrfAwareActionInterface;
+
+interface OrdersInterface extends HttpPostActionInterface, CsrfAwareActionInterface
 {
      /**
       * Creates a payment in Credova and returns the public id
@@ -21,5 +24,5 @@ interface PaymentsInterface
       * @return string
       * @throws \Magento\Framework\Exception\LocalizedException
       */
-    public function createPayment($cardId);
+    public function create($cardId);
 }//end interface

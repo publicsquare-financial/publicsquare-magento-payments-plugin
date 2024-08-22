@@ -137,6 +137,28 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
         return rtrim('https://api.credova.com/', '/');
     } //end getUrii()
 
+    /**
+     * Get credova payment allowed currencies
+     *
+     * @param  string $scopeType
+     * @param  null   $scopeCode
+     * @return string
+     */
+    public function getAllowedCurrencies(
+        $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+        $scopeCode = null
+    ): array {
+        return ['USD'];
+    } //end getCaptureAction()
+
+    public function getPreAuthorizationType(
+        $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+        $scopeCode = null
+    ): string {
+        return $this->scopeConfig
+            ->getValue(self::CREDOVA_PRE_AUTHORIZATION_TYPE, $scopeType, $scopeCode);
+    }
+
     public function getReturnReasons()
     {
         $authentication_token = $this->getAuthenticationToken();

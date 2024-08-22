@@ -40,10 +40,10 @@ define(
             createCard: function (cardholder_name) {
                 return credova.createCard(cardholder_name, credova.cardElement)
             },
-            placeOrderCredovaPayments: async function () {
+            placeOrder: async function () {
+                const self = this
                 fullScreenLoader.startLoader()
                 if (this.validate() && additionalValidators.validate()) {
-                    const url = urlBuilder.createUrl('/credova_payments/payments', {})
                     const billingAddress = quote.billingAddress();
                     try {
                         // Tokenize the card in Credova
@@ -51,13 +51,7 @@ define(
                             `${billingAddress.firstname} ${billingAddress.lastname}`
                         )
                         // Submit the payment
-                        const response = await storage.post(url, JSON.stringify({
-                            card: card.id
-                        }), false).then((res) => JSON.parse(res))
-                        const maskId = window.checkoutConfig.quoteData.entity_id;
-                        const successUrl = `${window.checkoutConfig.payment.credova_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? 'refercust' : 'refergues'}=${maskId}`
-                        $.mage.redirect(successUrl);
-                        return false;
+                        await self.placeOrderWithCardId(card.id)
                     } catch (error) {
                         console.log(error)
                         fullScreenLoader.stopLoader();
@@ -69,9 +63,27 @@ define(
                     messageList.addErrorMessage({
                         message: $t('Please check your checkout details.')
                     });
+                    return false
                 }
-                fullScreenLoader.stopLoader();
-                return false
+            },
+            placeOrderWithCardId: function (cardId) {
+                var serviceUrl = urlBuilder.createUrl('/credova_payments/payments', {});
+
+                return storage.post(
+                    serviceUrl,
+                    JSON.stringify({
+                        cardId
+                    })
+                ).done(function (response) {
+                    // Handle successful order placement
+                    const maskId = window.checkoutConfig.quoteData.entity_id;
+                    const successUrl = `${window.checkoutConfig.payment.credova_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? 'refercust' : 'refergues'}=${maskId}`
+                    $.mage.redirect(successUrl);
+                }).fail(function (response) {
+                    errorProcessor.process(response);
+                }).always(function () {
+                    fullScreenLoader.stopLoader();
+                });
             }
         });
     });

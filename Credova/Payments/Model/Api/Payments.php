@@ -147,11 +147,11 @@ class Payments implements PaymentsInterface
     /**
      * Creates an application in Financial and returns the public id
      *
-     * @param string $card
+     * @param string $cardId
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function createPayment($card)
+    public function createPayment($cardId)
     {
         $quoteId = $this->checkoutSession->getQuoteId();
         $quote = $this->quoteFactory->create()->load($quoteId);
@@ -203,7 +203,7 @@ class Payments implements PaymentsInterface
             "currency" => "USD",
             "capture" => $captureOrderImmediately,
             "payment_method" => [
-                "card" => $card,
+                "card" => $cardId,
             ],
             "customer" => [
                 "id" => "",

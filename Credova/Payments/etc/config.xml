@@ -11,10 +11,11 @@
  * @link https://credova.com/
  */
  -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Store/etc/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <payment>
             <credova_payments>
+                <model>CredovaPaymentsFacade</model>
                 <active>0</active>
                 <title>Credit/Debit Card</title>
                 <model>Credova\Payments\Model\PaymentMethod</model>
@@ -27,6 +28,7 @@
                 <avs_check>1</avs_check>
                 
                 <!-- What can we do? -->
+                <payment_action>authorize</payment_action>
                 <is_gateway>1</is_gateway>
                 <can_authorize>1</can_authorize>
                 <can_capture>1</can_capture>

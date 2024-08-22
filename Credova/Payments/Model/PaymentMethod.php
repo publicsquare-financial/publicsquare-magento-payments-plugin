@@ -12,29 +12,82 @@
 
 namespace Credova\Payments\Model;
 
-/**
- * Pay In Store payment method model
- */
+use Magento\Payment\Model\Method\Adapter;
+use Magento\Payment\Gateway\Command\CommandPoolInterface;
+use Magento\Payment\Gateway\Config\ValueHandlerPoolInterface;
+use Magento\Payment\Gateway\Data\PaymentDataObjectFactory;
+use Magento\Payment\Gateway\Validator\ValidatorPoolInterface;
+use Magento\Framework\Event\ManagerInterface;
+use Credova\Payments\Helper\Config;
 
-class PaymentMethod extends \Magento\Payment\Model\Method\AbstractMethod
+class PaymentMethod extends Adapter
 {
+    protected $config;
 
-    /**
-     * Constant variable
-     */
-    const METHOD_CODE = 'credova_payments';
+    public function __construct(
+        ManagerInterface $eventManager,
+        ValueHandlerPoolInterface $valueHandlerPool,
+        PaymentDataObjectFactory $paymentDataObjectFactory,
+        string $code,
+        string $formBlockType,
+        string $infoBlockType,
+        Config $config,
+        CommandPoolInterface $commandPool = null,
+        ValidatorPoolInterface $validatorPool = null
+    ) {
+        parent::__construct(
+            $eventManager,
+            $valueHandlerPool,
+            $paymentDataObjectFactory,
+            $code,
+            $formBlockType,
+            $infoBlockType,
+            $commandPool,
+            $validatorPool
+        );
+        $this->config = $config;
+    }
 
-    /**
-     * Payment code
-     *
-     * @var string
-     */
-    protected $_code = self::METHOD_CODE;
+    public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
+    {
+        if ($quote && $quote->getBaseGrandTotal() < $this->config->getActive()) {
+            return false;
+        }
+        return parent::isAvailable($quote);
+    }
 
-    /**
-     * Availability option
-     *
-     * @var boolean
-     */
-    protected $_isOffline = true;
-}//end class
+    public function canUseForCurrency($currencyCode)
+    {
+        return in_array($currencyCode, $this->config->getAllowedCurrencies());
+    }
+
+    public function authorize(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+        $commandCode = $this->getAuthorizeCommandCode();
+        $this->executeCommand($commandCode, ['payment' => $payment, 'amount' => $amount]);
+        return $this;
+    }
+
+    public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    {
+        if ($this->config->getPreAuthorizationType() === 'authorize') {
+            // If it's authorization only, we need to capture a previously authorized payment
+            $this->executeCommand('capture', ['payment' => $payment, 'amount' => $amount]);
+        } else {
+            // If it's auth+capture, we use the same command as authorize
+            $commandCode = $this->getAuthorizeCommandCode();
+            $this->executeCommand($commandCode, ['payment' => $payment, 'amount' => $amount]);
+        }
+        return $this;
+    }
+
+    private function getAuthorizeCommandCode()
+    {
+        return $this->config->getPreAuthorizationType() ? 'authorize' : 'authorize_capture';
+    }
+
+    private function executeCommand($commandCode, array $arguments = [])
+    {
+        $this->commandPool->get($commandCode)->execute($arguments);
+    }
+}

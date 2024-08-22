@@ -25,4 +25,10 @@
             <resource ref="anonymous"/>
         </resources>
     </route>
+    <route url="/V1/credova_payments/orders" method="POST">
+        <service class="Credova\Payments\Api\OrdersInterface" method="execute"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
 </routes>

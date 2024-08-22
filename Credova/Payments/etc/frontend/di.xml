@@ -4,9 +4,9 @@
  * DI File
  *
  * @category  Credova
- * @package   Credova_Financial
+ * @package   Credova_Payments
  * @author    Credova <info@credova.com>
- * @copyright 2019 Credova
+ * @copyright 2024 Credova
  * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
  * @link https://credova.com/
  */
@@ -17,6 +17,12 @@
             <argument name="configProviders" xsi:type="array">
                 <item name="credova_payments" xsi:type="object">Credova\Payments\Model\CredovaPaymentConfigProvider</item>
             </argument>
+        </arguments>
+    </type>
+
+    <type name="Credova\Payments\Controller\Payment\Capture">
+        <arguments>
+            <argument name="captureCommand" xsi:type="object">Credova\Payments\Gateway\Command\CaptureCommand</argument>
         </arguments>
     </type>
 </config>
