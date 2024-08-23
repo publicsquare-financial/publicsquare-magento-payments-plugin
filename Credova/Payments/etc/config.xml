@@ -24,11 +24,10 @@
                 <cvv_verification>1</cvv_verification>
                 <three_d_secure_authentiation>0</three_d_secure_authentiation>
                 <card_types>amex,visa,mastercard,discover</card_types>
-                <capture_action>authorize</capture_action>
+                <payment_action>authorize</payment_action>
                 <avs_check>1</avs_check>
                 
                 <!-- What can we do? -->
-                <payment_action>authorize</payment_action>
                 <is_gateway>1</is_gateway>
                 <can_authorize>1</can_authorize>
                 <can_capture>1</can_capture>

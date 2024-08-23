@@ -23,6 +23,7 @@ use Credova\Payments\Helper\Config;
 class PaymentMethod extends Adapter
 {
     protected $config;
+    protected $commandPool;
 
     public function __construct(
         ManagerInterface $eventManager,
@@ -46,6 +47,7 @@ class PaymentMethod extends Adapter
             $validatorPool
         );
         $this->config = $config;
+        $this->commandPool = $commandPool;
     }
 
     public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
@@ -61,33 +63,32 @@ class PaymentMethod extends Adapter
         return in_array($currencyCode, $this->config->getAllowedCurrencies());
     }
 
-    public function authorize(\Magento\Payment\Model\InfoInterface $payment, $amount)
-    {
-        $commandCode = $this->getAuthorizeCommandCode();
-        $this->executeCommand($commandCode, ['payment' => $payment, 'amount' => $amount]);
-        return $this;
-    }
+    // public function authorize(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    // {
+    //     $this->executeCommand('authorize', ['payment' => $payment, 'amount' => $amount]);
+    //     return $this;
+    // }
 
-    public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount)
-    {
-        if ($this->config->getPreAuthorizationType() === 'authorize') {
-            // If it's authorization only, we need to capture a previously authorized payment
-            $this->executeCommand('capture', ['payment' => $payment, 'amount' => $amount]);
-        } else {
-            // If it's auth+capture, we use the same command as authorize
-            $commandCode = $this->getAuthorizeCommandCode();
-            $this->executeCommand($commandCode, ['payment' => $payment, 'amount' => $amount]);
-        }
-        return $this;
-    }
+    // public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount)
+    // {
+    //     // if (in_array($this->config->getPreAuthorizationType(), array('authorize', 'authorize_capture'))) {
+    //     //     // If it's authorization only, we need to capture a previously authorized payment
+    //     //     $this->executeCommand('authorize', ['payment' => $payment, 'amount' => $amount]);
+    //     // } else {
+    //     //     // If it's auth+capture, we use the same command as authorize
+    //     //     $this->executeCommand('authorize', ['payment' => $payment, 'amount' => $amount]);
+    //     // }
+    //     $this->executeCommand('capture', ['payment' => $payment, 'amount' => $amount]);
+    //     return $this;
+    // }
 
     private function getAuthorizeCommandCode()
     {
-        return $this->config->getPreAuthorizationType() ? 'authorize' : 'authorize_capture';
+        return $this->config->getPreAuthorizationType() === 'authorize' ? 'authorize' : 'authorize';
     }
 
-    private function executeCommand($commandCode, array $arguments = [])
-    {
-        // $this->commandPool->get($commandCode)->execute($arguments);
-    }
+    // private function executeCommand($commandCode, array $arguments = [])
+    // {
+    //     $this->commandPool->get($commandCode)->execute($arguments);
+    // }
 }

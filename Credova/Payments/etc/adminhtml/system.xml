@@ -60,7 +60,7 @@
                     <label>Allowed card types</label>
                     <source_model>Credova\Payments\Model\Adminhtml\Inputs\CardTypes</source_model>
                 </field>
-                <field id="capture_action" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="payment_action" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Payment capture action</label>
                     <source_model>Credova\Payments\Model\Adminhtml\Inputs\CaptureAction</source_model>
                 </field>

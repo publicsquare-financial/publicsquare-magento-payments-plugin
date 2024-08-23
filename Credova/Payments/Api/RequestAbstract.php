@@ -82,7 +82,7 @@ abstract class RequestAbstract
      */
     protected function getUri(): string
     {
-        $host = rtrim('https://api.credova.com/', '/');
+        $host = $this->configHelper->getUrii();
 
         $path = ltrim($this->getPath());
 
@@ -91,7 +91,7 @@ abstract class RequestAbstract
     
     protected function getUrii(): string
     {
-        return rtrim('https://api.credova.com/', '/');
+        return $this->configHelper->getUrii();
     } //end getUrii()
 
     /**

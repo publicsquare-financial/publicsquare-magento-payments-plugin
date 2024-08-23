@@ -161,8 +161,7 @@ class Payments implements PaymentsInterface
         $firstName = $billingAddress->getFirstName();
         $lastName = $billingAddress->getLastName();
         $email = $billingAddress->getEmail();
-        $captureOrderImmediately =
-            $this->configHelper->getCaptureAction() === "authorize_capture";
+        $capture = $this->configHelper->getCaptureAction() === "sale";
 
         // Find or create new customer
         $customer = $this->customerFactory->create();
@@ -201,7 +200,7 @@ class Payments implements PaymentsInterface
         $data = [
             "amount" => 0,
             "currency" => "USD",
-            "capture" => $captureOrderImmediately,
+            "capture" => $capture,
             "payment_method" => [
                 "card" => $cardId,
             ],
@@ -343,7 +342,8 @@ class Payments implements PaymentsInterface
         $quote->save();
 
         // Set Sales Order Payment
-        $quote->getPayment()->importData(["method" => static::PAYMENT_METHOD]);
+        $payment = $quote->getPayment();
+        $payment->importData(["method" => static::PAYMENT_METHOD])->setLastTransId($response['id'])->save();
 
         // Collect Totals & Save Quote
         $quote->collectTotals()->save();
@@ -353,10 +353,9 @@ class Payments implements PaymentsInterface
         $order = $this->orderRepository->get($orderId);
 
         // Create transaction
-        $transactionType = $captureOrderImmediately ? \Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE : \Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH;
-        $transactionId = $this->createTransaction($order, $response, $transactionType);
+        $transactionId = $this->createTransaction($order, $response, );
 
-        $this->invoiceOrder($order, $transactionId, $captureOrderImmediately, $data['amount'], $transactionType, true);
+        $this->invoiceOrder($order, $transactionId, $capture, true);
 
         if ($orderId) {
             $result["order_id"] = $orderId;
@@ -369,39 +368,18 @@ class Payments implements PaymentsInterface
     private function invoiceOrder(
         $order,
         $transactionId,
-        $captureCase,
-        $amount,
-        $transactionType,
+        $capture = false,
         $save = true
     ) {
         $invoice = $this->invoiceService->prepareInvoice($order);
-        $captureType = $captureCase ? \Magento\Sales\Model\Order\Invoice::STATE_PAID : \Magento\Sales\Model\Order\Invoice::STATE_OPEN;
+        $captureType = $capture ? \Magento\Sales\Model\Order\Invoice::STATE_PAID : \Magento\Sales\Model\Order\Invoice::STATE_OPEN;
         $invoice->setRequestedCaptureCase($captureType);
 
         if ($transactionId) {
             $invoice->setTransactionId($transactionId);
             $order->getPayment()->setLastTransId($transactionId);
         }
-
-        // $this->adjustInvoiceAmounts($invoice, $amount);
-
         $invoice->register();
-
-        // $comment = __(
-        //     $captureCase ? "Captured payment of %1 through Credova." : "Authorized payment of %1 through Credova",
-        //     $order->formatPrice($amount)
-        // );
-        // $order->addStatusToHistory(
-        //     $captureCase ? "processing" : "authorized",
-        //     $comment,
-        //     $isCustomerNotified = false
-        // );
-        // $action = $captureCase ? "Captured" : "Authorized";
-        // $state = \Magento\Sales\Model\Order::STATE_PROCESSING;
-        // $status = $order->getConfig()->getStateDefaultStatus($state);
-        // $humanReadableAmount = $order->formatPrice($amount);
-        // $comment = __("%1 amount of %2 via Stripe. Transaction ID: %3", $action, $humanReadableAmount, $transactionId);
-        // $order->setState($state)->addStatusToHistory($status, $comment, $isCustomerNotified = false);
 
         if ($save) {
             $this->invoiceRepository->save($invoice);
@@ -426,14 +404,15 @@ class Payments implements PaymentsInterface
         return false;
     }
 
-    public function createTransaction($order = null, $paymentData = array(), $transactionType = string)
+    public function createTransaction($order = null, $paymentData = array(), $capture = false)
     {
+        $transactionType = $capture ? \Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE : \Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH;
         try {
             //get payment object from order object
             $payment = $order->getPayment();
             $payment->setLastTransId($paymentData['id']);
             $payment->setTransactionId($paymentData['id']);
-            $payment->setIsTransactionClosed(false);
+            $payment->setIsTransactionClosed($capture);
             $payment->setAdditionalInformation(
                 [\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS => (array) $paymentData]
             );

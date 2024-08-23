@@ -73,17 +73,6 @@
     <!-- <type name="Magento\Sales\Api\OrderRepositoryInterface">
         <plugin name="persist_credova_extension_attributes" type="Credova\Payments\Plugin\Sales\OrderRepository"/>
     </type> -->
-    <virtualType name="CredovaPaymentsFacade" type="Credova\Payments\Model\PaymentMethod">
-        <arguments>
-            <argument name="code" xsi:type="string">credova_payments</argument>
-            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
-            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info</argument>
-            <argument name="valueHandlerPool" xsi:type="object">CredovaPaymentsValueHandlerPool</argument>
-            <argument name="validatorPool" xsi:type="object">CredovaPaymentsValidatorPool</argument>
-            <argument name="commandPool" xsi:type="object">CredovaPaymentsCommandPool</argument>
-        </arguments>
-    </virtualType>
-
     <virtualType name="CredovaPaymentsValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -122,7 +111,7 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="authorize" xsi:type="string">Credova\Payments\Gateway\Command\AuthorizeCommand</item>
-                <item name="authorize_capture" xsi:type="string">Credova\Payments\Gateway\Command\AuthorizeCaptureCommand</item>
+                <item name="sale" xsi:type="string">Credova\Payments\Gateway\Command\AuthorizeCaptureCommand</item>
                 <item name="capture" xsi:type="string">Credova\Payments\Gateway\Command\CaptureCommand</item>
                 <item name="refund" xsi:type="string">Credova\Payments\Gateway\Command\RefundCommand</item>
             </argument>
@@ -139,4 +128,14 @@
             <argument name="commandPool" xsi:type="object">CredovaPaymentsCommandPool</argument>
         </arguments>
     </type>
+    <!-- <virtualType name="CredovaPaymentsFacade" type="Credova\Payments\Model\PaymentMethod">
+        <arguments>
+            <argument name="code" xsi:type="string">credova_payments</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">CredovaPaymentsValueHandlerPool</argument>
+            <argument name="validatorPool" xsi:type="object">CredovaPaymentsValidatorPool</argument>
+            <argument name="commandPool" xsi:type="object">CredovaPaymentsCommandPool</argument>
+        </arguments>
+    </virtualType> -->
 </config>

@@ -25,7 +25,7 @@ class CaptureAction extends \Magento\Eav\Model\Entity\Attribute\Source\AbstractS
         if ($this->_options === null) {
             $this->_options = [
                 ['value' => 'authorize', 'label' => __('Authorize')],
-                ['value' => 'authorize-capture', 'label' => __('Authorize & Capture')]
+                ['value' => 'sale', 'label' => __('Authorize & Capture')]
             ];
         }
         return $this->_options;
