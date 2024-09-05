@@ -161,7 +161,7 @@ class Payments implements PaymentsInterface
         $firstName = $billingAddress->getFirstName();
         $lastName = $billingAddress->getLastName();
         $email = $billingAddress->getEmail();
-        $capture = $this->configHelper->getCaptureAction() === "sale";
+        $capture = $this->configHelper->getPaymentAction() === "sale";
 
         // Find or create new customer
         $customer = $this->customerFactory->create();
@@ -322,6 +322,25 @@ class Payments implements PaymentsInterface
         }
         $data["amount"] = $data["amount"] * 100;
 
+        $quote->setPaymentMethod(static::PAYMENT_METHOD);
+        // $quote->setCredovaPublicId($response["id"]);
+        $quote->setInventoryProcessed(false);
+        $quote->save();
+
+        // Set Sales Order Payment
+        $payment = $quote->getPayment();
+        // $payment->importData(["method" => static::PAYMENT_METHOD])->setLastTransId($response['id'])->save();
+        $payment->importData(["method" => static::PAYMENT_METHOD])->save();
+
+        // Collect Totals & Save Quote
+        $quote->collectTotals()->save();
+
+        // Create Order From Quote
+        $orderId = $this->cartManagement->placeOrder($quote->getId());
+
+        $order = $this->orderRepository->get($orderId);
+
+        $data["external_id"] = $order->getIncrementId();
         /*
         @var \Credova\Payments\Api\Authenticated\Payments $request
          */
@@ -336,24 +355,8 @@ class Payments implements PaymentsInterface
             );
         }
 
-        $quote->setPaymentMethod(static::PAYMENT_METHOD);
-        $quote->setCredovaPublicId($response["id"]);
-        $quote->setInventoryProcessed(false);
-        $quote->save();
-
-        // Set Sales Order Payment
-        $payment = $quote->getPayment();
-        $payment->importData(["method" => static::PAYMENT_METHOD])->setLastTransId($response['id'])->save();
-
-        // Collect Totals & Save Quote
-        $quote->collectTotals()->save();
-
-        // Create Order From Quote
-        $orderId = $this->cartManagement->placeOrder($quote->getId());
-        $order = $this->orderRepository->get($orderId);
-
         // Create transaction
-        $transactionId = $this->createTransaction($order, $response, );
+        $transactionId = $this->createTransaction($order, $response, $capture);
 
         $this->invoiceOrder($order, $transactionId, $capture, true);
 

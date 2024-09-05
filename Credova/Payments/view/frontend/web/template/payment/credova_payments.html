@@ -29,6 +29,17 @@
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
         <div id="credova-elements-form" data-bind="afterRender: onContainerRendered"></div>
+        <!-- ko if: (isVaultEnabled())-->
+        <div class="field choice payment-method-vault-checkbox">
+            <input type="checkbox"
+                name="vault[is_enabled]"
+                class="checkbox"
+                data-bind="attr: {'id': getCode() + '_enable_vault'}, checked: vaultEnabler.isActivePaymentTokenEnabler"/>
+            <label class="label" data-bind="attr: {'for': getCode() + '_enable_vault'}">
+                <span><!-- ko i18n: 'Save for later use.'--><!-- /ko --></span>
+            </label>
+        </div>
+        <!-- /ko -->
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
             <!-- ko template: getTemplate() --><!-- /ko -->

@@ -19,9 +19,10 @@ define(
         'Magento_Checkout/js/model/quote',
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Checkout/js/model/full-screen-loader',
-        'mage/translate'
+        'mage/translate',
+        'Magento_Vault/js/view/payment/vault-enabler'
     ],
-    function ($, Component, credova, urlBuilder, storage, quote, additionalValidators, fullScreenLoader, $t) {
+    function ($, Component, credova, urlBuilder, storage, quote, additionalValidators, fullScreenLoader, $t, VaultEnabler) {
         'use strict';
 
         return Component.extend({
@@ -30,6 +31,16 @@ define(
             },
             apiKey: window.checkoutConfig.payment.credova_payments.pk,
             elementsFormSelector: '#credova-elements-form',
+            vaultName: 'credova_payments',
+            vaultEnabled: window.checkoutConfig.payment.credova_payments.vaultEnabled,
+            initialize: function () {
+                console.log('initialize')
+                var self = this;
+                self._super();
+                this.vaultEnabler = new VaultEnabler();
+                this.vaultEnabler.setPaymentCode(this.getVaultCode());
+                return self
+            },
             onContainerRendered: function () {
                 // This runs when the container div on the checkout page renders
                 credova.initElements({
@@ -84,7 +95,40 @@ define(
                 }).always(function () {
                     fullScreenLoader.stopLoader();
                 });
-            }
+            },
+            /**
+             * @returns {Object}
+             */
+            getData: function () {
+                var data = {
+                    'method': this.getCode(),
+                    'additional_data': {
+                        'payment_method_nonce': this.paymentPayload.nonce
+                    }
+                };
+
+                data['additional_data'] = _.extend(data['additional_data'], this.additionalData);
+                this.vaultEnabler.visitAdditionalData(data);
+
+                return data;
+            },
+            /**
+             * @returns {Boolean}
+             */
+            isVaultEnabled: function () {
+                console.log('isVaultEnabled', this.vaultEnabler, this.vaultEnabler.isVaultEnabled());
+                // return this.vaultEnabler.isVaultEnabled();
+                return this.vaultEnabled
+            },
+            /**
+             * Returns vault code.
+             *
+             * @returns {String}
+             */
+            getVaultCode: function () {
+                console.log('getVaultCode', window.checkoutConfig.payment[this.getCode()].ccVaultCode);
+                return window.checkoutConfig.payment[this.getCode()].ccVaultCode;
+            },
         });
     });
 

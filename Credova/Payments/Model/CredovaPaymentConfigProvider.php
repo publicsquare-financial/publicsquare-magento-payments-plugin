@@ -18,7 +18,7 @@ use Magento\Framework\UrlInterface;
 
 class CredovaPaymentConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
 {
-
+    const CODE = 'credova_payments';
     /**
      * @var \Magento\Checkout\Model\Session
      */
@@ -62,12 +62,14 @@ class CredovaPaymentConfigProvider implements \Magento\Checkout\Model\ConfigProv
     {
         return [
             'payment' => [
-                'credova_payments' => [
+                self::CODE => [
                     'pk'         => $this->credovaConfig->getPublicAPIKey(),
                     'cancelUrl'     => $this->urlBuilder->getUrl('credova_payments/checkout/cancel', ['_secure' => true]),
-                    'successUrl'    => $this->urlBuilder->getUrl('credova_payments/checkout/complete', ['_secure' => true])
+                    'successUrl'    => $this->urlBuilder->getUrl('credova_payments/checkout/complete', ['_secure' => true]),
+                    'vaultEnabled'  => $this->credovaConfig->getCCVaultActive(),
+                    'ccVaultCode'   => \Credova\Payments\Model\Transparent::CC_VAULT_CODE
                 ],
-            ],
+            ]
         ];
     }
 }

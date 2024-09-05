@@ -24,8 +24,9 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
     const CREDOVA_CVV_VERIFICATION                     = 'payment/credova_payments/cvv_verification';
     const CREDOVA_THREE_D_SECURE_AUTHENTICATION        = 'payment/credova_payments/three_d_secure_authentication';
     const CREDOVA_CARD_TYPES                           = 'payment/credova_payments/card_types';
-    const CREDOVA_CAPTURE_ACTION                       = 'payment/credova_payments/capture_action';
+    const CREDOVA_PAYMENT_ACTION                       = 'payment/credova_payments/payment_action';
     const CREDOVA_LOGGING_CONFIG_PATH                  = 'payment/credova_payments/debug';
+    const CREDOVA_CC_VAULT_ACTIVE                      = 'payment/credova_payments/cc_vault_active';
 
     /**
      * Get credova payment method active
@@ -124,13 +125,13 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
      * @param  null   $scopeCode
      * @return string
      */
-    public function getCaptureAction(
+    public function getPaymentAction(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
         $scopeCode = null
     ): string {
         return (string) $this->scopeConfig
-            ->getValue(self::CREDOVA_CAPTURE_ACTION, $scopeType, $scopeCode);
-    } //end getCaptureAction()
+            ->getValue(self::CREDOVA_PAYMENT_ACTION, $scopeType, $scopeCode);
+    } //end getPaymentAction()
 
     public function getUrii(): string
     {
@@ -157,6 +158,14 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
     ): string {
         return $this->scopeConfig
             ->getValue(self::CREDOVA_PRE_AUTHORIZATION_TYPE, $scopeType, $scopeCode);
+    }
+
+    public function getCCVaultActive(
+        $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+        $scopeCode = null
+    ): bool {
+        return (bool) $this->scopeConfig
+            ->getValue(self::CREDOVA_CC_VAULT_ACTIVE, $scopeType, $scopeCode);
     }
 
     public function getReturnReasons()

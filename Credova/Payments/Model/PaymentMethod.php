@@ -19,11 +19,13 @@ use Magento\Payment\Gateway\Data\PaymentDataObjectFactory;
 use Magento\Payment\Gateway\Validator\ValidatorPoolInterface;
 use Magento\Framework\Event\ManagerInterface;
 use Credova\Payments\Helper\Config;
+use Magento\Vault\Model\VaultPaymentInterface;
 
 class PaymentMethod extends Adapter
 {
     protected $config;
     protected $commandPool;
+    protected $vault;
 
     public function __construct(
         ManagerInterface $eventManager,
@@ -35,6 +37,7 @@ class PaymentMethod extends Adapter
         Config $config,
         CommandPoolInterface $commandPool = null,
         ValidatorPoolInterface $validatorPool = null
+        // VaultPaymentInterface $vault
     ) {
         parent::__construct(
             $eventManager,
@@ -48,6 +51,7 @@ class PaymentMethod extends Adapter
         );
         $this->config = $config;
         $this->commandPool = $commandPool;
+        // $this->vault = $vault;
     }
 
     public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
