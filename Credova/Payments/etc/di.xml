@@ -114,7 +114,7 @@
                 <item name="sale" xsi:type="string">Credova\Payments\Gateway\Command\AuthorizeCaptureCommand</item>
                 <item name="capture" xsi:type="string">Credova\Payments\Gateway\Command\CaptureCommand</item>
                 <item name="refund" xsi:type="string">Credova\Payments\Gateway\Command\RefundCommand</item>
-                <!-- <item name="vault_authorize" xsi:type="string">CredovaPaymentsVaultAuthorizeCommand</item> -->
+                <item name="vault_authorize" xsi:type="string">CredovaPaymentsVaultAuthorizeCommand</item>
             </argument>
         </arguments>
     </virtualType>

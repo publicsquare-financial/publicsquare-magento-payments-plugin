@@ -49,7 +49,7 @@ class TokenUiComponentProvider implements TokenUiComponentProviderInterface
         $component = $this->componentFactory->create(
             [
                 'config' => [
-                    'code' => ConfigProvider::CC_VAULT_CODE,
+                    'code' => \Credova\Payments\Model\Transparent::CC_VAULT_CODE,
                     'nonceUrl' => $this->getNonceRetrieveUrl(),
                     TokenUiComponentProviderInterface::COMPONENT_DETAILS => $jsonDetails,
                     TokenUiComponentProviderInterface::COMPONENT_PUBLIC_HASH => $paymentToken->getPublicHash()
@@ -67,6 +67,6 @@ class TokenUiComponentProvider implements TokenUiComponentProviderInterface
      */
     private function getNonceRetrieveUrl()
     {
-        return $this->urlBuilder->getUrl(ConfigProvider::CODE . '/payment/getnonce', ['_secure' => true]);
+        return $this->urlBuilder->getUrl(\Credova\Payments\Helper\Config::CODE . '/payment/getnonce', ['_secure' => true]);
     }
 }

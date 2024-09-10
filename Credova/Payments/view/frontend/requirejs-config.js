@@ -9,9 +9,9 @@ var config = {
   },
   config: {
     mixins: {
-      'Magento_Tax/js/view/checkout/summary/grand-total': {
-        'Credova_Payments/js/mixins/checkout/summary/grand_total': true
-      }
+      // 'Magento_Tax/js/view/checkout/summary/grand-total': {
+      //   'Credova_Payments/js/mixins/checkout/summary/grand_total': true
+      // }
     }
   }
 };

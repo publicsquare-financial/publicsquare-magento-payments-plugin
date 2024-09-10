@@ -26,7 +26,6 @@
                 <card_types>amex,visa,mastercard,discover</card_types>
                 <payment_action>authorize</payment_action>
                 <avs_check>1</avs_check>
-                <cc_vault_active>0</cc_vault_active>
                 <!-- What can we do? -->
                 <is_gateway>1</is_gateway>
                 <can_authorize>1</can_authorize>
@@ -49,7 +48,6 @@
             <credova_payments_cc_vault>
                 <model>CredovaPaymentsCCVaultFacade</model>
                 <title>Stored Cards (Credova)</title>
-                <!-- Vault parameters -->
                 <can_authorize_vault>1</can_authorize_vault>
             </credova_payments_cc_vault>
         </payment>

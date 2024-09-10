@@ -3,10 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\Braintree\Block\Customer;
+namespace Credova\Payments\Block\Customer;
 
-use Credova\Payments\Model\CredovaPaymentConfigProvider;
-use Magento\Framework\View\Element\Template;
+use Credova\Payments\Helper\Config;
 use Magento\Vault\Api\Data\PaymentTokenInterface;
 use Magento\Vault\Block\AbstractCardRenderer;
 
@@ -27,7 +26,12 @@ class CardRenderer extends AbstractCardRenderer
      */
     public function canRender(PaymentTokenInterface $token)
     {
-        return $token->getPaymentMethodCode() === CredovaPaymentConfigProvider::CODE;
+        throw new \Magento\Framework\Exception\LocalizedException(
+            __(
+                "payment method code: ".$token->getPaymentMethodCode()." config code: ".Config::CODE
+            )
+        );
+        return $token->getPaymentMethodCode() === Config::CODE;
     }
 
     /**

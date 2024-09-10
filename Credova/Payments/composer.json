@@ -7,6 +7,9 @@
     "OSL-3.0",
     "AFL-3.0"
   ],
+  "require": {
+    "magento/module-vault": "101.1.*"
+  },
   "repositories": [
     {
       "type": "composer",

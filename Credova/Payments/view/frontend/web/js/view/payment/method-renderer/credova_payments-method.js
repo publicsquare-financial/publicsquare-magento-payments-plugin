@@ -12,7 +12,7 @@
 define(
     [
         'jquery',
-        'Magento_Checkout/js/view/payment/default',
+        'Magento_Payment/js/view/payment/cc-form',
         'Credova_Payments/js/credova_payments',
         'Magento_Checkout/js/model/url-builder',
         'mage/storage',
@@ -20,19 +20,23 @@ define(
         'Magento_Checkout/js/model/payment/additional-validators',
         'Magento_Checkout/js/model/full-screen-loader',
         'mage/translate',
-        'Magento_Vault/js/view/payment/vault-enabler'
+        'Magento_Vault/js/view/payment/vault-enabler',
+        'Magento_Ui/js/model/messageList',
     ],
-    function ($, Component, credova, urlBuilder, storage, quote, additionalValidators, fullScreenLoader, $t, VaultEnabler) {
+    function ($, Component, credova, urlBuilder, storage, quote, additionalValidators, fullScreenLoader, $t, VaultEnabler, messageList) {
         'use strict';
 
         return Component.extend({
             defaults: {
-                template: 'Credova_Payments/payment/credova_payments'
+                template: 'Credova_Payments/payment/credova_payments',
+                paymentPayload: {
+                    nonce: null
+                },
+                apiKey: window.checkoutConfig.payment.credova_payments.pk,
+                code: 'credova_payments',
+                elementsFormSelector: '#credova-elements-form',
+                vaultName: 'credova_payments'
             },
-            apiKey: window.checkoutConfig.payment.credova_payments.pk,
-            elementsFormSelector: '#credova-elements-form',
-            vaultName: 'credova_payments',
-            vaultEnabled: window.checkoutConfig.payment.credova_payments.vaultEnabled,
             initialize: function () {
                 console.log('initialize')
                 var self = this;
@@ -83,7 +87,8 @@ define(
                 return storage.post(
                     serviceUrl,
                     JSON.stringify({
-                        cardId
+                        cardId,
+                        saveCard: true
                     })
                 ).done(function (response) {
                     // Handle successful order placement
@@ -117,8 +122,7 @@ define(
              */
             isVaultEnabled: function () {
                 console.log('isVaultEnabled', this.vaultEnabler, this.vaultEnabler.isVaultEnabled());
-                // return this.vaultEnabler.isVaultEnabled();
-                return this.vaultEnabled
+                return this.vaultEnabler.isVaultEnabled();
             },
             /**
              * Returns vault code.
@@ -129,6 +133,15 @@ define(
                 console.log('getVaultCode', window.checkoutConfig.payment[this.getCode()].ccVaultCode);
                 return window.checkoutConfig.payment[this.getCode()].ccVaultCode;
             },
+            /**
+             * Return Payment method code
+             *
+             * @returns {*}
+             */
+            getCode: function () {
+                return this.code;
+            }
+
         });
     });
 

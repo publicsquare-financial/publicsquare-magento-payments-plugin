@@ -25,4 +25,12 @@
             <argument name="captureCommand" xsi:type="object">Credova\Payments\Gateway\Command\CaptureCommand</argument>
         </arguments>
     </type>
+
+    <type name="Magento\Vault\Model\Ui\TokensConfigProvider">
+        <arguments>
+            <argument name="tokenUiComponentProviders" xsi:type="array">
+                <item name="credova_payments" xsi:type="object">Credova\Payments\Model\TokenUiComponentProvider</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

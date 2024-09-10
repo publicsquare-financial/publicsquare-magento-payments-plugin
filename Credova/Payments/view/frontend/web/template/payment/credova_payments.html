@@ -28,7 +28,19 @@
      <!-- ko foreach: getRegion('messages') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
-        <div id="credova-elements-form" data-bind="afterRender: onContainerRendered"></div>
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <div class="field number required">
+            <label data-bind="attr: {for: 'credova-elements-form'}" class="label">
+                <span><!-- ko i18n: 'Credit/Debit Card Number'--><!-- /ko --></span>
+            </label>
+            <div class="control">
+                <div id="credova-elements-form" data-bind="afterRender: onContainerRendered"></div>
+            </div>
+        </div>
         <!-- ko if: (isVaultEnabled())-->
         <div class="field choice payment-method-vault-checkbox">
             <input type="checkbox"
@@ -40,11 +52,6 @@
             </label>
         </div>
         <!-- /ko -->
-        <div class="payment-method-billing-address">
-            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
-            <!-- ko template: getTemplate() --><!-- /ko -->
-            <!--/ko-->
-        </div>
         <div class="checkout-agreements-block">
             <!-- ko foreach: $parent.getRegion('before-place-order') -->
                 <!-- ko template: getTemplate() --><!-- /ko -->

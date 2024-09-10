@@ -18,8 +18,9 @@ interface PaymentsInterface
       * Creates a payment in Credova and returns the public id
       *
       * @param string $cardId
+      * @param bool $saveCard = false
       * @return string
       * @throws \Magento\Framework\Exception\LocalizedException
       */
-    public function createPayment($cardId);
+    public function createPayment($cardId, $saveCard = false);
 }//end interface

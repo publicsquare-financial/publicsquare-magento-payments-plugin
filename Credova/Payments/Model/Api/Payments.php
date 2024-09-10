@@ -14,6 +14,7 @@
 namespace Credova\Payments\Model\Api;
 
 use Credova\Payments\Api\PaymentsInterface;
+use Credova\Payments\Model\Transparent;
 use Magento\Quote\Api\CartTotalRepositoryInterface;
 use Magento\Quote\Api\Data\TotalsInterface;
 use Magento\Quote\Api\CartManagementInterface;
@@ -27,11 +28,13 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\InvoiceRepositoryInterface;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Payment\Transaction\Builder;
+use Magento\Vault\Model\CreditCardTokenFactory;
+use Magento\Vault\Api\PaymentTokenRepositoryInterface;
+use Magento\Vault\Api\Data\PaymentTokenInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
 
 class Payments implements PaymentsInterface
 {
-    const PAYMENT_METHOD = "credova_payments";
-
     /**
      * @var \Credova\Payments\Api\Authenticated\PaymentsFactory
      */
@@ -103,6 +106,21 @@ class Payments implements PaymentsInterface
     protected $transactionBuilder;
 
     /**
+     * @var CreditCardTokenFactory
+     */
+    protected $creditCardTokenFactory;
+
+    /**
+     * @var PaymentTokenRepositoryInterface
+     */
+    protected $paymentTokenRepository;
+
+    /**
+     * @var EncryptorInterface
+     */
+    protected $encryptor;
+
+    /**
      * Exclude segment from CartTotal
      *
      * @var string[]
@@ -126,7 +144,10 @@ class Payments implements PaymentsInterface
         OrderRepositoryInterface $orderRepository,
         InvoiceRepositoryInterface $invoiceRepository,
         InvoiceSender $invoiceSender,
-        Builder $transactionBuilder
+        Builder $transactionBuilder,
+        CreditCardTokenFactory $creditCardTokenFactory,
+        PaymentTokenRepositoryInterface $paymentTokenRepository,
+        EncryptorInterface $encryptor
     ) {
         $this->paymentsRequestFactory = $paymentsRequestFactory;
         $this->checkoutSession = $checkoutSession;
@@ -142,16 +163,20 @@ class Payments implements PaymentsInterface
         $this->invoiceRepository = $invoiceRepository;
         $this->invoiceSender = $invoiceSender;
         $this->transactionBuilder = $transactionBuilder;
+        $this->creditCardTokenFactory = $creditCardTokenFactory;
+        $this->paymentTokenRepository = $paymentTokenRepository;
+        $this->encryptor = $encryptor;
     } //end __construct()
 
     /**
      * Creates an application in Financial and returns the public id
      *
      * @param string $cardId
+     * @param bool $saveCard
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    public function createPayment($cardId)
+    public function createPayment($cardId, $saveCard = false)
     {
         $quoteId = $this->checkoutSession->getQuoteId();
         $quote = $this->quoteFactory->create()->load($quoteId);
@@ -179,9 +204,8 @@ class Payments implements PaymentsInterface
                 ->setPassword($email);
             $customer->save();
         }
-        $customer = $this->customerRepository->getById(
-            $customer->getEntityId()
-        );
+        $customerId = $customer->getEntityId();
+        $customer = $this->customerRepository->getById($customerId);
         $quote->assignCustomer($customer);
 
         $phoneNumber = str_replace(" ", "-", $phoneNumber);
@@ -205,7 +229,7 @@ class Payments implements PaymentsInterface
                 "card" => $cardId,
             ],
             "customer" => [
-                "id" => "",
+                "external_id" => "",
                 "business_name" => "",
                 "first_name" => $billingAddress->getFirstName(),
                 "last_name" => $billingAddress->getLastName(),
@@ -322,15 +346,14 @@ class Payments implements PaymentsInterface
         }
         $data["amount"] = $data["amount"] * 100;
 
-        $quote->setPaymentMethod(static::PAYMENT_METHOD);
+        $quote->setPaymentMethod($this->configHelper::CODE);
         // $quote->setCredovaPublicId($response["id"]);
         $quote->setInventoryProcessed(false);
         $quote->save();
 
         // Set Sales Order Payment
         $payment = $quote->getPayment();
-        // $payment->importData(["method" => static::PAYMENT_METHOD])->setLastTransId($response['id'])->save();
-        $payment->importData(["method" => static::PAYMENT_METHOD])->save();
+        $payment->importData(["method" => $this->configHelper::CODE])->save();
 
         // Collect Totals & Save Quote
         $quote->collectTotals()->save();
@@ -359,6 +382,10 @@ class Payments implements PaymentsInterface
         $transactionId = $this->createTransaction($order, $response, $capture);
 
         $this->invoiceOrder($order, $transactionId, $capture, true);
+
+        if ($saveCard) {
+            $this->savePaymentMethod($customerId, $response['payment_method']);
+        }
 
         if ($orderId) {
             $result["order_id"] = $orderId;
@@ -445,5 +472,42 @@ class Payments implements PaymentsInterface
         } catch (Exception $e) {
             //log errors here
         }
+    }
+
+    private function savePaymentMethod($customerId, $paymentData) {
+        $paymentToken = $this->creditCardTokenFactory->create();
+        // $paymentToken->setExpiresAt('Y-m-d 00:00:00');
+        $paymentToken->setGatewayToken($paymentData['card']['id']);
+        $paymentToken->setTokenDetails(json_encode([
+            'type'              => 'Visa',
+            'maskedCC'          => $paymentData['card']['last4'],
+            'expirationDate'    => $paymentData['card']['exp_month'].'/'.$paymentData['card']['exp_year'],
+        ]));
+        $paymentToken->setIsActive(true);
+        $paymentToken->setIsVisible(true);
+        $paymentToken->setPaymentMethodCode(Transparent::CC_VAULT_CODE);
+        $paymentToken->setCustomerId($customerId);
+        $paymentToken->setPublicHash($this->generatePublicHash($paymentToken));
+        $this->paymentTokenRepository->save($paymentToken);
+    }
+
+    /**
+     * Generate vault payment public hash
+     *
+     * @param PaymentTokenInterface $paymentToken
+     * @return string
+     */
+    protected function generatePublicHash(PaymentTokenInterface $paymentToken)
+    {
+        $hashKey = $paymentToken->getGatewayToken();
+        if ($paymentToken->getCustomerId()) {
+            $hashKey = $paymentToken->getCustomerId();
+        }
+
+        $hashKey .= $paymentToken->getPaymentMethodCode()
+            . $paymentToken->getType()
+            . json_encode($paymentToken->getTokenDetails());
+
+        return $this->encryptor->getHash($hashKey);
     }
 } //end class

@@ -14,6 +14,7 @@ namespace Credova\Payments\Helper;
 
 class Config extends \Magento\Framework\App\Helper\AbstractHelper
 {
+    const CODE = 'credova_payments';
     const CREDOVA_ACTIVE_CONFIG_PATH                   = 'payment/credova_payments/active';
     const CREDOVA_TITLE_CONFIG_PATH                    = 'payment/credova_payments/title';
     const CREDOVA_ENVIRONMENT                          = 'payment/credova_payments/environment';
@@ -26,7 +27,7 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
     const CREDOVA_CARD_TYPES                           = 'payment/credova_payments/card_types';
     const CREDOVA_PAYMENT_ACTION                       = 'payment/credova_payments/payment_action';
     const CREDOVA_LOGGING_CONFIG_PATH                  = 'payment/credova_payments/debug';
-    const CREDOVA_CC_VAULT_ACTIVE                      = 'payment/credova_payments/cc_vault_active';
+    const CREDOVA_CC_VAULT_ACTIVE                      = 'payment/credova_payments/credova_payments_cc_vault';
 
     /**
      * Get credova payment method active

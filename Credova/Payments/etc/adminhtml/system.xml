@@ -70,7 +70,7 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <attribute type="disabled">1</attribute>
                 </field>
-                <field id="cc_vault_active" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                <field id="credova_payments_cc_vault" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Vault Enabled</label>  
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
