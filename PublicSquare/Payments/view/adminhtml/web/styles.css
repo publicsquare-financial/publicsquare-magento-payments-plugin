@@ -1,0 +1,37 @@
+
+.complex.publicsquare-financial-section .heading {
+  background: url('images/publicsquare-payments-logo.png') no-repeat 0 50% / 18rem auto;
+  padding-left: 20rem;
+  line-height: 32px;
+}
+
+.section-config.with-button.publicsquare-financial-section .config-heading strong {
+  font-weight: normal;
+}
+
+.section-config.with-button.publicsquare-financial-section .config-heading span {
+  font-weight: bold;
+}
+
+.publicsquare-financial-section .config-alt {
+  background: url(images/icon-sprite.png) no-repeat;
+  height: 45px;
+  margin: 0.5rem 0 0;
+  width: auto;
+  background-size: 17rem;
+}
+
+.complex.publicsquare-financial-section .button-container {
+  float: right;
+}
+
+.complex.publicsquare-financial-section .publicsquare-financial-tagline {
+  display: inline-block;
+  vertical-align: middle;
+  width: 50%;
+}
+
+/*.simplepath-wrapper-set.active .admin__collapsible-block { display:none; }*/
+.publicsquare-financial-section.section-config.active > .admin__collapsible-block + input + fieldset {
+  margin-left: 40px;
+}

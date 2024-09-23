@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Payment
+ *
+ * @category  PublicSquare
+ * @package   PublicSquare_Financial
+ * @author    PublicSquare <info@publicsquare.com>
+ * @copyright 2019 PublicSquare
+ * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
+ * @link https://publicsquare.com/
+ */
+ -->
+<payment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../Magento/Payment/etc/payment.xsd">
+    <groups>
+        <group id="offline">
+            <label>Offline Payment Methods</label>
+        </group>
+    </groups>
+    <methods>
+        <method name="publicsquare_payments">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        
+    </methods>
+</payment>

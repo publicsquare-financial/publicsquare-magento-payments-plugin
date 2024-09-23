@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * System
+ *
+ * @category  PublicSquare
+ * @package   PublicSquare_Payments
+ * @author    PublicSquare <info@publicsquare.com>
+ * @copyright 2019 PublicSquare
+ * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
+ * @link https://publicsquare.com/
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../Config/etc/system_file.xsd">
+    <system>
+        <tab id="publicsquare" translate="label" sortOrder="999999" class="publicsquare-tab">
+            <label>PublicSquare</label>
+        </tab>
+        <section id="payment">
+            <group id="publicsquare_payments" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label><![CDATA[<div class="publicsquare-financial-tagline"><span>PublicSquare Credit/Debit Payments</span><br/>Accept popular credit/debit cards from brands such as VISA, Mastercard, Discover & American Express.</div>]]></label>
+                <fieldset_css>complex publicsquare-financial-section</fieldset_css>
+                <frontend_model>PublicSquare\Payments\Block\Adminhtml\System\Config\Fieldset\Payment</frontend_model>
+                <field id="plugin_version" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Version</label>
+                    <frontend_model>PublicSquare\Payments\Block\Adminhtml\System\Config\Form\Field\Label</frontend_model>
+                </field>
+                <field id="active" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Enabled</label>  
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Checkout page payment method title</label>
+                </field>
+                <field id="publicsquare_api_public_key" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>PublicSquare Public API key</label>
+                    <comment><![CDATA[You can find your Public key by visiting the <a href="https://portal.publicsquare.com/developers/api-keys" target="_blank">API keys page</a> in your PublicSquare Portal.]]></comment>
+                </field>
+                <field id="publicsquare_api_secret_key" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>PublicSquare Secret API key</label>
+                    <comment><![CDATA[You can find your Secret/Restricted key by visiting the <a href="https://portal.publicsquare.com/developers/api-keys" target="_blank">API keys page</a> in your PublicSquare Portal. Restricted keys need "transaction:write" permissions.]]></comment>
+                </field>
+                <field id="security_type" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Security type</label>
+                    <source_model>PublicSquare\Payments\Model\Adminhtml\Inputs\SecurityType</source_model>
+                    <comment><![CDATA[Hosted iFrame - PCI SAQ A compliance is enabled by default & not currently configurable.]]></comment>
+                </field>
+                <field id="pre_authorization_type" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Pre-Authorization type</label>
+                    <source_model>PublicSquare\Payments\Model\Adminhtml\Inputs\PreAuthorizationType</source_model>
+                    <comment><![CDATA[Card number validation is enabled by default & not currently configurable.]]></comment>
+                </field>
+                <field id="cvv_verification" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>CVV verification</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[CVV verification is enabled by default & not currently configurable.]]></comment>
+                </field>
+                <field id="three_d_secure_authentication" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>3D secure authentication</label>
+                    <source_model>PublicSquare\Payments\Model\Adminhtml\Inputs\ThreeDSecureAuthentication</source_model>
+                    <comment><![CDATA[3D secure authentication is disabled by default & not currently configurable.]]></comment>
+                </field>
+                <field id="payment_action" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Payment capture action</label>
+                    <source_model>PublicSquare\Payments\Model\Adminhtml\Inputs\CaptureAction</source_model>
+                </field>
+                <field id="avs_check" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>AVS Check</label>
+                    <comment><![CDATA[AVS check happens automatically if an address and phone number is included in the payments creation request to PublicSquare.]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="publicsquare_payments_cc_vault" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Vault Enabled</label>  
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <config_path>payment/publicsquare_payments_cc_vault/active</config_path>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

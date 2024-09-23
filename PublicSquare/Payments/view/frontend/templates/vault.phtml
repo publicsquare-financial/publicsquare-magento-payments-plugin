@@ -1,0 +1,13 @@
+<?php $tokens = $block->getPaymentTokens(); ?>
+<?php if (count($tokens) > 0): ?>
+    <div class="publicsquare-vault-cards">
+        <?php foreach ($tokens as $token): ?>
+            <div class="publicsquare-vault-card">
+                <input type="radio" name="payment[token]" value="<?= $token->getPublicHash() ?>" id="token-<?= $token->getPublicHash() ?>">
+                <label for="token-<?= $token->getPublicHash() ?>">
+                    <?= $block->renderTokenCard($token) ?>
+                </label>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
