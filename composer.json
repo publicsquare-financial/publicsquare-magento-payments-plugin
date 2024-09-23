@@ -1,6 +1,34 @@
 {
+  "name": "publicsquare/module-payments",
+  "description": "PublicSquare provides a software platform for retailers to access third-party providers for lease-to-own financing and other lending products based on a consumer credit profile.",
+  "type": "magento2-module",
+  "version": "0.0.1",
+  "license": [
+    "OSL-3.0",
+    "AFL-3.0"
+  ],
+  "require": {
+    "magento/module-vault": "*"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://repo.magento.com/"
+    }
+  ],
+  "authors": [
+    {
+      "name": "PublicSquare",
+      "email": "info@publicsquare.com",
+      "homepage": "https://publicsquare.com/"
+    }
+  ],
   "autoload": {
+    "files": [
+      "registration.php"
+    ],
     "psr-4": {
+      "PublicSquare\\Payments\\": "",
       "Tests\\": "tests/"
     }
   },
@@ -8,5 +36,10 @@
     "codeception/codeception": "^5.1",
     "codeception/module-asserts": "*",
     "codeception/module-webdriver": "^4.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "magento/composer-dependency-version-audit-plugin": true
+    }
   }
 }
