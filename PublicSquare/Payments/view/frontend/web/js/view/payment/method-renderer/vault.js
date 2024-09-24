@@ -45,13 +45,6 @@ define([
     },
 
     /**
-     * Place order
-     */
-    beforePlaceOrder: function () {
-      this.getPaymentMethodNonce();
-    },
-
-    /**
      * Get last 4 digits of card
      * @returns {String}
      */
@@ -84,14 +77,8 @@ define([
       console.log('> placeOrder', self, self.publicHash)
       self.hostedFields((formComponent) => {
         console.log('> formComponent', formComponent)
-        // formComponent.paymentPayload.nonce = response.paymentMethodNonce;
-        // formComponent.additionalData = { public_hash: self.publicHash };
-        // formComponent.code = self.code;
-        // formComponent.messageContainer = self.messageContainer;
-        // formComponent.placeOrder();
         self.placeOrderWithCardId(self.publicHash);
       })
-      // self.getPaymentMethodNonce();
     },
 
     placeOrderWithCardId: function (publicHash) {
@@ -117,36 +104,6 @@ define([
       }).always(function () {
         fullScreenLoader.stopLoader();
       });
-    },
-
-    /**
-     * Send request to get payment method nonce
-     */
-    getPaymentMethodNonce: function () {
-      var self = this;
-
-      fullScreenLoader.startLoader();
-      $.getJSON(self.nonceUrl, {
-        'public_hash': self.publicHash
-      })
-        .done(function (response) {
-          fullScreenLoader.stopLoader();
-          self.hostedFields(function (formComponent) {
-            formComponent.paymentPayload.nonce = response.paymentMethodNonce;
-            formComponent.additionalData['public_hash'] = self.publicHash;
-            formComponent.code = self.code;
-            formComponent.messageContainer = self.messageContainer;
-            formComponent.placeOrder();
-          });
-        })
-        .fail(function (response) {
-          var error = JSON.parse(response.responseText);
-
-          fullScreenLoader.stopLoader();
-          messageList.addErrorMessage({
-            message: error.message
-          });
-        });
     },
 
       /**

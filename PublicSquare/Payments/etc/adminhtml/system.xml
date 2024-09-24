@@ -36,7 +36,7 @@
                     <label>PublicSquare Public API key</label>
                     <comment><![CDATA[You can find your Public key by visiting the <a href="https://portal.publicsquare.com/developers/api-keys" target="_blank">API keys page</a> in your PublicSquare Portal.]]></comment>
                 </field>
-                <field id="publicsquare_api_secret_key" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="publicsquare_api_secret_key" translate="label" type="obscure" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>PublicSquare Secret API key</label>
                     <comment><![CDATA[You can find your Secret/Restricted key by visiting the <a href="https://portal.publicsquare.com/developers/api-keys" target="_blank">API keys page</a> in your PublicSquare Portal. Restricted keys need "transaction:write" permissions.]]></comment>
                 </field>

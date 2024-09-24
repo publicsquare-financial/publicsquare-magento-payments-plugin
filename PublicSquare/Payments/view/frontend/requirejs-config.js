@@ -9,9 +9,6 @@ var config = {
   },
   config: {
     mixins: {
-      // 'Magento_Tax/js/view/checkout/summary/grand-total': {
-      //   'PublicSquare_Payments/js/mixins/checkout/summary/grand_total': true
-      // }
     }
   }
 };
