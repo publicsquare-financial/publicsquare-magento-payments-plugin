@@ -1,2 +1,4 @@
 .vscode
-vendor/
+
+src/magento-site
+vendor
