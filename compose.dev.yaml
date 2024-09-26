@@ -1,0 +1,26 @@
+services:
+  app:
+    volumes: &appvolumes
+      ## Host mounts with performance penalty, only put what is necessary here
+      - ./src/PublicSquare:/var/www/html/app/code/PublicSquare
+      - ./src/magento-site/app/code:/var/www/html/app/code:cached
+      - ./src/magento-site/app/design:/var/www/html/app/design:cached
+      - ./src/magento-site/app/etc:/var/www/html/app/etc:cached
+      - ./src/magento-site/composer.json:/var/www/html/composer.json:cached
+      - ./src/magento-site/composer.lock:/var/www/html/composer.lock:cached
+      - ./src/magento-site/grunt-config.json.sample:/var/www/html/grunt-config.json:cached
+      - ./src/magento-site/Gruntfile.js.sample:/var/www/html/Gruntfile.js:cached
+      - ./src/magento-site/dev/tools/grunt/configs:/var/www/html/dev/tools/grunt/configs:cached
+      - ./src/magento-site/nginx.conf.sample:/var/www/html/nginx.conf:cached
+      - ./src/magento-site/package.json.sample:/var/www/html/package.json:cached
+
+  phpfpm:
+    volumes: *appvolumes
+
+  phpmyadmin:
+    image: linuxserver/phpmyadmin
+    env_file: env/db.env
+    ports:
+      - 8080:80
+    depends_on:
+      - db
