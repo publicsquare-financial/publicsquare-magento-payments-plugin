@@ -37,10 +37,12 @@ define([
      * @returns {String}
      */
     getPaymentIcon: function () {
+      console.log('here');
       return window.checkoutConfig.payment['braintree_paypal'].paymentIcon;
     },
 
     getIcons: function (type) {
+      console.log('here2');
       return 'https://placehold.it/50x50';
     },
 
@@ -65,6 +67,7 @@ define([
      * @returns {String}
      */
     getCardType: function () {
+      console.log(this.details);
       return this.details.type;
     },
 

@@ -19,10 +19,4 @@
             <resource ref="anonymous"/>
         </resources>
     </route>
-    <route url="/V1/publicsquare_payments/returns" method="POST">
-        <service class="PublicSquare\Payments\Api\RefundsInterface" method="refundOrder"/>
-        <resources>
-            <resource ref="anonymous"/>
-        </resources>
-    </route>
 </routes>

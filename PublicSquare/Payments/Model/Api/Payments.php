@@ -213,8 +213,7 @@ class Payments implements PaymentsInterface
                 ->setStore($store)
                 ->setFirstname($firstName)
                 ->setLastname($lastName)
-                ->setEmail($email)
-                ->setPassword($email);
+                ->setEmail($email);
             $customer->save();
         }
         $customerId = $customer->getEntityId();
@@ -290,8 +289,6 @@ class Payments implements PaymentsInterface
             ],
         ];
 
-        $cartTotal = $this->cartTotalRepository->get($quoteId);
-
         $quote->setPaymentMethod(Config::CODE);
         // $quote->setPublicSquarePublicId($response["id"]);
         $quote->setInventoryProcessed(false);
@@ -321,6 +318,11 @@ class Payments implements PaymentsInterface
         if (!array_key_exists("id", $response)) {
             throw new \Magento\Framework\Exception\CouldNotSaveException(
                 __(implode(",", $response["errors"]))
+            );
+        } else if (array_key_exists("fraud_decision", $response) && $response["fraud_decision"]["decision"] === "reject") {
+            $order->cancel()->save();
+            throw new \Magento\Framework\Exception\CouldNotSaveException(
+                __("The payment for order #%1 cannot be processed.", $orderId)
             );
         }
 
@@ -383,7 +385,6 @@ class Payments implements PaymentsInterface
     public function createTransaction($order = null, $paymentData = array(), $capture = false)
     {
         $transactionType = $capture ? Transaction::TYPE_CAPTURE : Transaction::TYPE_AUTH;
-        $amount = $order->getGrandTotal();
         try {
             //get payment object from order object
             $payment = $order->getPayment();
@@ -402,7 +403,6 @@ class Payments implements PaymentsInterface
                 ->setOrder($order)
                 ->setTransactionId($paymentData['id'])
                 ->setFailSafe(true)
-                //build method creates the transaction and returns the object
                 ->build($transactionType);
             $payment->setParentTransactionId(null);
             $payment->save();
@@ -415,10 +415,13 @@ class Payments implements PaymentsInterface
 
     private function savePaymentMethod($customerId, $paymentData) {
         $paymentToken = $this->creditCardTokenFactory->create();
-        $paymentToken->setExpiresAt('2025-12-31 00:00:00');
+        
+        // Use the exp_month and exp_year to generate the expiration date
+        $expirationDate = date('Y-m-t 23:59:59', strtotime($paymentData['card']['exp_year'] . '-' . $paymentData['card']['exp_month']));
+        $paymentToken->setExpiresAt($expirationDate);
         $paymentToken->setGatewayToken($paymentData['card']['id']);
         $paymentToken->setTokenDetails(json_encode([
-            'type'              => 'visa',
+            'type'              => $paymentData['card']['brand'],
             'maskedCC'          => $paymentData['card']['last4'],
             'expirationDate'    => $paymentData['card']['exp_month'].'/'.$paymentData['card']['exp_year'],
         ]));

@@ -16,7 +16,7 @@ $paymentTitle = $block->getMethod()->getConfigData('title', $block->getInfo()->g
 <?php if ($specificInfo) : ?>
     <table class="data-table admin__table-secondary">
     <?php foreach ($specificInfo as $label => $value) : ?>
-        <tr style="text-transform: capitalize;">
+        <tr>
             <th><?= $block->escapeHtml($label) ?>:</th>
             <td>
                 <?= $value ?>

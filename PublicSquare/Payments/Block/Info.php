@@ -23,17 +23,23 @@ class Info extends Cc
         }
         $transport = parent::_prepareSpecificInformation($transport);
         $data = [];
-        if ($this->getRawDetailsInfo()) {
+        if ($rawDetails = $this->getRawDetailsInfo()) {
             $data = [
-                (string)__('Payment Status') => (string)__($this->getRawDetailsInfo()['status'])
+                (string)__('Payment Status') => str_replace('_', ' ', (string)__($rawDetails['status'])),
+                (string)__('Payment ID') => $rawDetails['id'],
+                (string)__('Payment Details') => $this->getPaymentDetailsLink('Details'),
+                (string)__('AVS Response') => 'Y',
+                (string)__('CVV Response') => 'M',
             ];
-            $fraudDecision = $this->getFraudDecision();
-            if ($fraudDecision) {
+            if ($fraudDecision = $this->getFraudDecision()) {
                 $data[(string)__('Fraud Decision')] = (string)__($fraudDecision);
+                if ($fraudRules = $this->getFraudRules()) {
+                    foreach ($fraudRules as $rule) {
+                        $data[(string)__('Rule failed') . ' - ' . $rule['rule_engine']] = $rule['rule_description'];
+                    }
+                }
                 if ($fraudDecision !== 'accept') {
                     $data[(string)__('Fraud Review Link')] = $this->getPaymentDetailsLink($fraudDecision === 'review' ? 'Review' : 'Details');
-                } else {
-                    $data[(string)__('Payment Details')] = $this->getPaymentDetailsLink('Details');
                 }
             }
         }
@@ -47,9 +53,21 @@ class Info extends Cc
 
     public function getFraudDecision()
     {
-        if ($this->getRawDetailsInfo()) {
-            return $this->getRawDetailsInfo()['fraud_decision']['decision'];
-        }
+        try {
+            if ($this->getRawDetailsInfo()) {
+                return $this->getRawDetailsInfo()['fraud_decision']['decision'];
+            }
+        } catch (\Exception $e) {}
+        return null;
+    }
+
+    public function getFraudRules()
+    {
+        try {
+            if ($this->getRawDetailsInfo()) {
+                return $this->getRawDetailsInfo()['fraud_decision']['rules'];
+            }
+        } catch (\Exception $e) {}
         return null;
     }
 
