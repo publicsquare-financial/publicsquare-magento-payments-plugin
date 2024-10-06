@@ -74,9 +74,7 @@ define([
     placeOrder: function () {
       var self = this;
 
-      console.log('> placeOrder', self, self.publicHash)
-      self.hostedFields((formComponent) => {
-        console.log('> formComponent', formComponent)
+      self.hostedFields(() => {
         self.placeOrderWithCardId(self.publicHash);
       })
     },
@@ -95,7 +93,7 @@ define([
       ).done(function (response) {
         // Handle successful order placement
         const maskId = window.checkoutConfig.quoteData.entity_id;
-        const successUrl = `${window.checkoutConfig.payment.publicsquare_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? 'refercust' : 'refergues'}=${maskId}`
+        const successUrl = `${window.checkoutConfig.payment.publicsquare_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? 'refercust' : 'refergues'}=${maskId}`;
         $.mage.redirect(successUrl);
       }).fail(function (response) {
         messageList.addErrorMessage({

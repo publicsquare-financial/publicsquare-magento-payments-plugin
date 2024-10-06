@@ -199,7 +199,7 @@ class Payments implements PaymentsInterface
         $firstName = $billingAddress->getFirstName();
         $lastName = $billingAddress->getLastName();
         $email = $billingAddress->getEmail();
-        $capture = $this->configHelper->getPaymentAction() === "sale";
+        $capture = $this->configHelper->getPaymentAction() !== "authorize";
 
         // Find or create new customer
         $customer = $this->customerFactory->create();
@@ -383,34 +383,27 @@ class Payments implements PaymentsInterface
     public function createTransaction($order = null, $paymentData = array(), $capture = false)
     {
         $transactionType = $capture ? Transaction::TYPE_CAPTURE : Transaction::TYPE_AUTH;
+        $amount = $order->getGrandTotal();
         try {
             //get payment object from order object
             $payment = $order->getPayment();
             $payment->setLastTransId($paymentData['id']);
             $payment->setTransactionId($paymentData['id']);
-            $payment->setIsTransactionClosed($capture);
-            $payment->setAdditionalInformation(
-                [Transaction::RAW_DETAILS => (array) $paymentData]
-            );
-            $formatedPrice = $order->getBaseCurrency()->formatTxt(
-                $order->getGrandTotal()
-            );
-            $message = __('The authorized amount is %1.', $formatedPrice);
+            $payment->setIsTransactionClosed($capture ? 1 : 0);
+            $payment->setCcLast4($paymentData['payment_method']['card']['last4']);
+            $payment->setCcType($paymentData['payment_method']['card']['brand']);
+            $payment->setCcExpMonth($paymentData['payment_method']['card']['exp_month']);
+            $payment->setCcExpYear($paymentData['payment_method']['card']['exp_year']);
+            $payment->setCcTransId($paymentData['id']);
+            $payment->setAdditionalInformation(Transaction::RAW_DETAILS, $paymentData);
             //get the object of builder class
             $trans = $this->transactionBuilder;
             $transaction = $trans->setPayment($payment)
                 ->setOrder($order)
                 ->setTransactionId($paymentData['id'])
-                ->setAdditionalInformation(
-                    [Transaction::RAW_DETAILS => (array) $paymentData]
-                )
                 ->setFailSafe(true)
                 //build method creates the transaction and returns the object
                 ->build($transactionType);
-            $payment->addTransactionCommentsToOrder(
-                $transaction,
-                $message
-            );
             $payment->setParentTransactionId(null);
             $payment->save();
             $order->save();

@@ -89,7 +89,7 @@
 
     <virtualType name="PublicSquarePaymentsConfig" type="Magento\Payment\Gateway\Config\Config">
         <arguments>
-            <argument name="methodCode" xsi:type="string">publicsquare_payments</argument>
+            <argument name="methodCode" xsi:type="const">PublicSquare\Payments\Helper\Config::CODE</argument>
         </arguments>
     </virtualType>
 
@@ -114,12 +114,24 @@
                 <item name="sale" xsi:type="string">PublicSquare\Payments\Gateway\Command\AuthorizeCaptureCommand</item>
                 <item name="capture" xsi:type="string">PublicSquare\Payments\Gateway\Command\CaptureCommand</item>
                 <item name="refund" xsi:type="string">PublicSquare\Payments\Gateway\Command\RefundCommand</item>
+                <item name="void" xsi:type="string">PublicSquare\Payments\Gateway\Command\CancelCommand</item>
+                <item name="cancel" xsi:type="string">PublicSquare\Payments\Gateway\Command\CancelCommand</item>
                 <item name="vault_capture" xsi:type="string">PublicSquarePaymentsVaultCaptureCommand</item>
             </argument>
         </arguments>
     </virtualType>
 
-    <type name="PublicSquare\Payments\Model\PaymentMethod">
+    <virtualType name="PublicSquarePaymentsFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">PublicSquare\Payments\Helper\Config::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form\Cc</argument>
+            <argument name="infoBlockType" xsi:type="string">PublicSquare\Payments\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">PublicSquarePaymentsValueHandlerPool</argument>
+            <argument name="validatorPool" xsi:type="object">PublicSquarePaymentsValidatorPool</argument>
+            <argument name="commandPool" xsi:type="object">PublicSquarePaymentsCommandPool</argument>
+        </arguments>
+    </virtualType>
+    <!-- <type name="PublicSquare\Payments\Model\PaymentMethod">
         <arguments>
             <argument name="code" xsi:type="string">publicsquare_payments</argument>
             <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
@@ -128,13 +140,13 @@
             <argument name="validatorPool" xsi:type="object">PublicSquarePaymentsValidatorPool</argument>
             <argument name="commandPool" xsi:type="object">PublicSquarePaymentsCommandPool</argument>
         </arguments>
-    </type>
+    </type> -->
     <!-- Vault config -->
     <virtualType name="PublicSquarePaymentsCCVaultFacade" type="Magento\Vault\Model\Method\Vault">
         <arguments>
             <argument name="config" xsi:type="object">PublicSquarePaymentsVaultPaymentConfig</argument>
             <argument name="valueHandlerPool" xsi:type="object">PublicSquarePaymentsVaultPaymentValueHandlerPool</argument>
-            <argument name="vaultProvider" xsi:type="object">PublicSquare\Payments\Model\PaymentMethod</argument>
+            <argument name="vaultProvider" xsi:type="object">PublicSquarePaymentsFacade</argument>
             <argument name="code" xsi:type="const">PublicSquare\Payments\Helper\Config::VAULT_CODE</argument>
         </arguments>
     </virtualType>

@@ -4,32 +4,30 @@ namespace PublicSquare\Payments\Gateway\Command;
 
 use ErrorException;
 use Magento\Payment\Gateway\CommandInterface;
-use PublicSquare\Payments\Api\Authenticated\PaymentCaptureFactory;
+use PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 
-class CaptureCommand implements CommandInterface
+class CancelCommand implements CommandInterface
 {
     /**
-     * @var \PublicSquare\Payments\Api\Authenticated\PaymentCaptureFactory
+     * @var \PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory
      */
-    private $paymentCaptureRequestFactory;
+    private $paymentCancelRequestFactory;
 
     /**
      * @var \Magento\Sales\Api\TransactionRepositoryInterface
      */
     private $transactionRepository;
-
-    public function __construct(PaymentCaptureFactory $paymentCaptureRequestFactory, TransactionRepositoryInterface $transactionRepository) {
-        $this->paymentCaptureRequestFactory = $paymentCaptureRequestFactory;
+    
+    public function __construct(PaymentCancelFactory $paymentCancelRequestFactory, TransactionRepositoryInterface $transactionRepository) {
+        $this->paymentCancelRequestFactory = $paymentCancelRequestFactory;
         $this->transactionRepository = $transactionRepository;
     }
 
     public function execute(array $commandSubject)
     {
         $payment = $commandSubject['payment']->getPayment();
-        $amount = $commandSubject['amount'] * 100;
-        // throw new LocalizedException(__('CaptureCommand => '.json_encode(get_object_vars($payment)).' '.$payment->getLastTransId().' '.json_encode($payment->getOrder()->getId())));
         $tid = $payment->getLastTransId();
         $transaction = $this->transactionRepository->get($tid);
         // PSQ payment id
@@ -42,14 +40,13 @@ class CaptureCommand implements CommandInterface
 
         try
         {
-            $request = $this->paymentCaptureRequestFactory->create(['payment' => [
-                'payment_id' => $transactionId,
-                'amount' => $amount
+            $request = $this->paymentCancelRequestFactory->create(['payment' => [
+                'payment_id' => $transactionId
             ]]);
             $response = $request->getResponseData();
-            if ($response['status'] != 'succeeded')
+            if ($response['status'] != 'cancelled')
             {
-                throw new LocalizedException(__('Sorry, capture failed 1.'.json_encode($response)));
+                throw new LocalizedException(__(json_encode($response)));
             } else {
                 $payment->setAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $response);
             }
@@ -57,7 +54,7 @@ class CaptureCommand implements CommandInterface
         catch (\Exception $e)
         {
             // $this->helper->throwError($e->getMessage());
-            throw new LocalizedException(__('Sorry, capture failed 2. amount: '.$amount.' error: '.$e->getMessage()));
+            throw new LocalizedException(__($e->getMessage()));
         }
         
         $payment->setIsTransactionClosed(0);

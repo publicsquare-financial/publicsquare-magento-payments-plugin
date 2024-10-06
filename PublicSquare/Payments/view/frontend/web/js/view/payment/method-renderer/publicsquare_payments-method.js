@@ -38,7 +38,6 @@ define(
                 vaultName: 'publicsquare_payments'
             },
             initialize: function () {
-                console.log('initialize')
                 var self = this;
                 self._super();
                 this.vaultEnabler = new VaultEnabler();
@@ -94,7 +93,7 @@ define(
                 ).done(function (response) {
                     // Handle successful order placement
                     const maskId = window.checkoutConfig.quoteData.entity_id;
-                    const successUrl = `${window.checkoutConfig.payment.publicsquare_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? 'refercust' : 'refergues'}=${maskId}`
+                    const successUrl = `${window.checkoutConfig.payment.publicsquare_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? 'refercust' : 'refergues'}=${maskId}`;
                     $.mage.redirect(successUrl);
                 }).fail(function (response) {
                     messageList.addErrorMessage({

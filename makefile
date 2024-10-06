@@ -119,3 +119,6 @@ stopall:
 
 verify:
 	@./bin/verify
+
+install-docker:
+	@./bin/install-docker

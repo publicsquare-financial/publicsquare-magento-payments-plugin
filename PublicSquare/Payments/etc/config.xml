@@ -18,7 +18,6 @@
                 <model>PublicSquarePaymentsFacade</model>
                 <active>0</active>
                 <title>Credit/Debit Card</title>
-                <model>PublicSquare\Payments\Model\PaymentMethod</model>
                 <security_type>iframe</security_type>
                 <pre_authorization_type>test</pre_authorization_type>
                 <cvv_verification>1</cvv_verification>
@@ -44,6 +43,7 @@
                 <can_capture_vault>1</can_capture_vault>
                 <can_use_internal>1</can_use_internal>
                 <can_vault>1</can_vault>
+                <paymentInfoKeys>cc_type,cc_last_4,cc_trans_id,payment_id,fraud_decision</paymentInfoKeys>
             </publicsquare_payments>
             <publicsquare_payments_cc_vault>
                 <model>PublicSquarePaymentsCCVaultFacade</model>
