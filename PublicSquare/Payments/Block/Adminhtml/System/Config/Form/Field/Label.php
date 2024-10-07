@@ -29,11 +29,9 @@ class Label extends \Magento\Config\Block\System\Config\Form\Field
         return $version;
     }
 
-
     public function getModuleVersion()
     {
         $moduleInfo = $this->moduleInfoProvider->getModuleInfo('PublicSquare_Payments');
-        dd($moduleInfo);
         return $moduleInfo['version'];
     }
 }
