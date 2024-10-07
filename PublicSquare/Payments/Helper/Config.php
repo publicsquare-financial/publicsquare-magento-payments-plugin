@@ -28,6 +28,7 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
     const PUBLICSQUARE_CARD_TYPES                           = 'payment/publicsquare_payments/card_types';
     const PUBLICSQUARE_PAYMENT_ACTION                       = 'payment/publicsquare_payments/payment_action';
     const PUBLICSQUARE_LOGGING_CONFIG_PATH                  = 'payment/publicsquare_payments/debug';
+    const PUBLICSQUARE_CARD_IMAGES_BASE_PATH                = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
 
     /**
      * Get publicsquare payment method active

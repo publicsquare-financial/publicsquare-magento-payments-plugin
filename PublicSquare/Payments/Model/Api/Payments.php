@@ -427,7 +427,7 @@ class Payments implements PaymentsInterface
         ]));
         $paymentToken->setIsActive(true);
         $paymentToken->setIsVisible(true);
-        $paymentToken->setPaymentMethodCode(Config::VAULT_CODE);
+        $paymentToken->setPaymentMethodCode(Config::CODE);
         $paymentToken->setWebsiteId($this->storeManager->getStore()->getWebsiteId());
         $paymentToken->setCustomerId($customerId);
         $paymentToken->setPublicHash($this->generatePublicHash($paymentToken));

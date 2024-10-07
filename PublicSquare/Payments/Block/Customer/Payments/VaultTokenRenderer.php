@@ -45,7 +45,7 @@ class VaultTokenRenderer extends AbstractTokenRenderer
      */
     public function getIconUrl()
     {
-        return 'https://assets.publicsquare.com/sc/web/assets/images/cards/'.strtolower($this->getTokenDetails()['type']).'.svg';
+        return Config::PUBLICSQUARE_CARD_IMAGES_BASE_PATH.strtolower($this->getTokenDetails()['type']).'.svg';
     }
 
     /**

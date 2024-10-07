@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
     <policies>
-
         <policy id="frame-src">
             <values>
                 <value id="publicsquare-iframe" type="host">*.publicsquare.com</value>
@@ -11,7 +10,6 @@
                 <value id="bt-script" type="host">*.basistheory.com</value>
             </values>
         </policy>
-
         <policy id="frame-ancestors">
             <values>
                 <value id="publicsquare-iframe3" type="host">*.publicsquare.com</value>
@@ -27,8 +25,14 @@
                <values>
                    <value id="publicsquare-api" type="host">*.publicsquare.com</value>
                    <value id="bt-api" type="host">*.basistheory.com</value>
+                   <value id="ld-api" type="host">*.launchdarkly.com</value>
+                   <value id="dd-api" type="host">*.browser-intake-datadoghq.com</value>
                </values>
-           </policy>
-
+        </policy>
+        <policy id="img-src">
+            <values>
+                <value id="publicsquare-img" type="host">*.publicsquare.com</value>
+            </values>
+        </policy>
     </policies>
 </csp_whitelist>

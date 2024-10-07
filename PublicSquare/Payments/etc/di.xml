@@ -12,7 +12,6 @@
  */
  -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-
     <type name="PublicSquare\Payments\Logger\Handler">
         <arguments>
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
@@ -49,30 +48,10 @@
     </type>
 
     <preference for="PublicSquare\Payments\Api\Data\CustomerInterface" type="PublicSquare\Payments\Model\Data\Customer" />
-    <!-- <preference for="PublicSquare\Payments\Api\Data\FederalLicenseInterface" type="PublicSquare\Payments\Model\Data\FederalLicense"/> -->
-
     <preference for="PublicSquare\Payments\Api\PaymentsInterface" type="PublicSquare\Payments\Model\Api\Payments" />
     <preference for="PublicSquare\Payments\Api\OrdersInterface" type="PublicSquare\Payments\Model\Api\Orders" />
-    <!-- <preference for="PublicSquare\Payments\Api\FederalLicenseRepositoryInterface" type="PublicSquare\Payments\Model\Api\FederalLicenseRepository"/> -->
     <preference for="PublicSquare\Payments\Api\ReturnsInterface" type="PublicSquare\Payments\Model\Api\ReturnRequest" />
 
-    <!-- <virtualType name="PublicSquare\Payments\Model\ResourceModel\Grid\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
-        <arguments>
-            <argument name="mainTable" xsi:type="string">sales_order_grid</argument>
-            <argument name="resourceModel" xsi:type="string">PublicSquare\Payments\Model\ResourceModel\Grid</argument>
-        </arguments>
-    </virtualType>
-    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <arguments>
-            <argument name="collections" xsi:type="array">
-                <item name="grid_record_grid_list_data_source" xsi:type="string">PublicSquare\Payments\Model\ResourceModel\Grid\Grid\Collection</item>
-            </argument>
-        </arguments>
-    </type> -->
-
-    <!-- <type name="Magento\Sales\Api\OrderRepositoryInterface">
-        <plugin name="persist_publicsquare_extension_attributes" type="PublicSquare\Payments\Plugin\Sales\OrderRepository"/>
-    </type> -->
     <virtualType name="PublicSquarePaymentsValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -131,16 +110,6 @@
             <argument name="commandPool" xsi:type="object">PublicSquarePaymentsCommandPool</argument>
         </arguments>
     </virtualType>
-    <!-- <type name="PublicSquare\Payments\Model\PaymentMethod">
-        <arguments>
-            <argument name="code" xsi:type="string">publicsquare_payments</argument>
-            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
-            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info</argument>
-            <argument name="valueHandlerPool" xsi:type="object">PublicSquarePaymentsValueHandlerPool</argument>
-            <argument name="validatorPool" xsi:type="object">PublicSquarePaymentsValidatorPool</argument>
-            <argument name="commandPool" xsi:type="object">PublicSquarePaymentsCommandPool</argument>
-        </arguments>
-    </type> -->
     <!-- Vault config -->
     <virtualType name="PublicSquarePaymentsCCVaultFacade" type="Magento\Vault\Model\Method\Vault">
         <arguments>

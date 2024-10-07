@@ -53,7 +53,7 @@ class CardRenderer extends AbstractCardRenderer
      */
     public function getIconUrl()
     {
-        return 'https://assets.publicsquare.com/sc/web/assets/images/cards/'.strtolower($this->getTokenDetails()['type']).'.svg';
+        return Config::PUBLICSQUARE_CARD_IMAGES_BASE_PATH.strtolower($this->getTokenDetails()['type']).'.svg';
     }
 
     /**
@@ -63,7 +63,6 @@ class CardRenderer extends AbstractCardRenderer
     public function getIconHeight()
     {
         return $this->getIconForType($this->getTokenDetails()['type'])['height'];
-        // return 71;
     }
 
     /**
@@ -72,7 +71,6 @@ class CardRenderer extends AbstractCardRenderer
      */
     public function getIconWidth()
     {
-        // return $this->getIconForType($this->getTokenDetails()['type'])['width'];
         return 45;
     }
 

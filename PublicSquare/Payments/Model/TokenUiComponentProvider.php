@@ -27,6 +27,20 @@ class TokenUiComponentProvider implements TokenUiComponentProviderInterface
     private $urlBuilder;
 
     /**
+     * Most used credit card types
+     * @var array
+     */
+    public static $baseCardTypes = [
+        'american_express' => 'amex',
+        'visa' => 'visa',
+        'mastercard' => 'mastercard',
+        'discover' => 'discover',
+        'jbc' => 'jbc',
+        'unionpay' => 'unionpay',
+        'maestro' => 'maestro',
+    ];
+
+    /**
      * @param TokenUiComponentInterfaceFactory $componentFactory
      * @param UrlInterface $urlBuilder
      */

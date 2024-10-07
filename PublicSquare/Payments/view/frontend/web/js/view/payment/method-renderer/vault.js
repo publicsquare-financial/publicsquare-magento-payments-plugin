@@ -24,26 +24,12 @@ define([
       additionalData: {}
     },
 
-    /**
-     * Get PayPal payer email
-     * @returns {String}
-     */
-    getPayerEmail: function () {
-      return this.details.payerEmail;
-    },
-
-    /**
-     * Get type of payment
-     * @returns {String}
-     */
-    getPaymentIcon: function () {
-      console.log('here');
-      return window.checkoutConfig.payment['braintree_paypal'].paymentIcon;
-    },
-
     getIcons: function (type) {
-      console.log('here2');
-      return 'https://placehold.it/50x50';
+      return {
+        url: `${window.checkoutConfig.payment.publicsquare_payments.cardImagesBasePath}${type}.svg`,
+        width: '45',
+        height: '29',
+      };
     },
 
     /**
@@ -67,7 +53,6 @@ define([
      * @returns {String}
      */
     getCardType: function () {
-      console.log(this.details);
       return this.details.type;
     },
 

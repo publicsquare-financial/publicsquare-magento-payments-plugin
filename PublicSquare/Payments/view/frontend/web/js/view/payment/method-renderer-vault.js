@@ -10,7 +10,7 @@ define(
         'use strict';
         rendererList.push(
             {
-                type: 'publicsquare_payments__cc_vault',
+                type: 'publicsquare_payments_cc_vault',
                 component: 'PublicSquare_Payments/js/view/payment/method-renderer/vault',
                 group: 'vaultGroup'
             }
