@@ -2,7 +2,7 @@ services:
   app:
     volumes: &appvolumes
       ## Host mounts with performance penalty, only put what is necessary here
-      - ./src/PublicSquare:/var/www/html/app/code/PublicSquare
+      - ./PublicSquare:/var/www/html/app/code/PublicSquare
       - ./src/magento-site/app/code:/var/www/html/app/code:cached
       - ./src/magento-site/app/design:/var/www/html/app/design:cached
       - ./src/magento-site/app/etc:/var/www/html/app/etc:cached

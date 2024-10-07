@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Web API
+ *
+ * @category  PublicSquare
+ * @package   PublicSquare_Payments
+ * @author    PublicSquare <info@publicsquare.com>
+ * @copyright 2024 PublicSquare
+ * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
+ * @link https://publicsquare.com/
+ */
+ -->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/publicsquare_payments/payments" method="POST">
+        <service class="PublicSquare\Payments\Api\PaymentsInterface" method="createPayment"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+</routes>
