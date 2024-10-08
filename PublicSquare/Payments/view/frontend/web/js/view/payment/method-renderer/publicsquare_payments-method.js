@@ -57,8 +57,8 @@ define(
             },
             placeOrder: async function () {
                 const self = this
-                fullScreenLoader.startLoader()
                 if (this.validate() && additionalValidators.validate()) {
+                    fullScreenLoader.startLoader()
                     const billingAddress = quote.billingAddress();
                     try {
                         // Tokenize the card in PublicSquare

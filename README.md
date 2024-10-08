@@ -5,12 +5,12 @@ PublicSquare provides a software platform for retailers to access third-party pr
 
 ## INSTALLATION
 
-### MANUAL INSTALLATION
+### Manual Installation
 * extract files from an archive
 
 * deploy files into Magento2 folder `app/code/`
 
-### ENABLE EXTENSION
+### Enabled Extension
 * enable extension (in command line, see manual: `http://devdocs.magento.com/guides/v2.0/config-guide/cli/config-cli-subcommands.html`):
 >`$> bin/magento module:enable PublicSquare_Payments`
 
@@ -20,7 +20,7 @@ PublicSquare provides a software platform for retailers to access third-party pr
 * [if needed] re-deploy static view files:
 >`$> bin/magento setup:static-content:deploy`
 
-### MAGENTO DOCKER INSTALL
+### Docker Installation
 
 If you need a local installation of Magento2, the cleanest way is to use Docker. [This repo](https://github.com/markshust/docker-magento?tab=readme-ov-file#automated-setup-new-project) provides an out of the box installation with just a few commands.
 
@@ -70,6 +70,11 @@ $ make install-docker
 
 * Navigate to the payment methods page in Magento admin (Stores > Configuration > Sales > Payment Methods) and confirm that PublicSquare Payments shows up in the "Other Payment Methods" section.
 
-Enjoy!
-Best regards,
-PublicSquare Financial
+# AUTOMATED TESTS
+
+### Running Acceptance Tests
+
+```bash
+$ composer install
+$ php vendor/bin/codecept run Acceptance --steps
+```
