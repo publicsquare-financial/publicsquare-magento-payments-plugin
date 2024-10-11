@@ -55,7 +55,7 @@ class Info extends Cc
     {
         try {
             if ($this->getRawDetailsInfo()) {
-                return $this->getRawDetailsInfo()['fraud_decision']['decision'];
+                return $this->getRawDetailsInfo()['fraud_details']['decision'];
             }
         } catch (\Exception $e) {}
         return null;
@@ -65,7 +65,7 @@ class Info extends Cc
     {
         try {
             if ($this->getRawDetailsInfo()) {
-                return $this->getRawDetailsInfo()['fraud_decision']['rules'];
+                return $this->getRawDetailsInfo()['fraud_details']['rules'];
             }
         } catch (\Exception $e) {}
         return null;

@@ -12,7 +12,11 @@
 
 namespace PublicSquare\Payments\Helper;
 
-class Config extends \Magento\Framework\App\Helper\AbstractHelper
+use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+
+class Config extends AbstractHelper
 {
     const CODE = 'publicsquare_payments';
     const VAULT_CODE = 'publicsquare_payments_cc_vault';
@@ -29,6 +33,25 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
     const PUBLICSQUARE_PAYMENT_ACTION                       = 'payment/publicsquare_payments/payment_action';
     const PUBLICSQUARE_LOGGING_CONFIG_PATH                  = 'payment/publicsquare_payments/debug';
     const PUBLICSQUARE_CARD_IMAGES_BASE_PATH                = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
+    
+    /**
+     * @var \Magento\Framework\Serialize\Serializer\Json
+     */
+    private $serializer;
+
+    /**
+     * PublicSquare config constructor
+     *
+     * @param Json|null $serializer
+     */
+    public function __construct(
+        Context $context,
+        Json $serializer = null
+    ) {
+        parent::__construct($context);
+        $this->serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
+            ->get(Json::class);
+    }
 
     /**
      * Get publicsquare payment method active
@@ -160,5 +183,51 @@ class Config extends \Magento\Framework\App\Helper\AbstractHelper
     ): string {
         return $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_PRE_AUTHORIZATION_TYPE, $scopeType, $scopeCode);
+    }
+
+    /**
+     * Return the country specific card type config
+     *
+     * @param int|null $storeId
+     * @return array
+     */
+    public function getCountrySpecificCardTypeConfig($storeId = null)
+    {
+        return [];
+    }
+
+    /**
+     * Retrieve available credit card types
+     *
+     * @param int|null $storeId
+     * @return array
+     */
+    public function getAvailableCardTypes($storeId = null)
+    {
+        return \PublicSquare\Payments\Model\Adminhtml\Source\CcType::ALLOWED_TYPES;
+    }
+
+    /**
+     * Retrieve mapper between Magento and Braintree card types
+     *
+     * @return array
+     */
+    public function getCcTypesMapper()
+    {
+        return [];
+    }
+
+    /**
+     * Gets list of card types available for country.
+     *
+     * @param string $country
+     * @param int|null $storeId
+     * @return array
+     */
+    public function getCountryAvailableCardTypes($country, $storeId = null)
+    {
+        $types = $this->getCountrySpecificCardTypeConfig($storeId);
+
+        return (!empty($types[$country])) ? $types[$country] : [];
     }
 } //end class
