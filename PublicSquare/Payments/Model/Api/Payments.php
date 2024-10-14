@@ -389,12 +389,12 @@ class Payments implements PaymentsInterface
                 if (array_key_exists('rules', $paymentData['fraud_details'])) {
                     $payment->setAdditionalInformation('fraud_rules', $paymentData['fraud_details']['rules']);
                 }
-                if (array_key_exists('avsCode', $paymentData['fraud_details'])) {
-                    $payment->setAdditionalInformation('avsCode', $paymentData['fraud_details']['avsCode']);
-                }
-                if (array_key_exists('cvv2Reply', $paymentData['fraud_details'])) {
-                    $payment->setAdditionalInformation('cvv2Reply', $paymentData['fraud_details']['cvv2Reply']);
-                }
+            }
+            if (array_key_exists('avs_code', $paymentData['payment_method']['card'])) {
+                $payment->setAdditionalInformation('avsCode', $paymentData['payment_method']['card']['avs_code']);
+            }
+            if (array_key_exists('cvv2_reply', $paymentData['payment_method']['card'])) {
+                $payment->setAdditionalInformation('cvv2Reply', $paymentData['payment_method']['card']['cvv2_reply']);
             }
             //get the object of builder class
             $trans = $this->transactionBuilder;

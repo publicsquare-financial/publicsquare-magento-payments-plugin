@@ -28,9 +28,11 @@ class Info extends Cc
                 (string)__('Payment Status') => str_replace('_', ' ', (string)__($rawDetails['status'])),
                 (string)__('Payment ID') => $rawDetails['id'],
                 (string)__('Payment Details') => $this->getPaymentDetailsLink('Details'),
-                (string)__('AVS Response') => 'Y',
-                (string)__('CVV Response') => 'M',
             ];
+            if ($card = $this->getCardPaymentMethod()) {
+                $data[(string)__('AVS Response')] = $card['avs_code'];
+                $data[(string)__('CVV Response')] = $card['cvv2_reply'];
+            }
             if ($fraudDecision = $this->getFraudDecision()) {
                 $data[(string)__('Fraud Decision')] = (string)__($fraudDecision);
                 if ($fraudRules = $this->getFraudRules()) {
@@ -68,6 +70,14 @@ class Info extends Cc
                 return $this->getRawDetailsInfo()['fraud_details']['rules'];
             }
         } catch (\Exception $e) {}
+        return null;
+    }
+
+    public function getCardPaymentMethod()
+    {
+        if ($this->getRawDetailsInfo()) {
+            return $this->getRawDetailsInfo()['payment_method']['card'];
+        }
         return null;
     }
 
