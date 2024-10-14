@@ -35,7 +35,8 @@ define(
                 apiKey: window.checkoutConfig.payment.publicsquare_payments.pk,
                 code: 'publicsquare_payments',
                 elementsFormSelector: '#publicsquare-elements-form',
-                vaultName: 'publicsquare_payments'
+                vaultName: 'publicsquare_payments',
+                errorMessage: 'Something went wrong. Please try again or contact support for assistance.'
             },
             initialize: function () {
                 var self = this;
@@ -71,7 +72,7 @@ define(
                         console.log(error)
                         fullScreenLoader.stopLoader();
                         messageList.addErrorMessage({
-                            message: $t(error)
+                            message: $t(error.responseJSON && error.responseJSON.message ? error.responseJSON.message : self.errorMessage)
                         });
                     }
                 } else {
@@ -82,6 +83,7 @@ define(
                 }
             },
             placeOrderWithCardId: function (cardId) {
+                var self = this;
                 var serviceUrl = urlBuilder.createUrl('/publicsquare_payments/payments', {});
 
                 return storage.post(
@@ -97,7 +99,7 @@ define(
                     $.mage.redirect(successUrl);
                 }).fail(function (response) {
                     messageList.addErrorMessage({
-                        message: $t('Something went wrong. Please try again or contact support for assistance.')
+                        message: $t(self.errorMessage)
                     });
                 }).always(function () {
                     fullScreenLoader.stopLoader();

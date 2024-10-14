@@ -196,32 +196,18 @@ class Payments implements PaymentsInterface
         $billingAddress = $quote->getBillingAddress();
         $shippingAddress = $quote->getShippingAddress();
         $phoneNumber = $billingAddress->getTelephone();
-        $firstName = $billingAddress->getFirstName();
-        $lastName = $billingAddress->getLastName();
         $email = $billingAddress->getEmail();
         $capture = $this->configHelper->getPaymentAction() !== "authorize";
-
-        // Find or create new customer
-        $customer = $this->customerFactory->create();
-        $store = $this->storeManager->getStore();
-        $websiteId = $this->storeManager->getStore()->getWebsiteId();
-        $customer->setWebsiteId($websiteId);
-        $customer->loadByEmail($email);
-        if (!$customer->getEntityId()) {
-            $customer
-                ->setWebsiteId($websiteId)
-                ->setStore($store)
-                ->setFirstname($firstName)
-                ->setLastname($lastName)
-                ->setEmail($email);
-            $customer->save();
-        }
-        $customerId = $customer->getEntityId();
         
+        try {
+            $customer = $this->customerRepository->get($email);
+        } catch (\Magento\Framework\Exception\NoSuchEntityException $th) {
+            $customer = null;
+        }
         // publicHash will be provided if the payment method is from the vault
-        if ($publicHash) {
+        if ($publicHash && $customer) {
             try {
-                $cardId = $this->getCardIdFromPublicHash($publicHash, $customerId);
+                $cardId = $this->getCardIdFromPublicHash($publicHash, $customer->getId());
                 if (!$cardId) {
                     throw new \Magento\Framework\Exception\CouldNotSaveException(__('$publicHash && !$cardId'.self::ERROR_MESSAGE));
                 }
@@ -229,9 +215,9 @@ class Payments implements PaymentsInterface
                 throw new \Magento\Framework\Exception\CouldNotSaveException(__('Error retrieving card id from public hash'.self::ERROR_MESSAGE));
             }
         }
-        
-        $customer = $this->customerRepository->getById($customerId);
-        $quote->assignCustomer($customer);
+        if ($customer) {
+            $quote->assignCustomer($customer);
+        }
 
         $phoneNumber = str_replace(" ", "-", $phoneNumber);
         $phoneNumber = preg_replace("/\D+/", "", $phoneNumber);
@@ -289,17 +275,11 @@ class Payments implements PaymentsInterface
             ],
         ];
 
-        $quote->setPaymentMethod(Config::CODE);
-        // $quote->setPublicSquarePublicId($response["id"]);
-        $quote->setInventoryProcessed(false);
-        $quote->save();
-
-        // Set Sales Order Payment
-        $payment = $quote->getPayment();
-        $payment->importData(["method" => Config::CODE])->save();
-
-        // Collect Totals & Save Quote
-        $quote->collectTotals()->save();
+        $quote->getPayment()->importData(["method" => Config::CODE]);
+        $quote->setPaymentMethod(Config::CODE)
+            ->setInventoryProcessed(false)
+            ->collectTotals()
+            ->save();
 
         // Create Order From Quote
         $orderId = $this->cartManagement->placeOrder($quote->getId());
@@ -319,7 +299,12 @@ class Payments implements PaymentsInterface
             throw new \Magento\Framework\Exception\CouldNotSaveException(
                 __(implode(",", $response["errors"]))
             );
-        } else if (array_key_exists("fraud_decision", $response) && $response["fraud_decision"]["decision"] === "reject") {
+        } else if (array_key_exists("errors", $response)) {
+            dd($response);
+            throw new \Magento\Framework\Exception\CouldNotSaveException(
+                __("The payment for order #%1 cannot be processed.", $orderId)
+            );
+        } else if (array_key_exists("fraud_details", $response) && $response["fraud_details"]["decision"] === "reject") {
             $order->cancel()->save();
             throw new \Magento\Framework\Exception\CouldNotSaveException(
                 __("The payment for order #%1 cannot be processed.", $orderId)
@@ -329,10 +314,10 @@ class Payments implements PaymentsInterface
         // Create transaction
         $transactionId = $this->createTransaction($order, $response, $capture);
 
-        $this->invoiceOrder($order, $transactionId, $capture, true);
+        $this->invoiceOrder($order, $transactionId, $capture);
 
-        if ($saveCard) {
-            $this->savePaymentMethod($customerId, $response['payment_method']);
+        if ($customer && $saveCard) {
+            $this->savePaymentMethod($customer->getId(), $response['payment_method']);
         }
 
         if ($orderId) {
@@ -351,7 +336,7 @@ class Payments implements PaymentsInterface
     ) {
         $invoice = $this->invoiceService->prepareInvoice($order);
         $captureType = $capture ? \Magento\Sales\Model\Order\Invoice::STATE_PAID : \Magento\Sales\Model\Order\Invoice::STATE_OPEN;
-        $invoice->setRequestedCaptureCase($captureType);
+        $invoice->setState($captureType);
 
         if ($transactionId) {
             $invoice->setTransactionId($transactionId);
@@ -363,6 +348,7 @@ class Payments implements PaymentsInterface
             $this->invoiceRepository->save($invoice);
             $this->orderRepository->save($order);
             $this->sendInvoiceEmail($invoice);
+            $invoice->save();
         }
 
         return $invoice;
@@ -390,13 +376,27 @@ class Payments implements PaymentsInterface
             $payment = $order->getPayment();
             $payment->setLastTransId($paymentData['id']);
             $payment->setTransactionId($paymentData['id']);
-            $payment->setIsTransactionClosed($capture ? 1 : 0);
+            $payment->setIsTransactionClosed($capture ? 0 : 1);
             $payment->setCcLast4($paymentData['payment_method']['card']['last4']);
             $payment->setCcType($paymentData['payment_method']['card']['brand']);
             $payment->setCcExpMonth($paymentData['payment_method']['card']['exp_month']);
             $payment->setCcExpYear($paymentData['payment_method']['card']['exp_year']);
             $payment->setCcTransId($paymentData['id']);
             $payment->setAdditionalInformation(Transaction::RAW_DETAILS, $paymentData);
+            if (array_key_exists('fraud_details', $paymentData)) {
+                if (array_key_exists('decision', $paymentData['fraud_details'])) {
+                    $payment->setAdditionalInformation('fraud_decision', $paymentData['fraud_details']['decision']);
+                }
+                if (array_key_exists('rules', $paymentData['fraud_details'])) {
+                    $payment->setAdditionalInformation('fraud_rules', $paymentData['fraud_details']['rules']);
+                }
+            }
+            if (array_key_exists('avs_code', $paymentData['payment_method']['card'])) {
+                $payment->setAdditionalInformation('avsCode', $paymentData['payment_method']['card']['avs_code']);
+            }
+            if (array_key_exists('cvv2_reply', $paymentData['payment_method']['card'])) {
+                $payment->setAdditionalInformation('cvv2Reply', $paymentData['payment_method']['card']['cvv2_reply']);
+            }
             //get the object of builder class
             $trans = $this->transactionBuilder;
             $transaction = $trans->setPayment($payment)
