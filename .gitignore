@@ -1,4 +1,5 @@
 .vscode
+.idea
 
 src/magento-site
 vendor
