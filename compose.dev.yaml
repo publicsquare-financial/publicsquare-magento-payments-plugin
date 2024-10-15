@@ -13,6 +13,7 @@ services:
       - ./src/magento-site/dev/tools/grunt/configs:/var/www/html/dev/tools/grunt/configs:cached
       - ./src/magento-site/nginx.conf.sample:/var/www/html/nginx.conf:cached
       - ./src/magento-site/package.json.sample:/var/www/html/package.json:cached
+      - ./docker/php.ini:/usr/local/etc/php/php.ini
 
   phpfpm:
     volumes: *appvolumes
