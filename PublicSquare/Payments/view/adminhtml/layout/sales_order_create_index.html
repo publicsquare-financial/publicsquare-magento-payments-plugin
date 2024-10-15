@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="order_create_billing_form">
+            <action method="setMethodFormTemplate">
+                <argument name="method" xsi:type="string">publicsquare_payments</argument>
+                <argument name="template" xsi:type="string">PublicSquare_Payments::form/cc.phtml</argument>
+            </action>
+        </referenceBlock>
+        <!-- <referenceBlock name="order_create_billing_form">
+            <action method="setMethodFormTemplate">
+                <argument name="method" xsi:type="const">PublicSquare\Payments\Helper\Config::VAULT_CODE</argument>
+                <argument name="template" xsi:type="string">Magento_Vault::form/vault.phtml</argument>
+            </action>
+            <action method="setMethodFormTemplate">
+                <argument name="method" xsi:type="string">braintree_paypal_vault</argument>
+                <argument name="template" xsi:type="string">Magento_Vault::form/vault.phtml</argument>
+            </action>
+        </referenceBlock> -->
+        <referenceBlock name="content">
+            <block name="publicsquare_payments_payment_script"
+                   as="publicsquare_payments_payment_script"
+                   template="PublicSquare_Payments::payment/script.phtml"
+                   class="PublicSquare\Payments\Block\Payment"
+                   after="billing_method"/>
+        </referenceBlock>
+    </body>
+</page>

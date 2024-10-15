@@ -41,7 +41,6 @@
                 <can_use_for_multishipping>0</can_use_for_multishipping>
                 <can_authorize_vault>1</can_authorize_vault>
                 <can_capture_vault>1</can_capture_vault>
-                <can_use_internal>1</can_use_internal>
                 <can_vault>1</can_vault>
                 <paymentInfoKeys>cc_type,cc_last_4,cc_trans_id,payment_id,fraud_decision,avsStreetAddressResponseCode,cvvResponseCode</paymentInfoKeys>
             </publicsquare_payments>

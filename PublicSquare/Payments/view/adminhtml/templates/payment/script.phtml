@@ -1,0 +1,35 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var PublicSquare\Payments\Block\Payment $block */
+
+$code = $block->escapeHtml($block->getCode());
+
+?>
+<script>
+    //<![CDATA[
+    require(
+        [
+            'PublicSquare_Payments/js/publicsquare_payments',
+            'jquery',
+            'domReady!'
+        ], function(publicsquare, $) {
+            var config = <?= /* @noEscape */ $block->getPaymentConfig() ?>,
+                payment,
+                form = $('#payment_form_<?= /* @noEscape */ $code ?>');
+
+            config.active = form.length > 0 && !form.is(':hidden');
+            console.log(publicsquare);
+            // payment = new Braintree(config);
+
+            return {
+              onContainerRendered: function() {
+                console.log('onContainerRendered');
+              }
+            }
+        });
+    //]]>
+</script>
