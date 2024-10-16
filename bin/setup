@@ -62,5 +62,7 @@ bin/clinotty bin/magento deploy:mode:set developer
 bin/cli bin/magento sampledata:deploy
 bin/clinotty bin/magento admin:user:create --admin-user=admin --admin-password=AdminPassword123 --admin-email=admin@example.com --admin-firstname=admin --admin-lastname=admin
 
+bin/clinotty bin/magento setup:upgrade
+
 echo "Docker development environment setup complete."
 echo "You may now access your Magento instance at https://${DOMAIN}/"
