@@ -14,12 +14,15 @@ bin/start --no-dev
 [ $? != 0 ] && echo "Failed to start Docker services" && exit
 
 bin/clinotty chmod u+x bin/magento
-rm -rf src/magento-site && mkdir src/magento-site
+rm -rf src/magento-site && mkdir -p src/magento-site
 
 echo "Adding Magento modules to Composer allow-plugins directive..."
 bin/clinotty composer config --no-plugins allow-plugins.magento/magento-composer-installer true
 bin/clinotty composer config --no-plugins allow-plugins.magento/inventory-composer-installer true
 bin/clinotty composer config --no-plugins allow-plugins.laminas/laminas-dependency-plugin true
+
+echo "Uninstalling Magento..."
+bin/clinotty bin/magento setup:uninstall -y
 
 echo "Running, Magento setup:install..."
 bin/setup-install "${DOMAIN}"
@@ -55,6 +58,9 @@ bin/clinotty bin/magento cache:flush
 
 echo "Turning on developer mode..."
 bin/clinotty bin/magento deploy:mode:set developer
+
+bin/clinotty bin/magento sampledata:deploy
+bin/clinotty bin/magento admin:user:create --admin-user=admin --admin-password=AdminPassword123 --admin-email=admin@example.com --admin-firstname=admin --admin-lastname=admin
 
 echo "Docker development environment setup complete."
 echo "You may now access your Magento instance at https://${DOMAIN}/"
