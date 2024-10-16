@@ -335,7 +335,7 @@ class Payments implements PaymentsInterface
         $save = true
     ) {
         $invoice = $this->invoiceService->prepareInvoice($order);
-        $captureType = $capture ? \Magento\Sales\Model\Order\Invoice::STATE_PAID : \Magento\Sales\Model\Order\Invoice::STATE_OPEN;
+        $captureType = $capture || false ? \Magento\Sales\Model\Order\Invoice::STATE_PAID : \Magento\Sales\Model\Order\Invoice::STATE_OPEN;
         $invoice->setState($captureType);
 
         if ($transactionId) {
@@ -376,7 +376,7 @@ class Payments implements PaymentsInterface
             $payment = $order->getPayment();
             $payment->setLastTransId($paymentData['id']);
             $payment->setTransactionId($paymentData['id']);
-            $payment->setIsTransactionClosed($capture ? 0 : 1);
+            $payment->setIsTransactionClosed(0);
             $payment->setCcLast4($paymentData['payment_method']['card']['last4']);
             $payment->setCcType($paymentData['payment_method']['card']['brand']);
             $payment->setCcExpMonth($paymentData['payment_method']['card']['exp_month']);
