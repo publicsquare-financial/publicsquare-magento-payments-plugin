@@ -20,7 +20,6 @@ use Magento\Quote\Api\CartManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\CustomerFactory;
-use Magento\Quote\Model\QuoteFactory;
 use PublicSquare\Payments\Helper\Config;
 use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -71,11 +70,6 @@ class Payments implements PaymentsInterface
      * @var CustomerFactory
      */
     protected $customerFactory;
-
-    /**
-     * @var QuoteFactory
-     */
-    protected $quoteFactory;
 
     /**
      * @var Config
@@ -145,7 +139,6 @@ class Payments implements PaymentsInterface
         CustomerRepositoryInterface $customerRepository,
         StoreManagerInterface $storeManager,
         CustomerFactory $customerFactory,
-        QuoteFactory $quoteFactory,
         Config $configHelper,
         InvoiceService $invoiceService,
         OrderRepositoryInterface $orderRepository,
@@ -164,7 +157,6 @@ class Payments implements PaymentsInterface
         $this->customerRepository = $customerRepository;
         $this->storeManager = $storeManager;
         $this->customerFactory = $customerFactory;
-        $this->quoteFactory = $quoteFactory;
         $this->configHelper = $configHelper;
         $this->invoiceService = $invoiceService;
         $this->orderRepository = $orderRepository;
