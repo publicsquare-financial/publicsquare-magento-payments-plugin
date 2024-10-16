@@ -191,8 +191,7 @@ class Payments implements PaymentsInterface
             throw new \Magento\Framework\Exception\CouldNotSaveException(__('!$cardId && !$publicHash'.self::ERROR_MESSAGE));
         }
 
-        $quoteId = $this->checkoutSession->getQuoteId();
-        $quote = $this->quoteFactory->create()->load($quoteId);
+        $quote = $this->checkoutSession->getQuote();
         $billingAddress = $quote->getBillingAddress();
         $shippingAddress = $quote->getShippingAddress();
         $phoneNumber = $billingAddress->getTelephone();
@@ -216,7 +215,7 @@ class Payments implements PaymentsInterface
             }
         }
         if ($customer) {
-            $quote->assignCustomer($customer);
+            $quote->setCustomer($customer);
         }
 
         $phoneNumber = str_replace(" ", "-", $phoneNumber);
