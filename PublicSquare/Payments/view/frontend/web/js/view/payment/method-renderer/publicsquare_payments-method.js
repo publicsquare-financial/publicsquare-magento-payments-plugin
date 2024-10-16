@@ -44,6 +44,7 @@ define(
                 this.vaultEnabler = new VaultEnabler();
                 this.vaultEnabler.setPaymentCode(this.getVaultCode());
                 this.vaultEnabler.isActivePaymentTokenEnabler(false);
+                console.log('quote', quote, quote.billingAddress());
                 return self
             },
             onContainerRendered: function () {

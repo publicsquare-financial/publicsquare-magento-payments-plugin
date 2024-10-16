@@ -15,10 +15,11 @@ $ccType = $block->getInfoData('cc_type');
     >
     <div class="admin__field _required">
         <label class="label admin__field-label" for="<?= /* @noEscape */ $code ?>_cc_type" >
-            <span><?= $block->escapeHtml(__('Credit Card Type')) ?></span>
+            <span><?= $block->escapeHtml(__('Credit Card')) ?></span>
         </label>
         <div class="admin__field-control control">
-            <div id="publicsquare-elements-form" data-bind="afterRender: onContainerRendered"></div>
+            <!-- <div id="publicsquare-elements-form" data-bind="afterRender: onContainerRendered" /> -->
+            <div id="publicsquare-elements-form" />
         </div>
     </div>
 
@@ -38,3 +39,27 @@ $ccType = $block->getInfoData('cc_type');
            name="payment[payment_method_nonce]"/>
     <input type="submit" name="Submit" style="display: none;">
 </fieldset>
+<script nonce="<?= $block->escapeHtmlAttr($block->getNonce()) ?>">
+    //<![CDATA[
+    require(
+        [
+            'PublicSquare_Payments/js/publicsquare_payments',
+            'jquery',
+            'domReady!'
+        ], function(publicsquare, $) {
+            console.log('publicsquare', publicsquare);
+            var config = <?= /* @noEscape */ $block->getPaymentConfig() ?>,
+                payment,
+                form = $('#payment_form_<?= /* @noEscape */ $code ?>');
+
+            config.active = form.length > 0 && !form.is(':hidden');
+            // payment = new Braintree(config);
+
+            return {
+              onContainerRendered: function() {
+                console.log('onContainerRendered');
+              }
+            }
+        });
+    //]]>
+</script>

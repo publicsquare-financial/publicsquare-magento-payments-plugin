@@ -17,19 +17,12 @@ $code = $block->escapeHtml($block->getCode());
             'jquery',
             'domReady!'
         ], function(publicsquare, $) {
+            console.log('publicsquare', publicsquare);
             var config = <?= /* @noEscape */ $block->getPaymentConfig() ?>,
                 payment,
                 form = $('#payment_form_<?= /* @noEscape */ $code ?>');
 
             config.active = form.length > 0 && !form.is(':hidden');
-            console.log(publicsquare);
-            // payment = new Braintree(config);
-
-            return {
-              onContainerRendered: function() {
-                console.log('onContainerRendered');
-              }
-            }
         });
     //]]>
 </script>
