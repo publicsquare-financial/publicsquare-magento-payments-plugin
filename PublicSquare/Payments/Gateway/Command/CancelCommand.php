@@ -35,7 +35,7 @@ class CancelCommand implements CommandInterface
 
         if (!$transactionId)
         {
-            throw new LocalizedException(__('Sorry, it is not possible to invoice this order because the payment is still pending.'));
+            throw new LocalizedException(__('Sorry, it is not possible to cancel this order.'));
         }
 
         try
