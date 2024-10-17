@@ -188,7 +188,6 @@ class Payments implements PaymentsInterface
         $shippingAddress = $quote->getShippingAddress();
         $phoneNumber = $billingAddress->getTelephone();
         $email = $billingAddress->getEmail();
-        $capture = $this->configHelper->getPaymentAction() !== "authorize";
         
         try {
             $customer = $this->customerRepository->get($email);
@@ -226,7 +225,8 @@ class Payments implements PaymentsInterface
         $data = [
             "amount" => 0,
             "currency" => "USD",
-            "capture" => $capture,
+            // Authorize only, because the CaptureCommand will handle capturing the payment
+            "capture" => false,
             "payment_method" => [
                 "card" => $cardId,
             ],
@@ -303,9 +303,9 @@ class Payments implements PaymentsInterface
         }
 
         // Create transaction
-        $transactionId = $this->createTransaction($order, $response, $capture);
+        $transactionId = $this->createTransaction($order, $response);
 
-        $this->invoiceOrder($order, $transactionId, $capture);
+        $this->invoiceOrder($order, $transactionId);
 
         if ($customer && $saveCard) {
             $this->savePaymentMethod($customer->getId(), $response['payment_method']);
@@ -322,12 +322,11 @@ class Payments implements PaymentsInterface
     private function invoiceOrder(
         $order,
         $transactionId,
-        $capture = false,
         $save = true
     ) {
         $invoice = $this->invoiceService->prepareInvoice($order);
-        $captureType = $capture || false ? \Magento\Sales\Model\Order\Invoice::STATE_PAID : \Magento\Sales\Model\Order\Invoice::STATE_OPEN;
-        $invoice->setState($captureType);
+        $invoice->setState(\Magento\Sales\Model\Order\Invoice::STATE_OPEN);
+        $invoice->setRequestedCaptureCase(\Magento\Sales\Model\Order\Invoice::CAPTURE_ONLINE);
 
         if ($transactionId) {
             $invoice->setTransactionId($transactionId);
@@ -359,9 +358,8 @@ class Payments implements PaymentsInterface
         return false;
     }
 
-    public function createTransaction($order = null, $paymentData = array(), $capture = false)
+    public function createTransaction($order = null, $paymentData = array())
     {
-        $transactionType = $capture ? Transaction::TYPE_CAPTURE : Transaction::TYPE_AUTH;
         try {
             //get payment object from order object
             $payment = $order->getPayment();
@@ -394,7 +392,7 @@ class Payments implements PaymentsInterface
                 ->setOrder($order)
                 ->setTransactionId($paymentData['id'])
                 ->setFailSafe(true)
-                ->build($transactionType);
+                ->build(Transaction::TYPE_AUTH);
             $payment->setParentTransactionId(null);
             $payment->save();
             $order->save();
