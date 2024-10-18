@@ -21,6 +21,7 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Quote\Model\QuoteFactory;
+use PublicSquare\Payments\Exception\SaveInvoiceException;
 use PublicSquare\Payments\Helper\Config;
 use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -33,6 +34,7 @@ use Magento\Vault\Api\Data\PaymentTokenInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Vault\Api\PaymentTokenManagementInterface;
+use PublicSquare\Payments\Exception\CreateTransactionException;
 
 class Payments implements PaymentsInterface
 {
@@ -127,6 +129,12 @@ class Payments implements PaymentsInterface
      */
     protected $tokenManagement;
 
+//    /**
+//     * @var \Psr\Log\LoggerInterface
+//     */
+/** @var \PublicSquare\Payments\Logger\Logger  */
+    protected $logger;
+
     /**
      * Exclude segment from CartTotal
      *
@@ -155,7 +163,9 @@ class Payments implements PaymentsInterface
         CreditCardTokenFactory $creditCardTokenFactory,
         PaymentTokenRepositoryInterface $paymentTokenRepository,
         EncryptorInterface $encryptor,
-        PaymentTokenManagementInterface $tokenManagement
+        PaymentTokenManagementInterface $tokenManagement,
+        //\Psr\Log\LoggerInterface $logger,
+        \PublicSquare\Payments\Logger\Logger $logger,
     ) {
         $this->paymentsRequestFactory = $paymentsRequestFactory;
         $this->checkoutSession = $checkoutSession;
@@ -175,6 +185,7 @@ class Payments implements PaymentsInterface
         $this->paymentTokenRepository = $paymentTokenRepository;
         $this->encryptor = $encryptor;
         $this->tokenManagement = $tokenManagement;
+        $this->logger = $logger;
     } //end __construct()
 
     /**
@@ -191,141 +202,148 @@ class Payments implements PaymentsInterface
             throw new \Magento\Framework\Exception\CouldNotSaveException(__('!$cardId && !$publicHash'.self::ERROR_MESSAGE));
         }
 
-        $quoteId = $this->checkoutSession->getQuoteId();
-        $quote = $this->quoteFactory->create()->load($quoteId);
-        $billingAddress = $quote->getBillingAddress();
-        $shippingAddress = $quote->getShippingAddress();
-        $phoneNumber = $billingAddress->getTelephone();
-        $email = $billingAddress->getEmail();
-        $capture = $this->configHelper->getPaymentAction() !== "authorize";
-        
         try {
-            $customer = $this->customerRepository->get($email);
-        } catch (\Magento\Framework\Exception\NoSuchEntityException $th) {
-            $customer = null;
-        }
-        // publicHash will be provided if the payment method is from the vault
-        if ($publicHash && $customer) {
+            $quoteId = $this->checkoutSession->getQuoteId();
+            $quote = $this->quoteFactory->create()->load($quoteId);
+            $billingAddress = $quote->getBillingAddress();
+            $shippingAddress = $quote->getShippingAddress();
+            $phoneNumber = $billingAddress->getTelephone();
+            $email = $billingAddress->getEmail();
+            $capture = $this->configHelper->getPaymentAction() !== "authorize";
+
             try {
-                $cardId = $this->getCardIdFromPublicHash($publicHash, $customer->getId());
-                if (!$cardId) {
-                    throw new \Magento\Framework\Exception\CouldNotSaveException(__('$publicHash && !$cardId'.self::ERROR_MESSAGE));
-                }
-            } catch (\Throwable $th) {
-                throw new \Magento\Framework\Exception\CouldNotSaveException(__('Error retrieving card id from public hash'.self::ERROR_MESSAGE));
+                $customer = $this->customerRepository->get($email);
+            } catch (\Magento\Framework\Exception\NoSuchEntityException $th) {
+                $customer = null;
             }
+            // publicHash will be provided if the payment method is from the vault
+            if ($publicHash && $customer) {
+                try {
+                    $cardId = $this->getCardIdFromPublicHash($publicHash, $customer->getId());
+                    if (!$cardId) {
+                        throw new \Magento\Framework\Exception\CouldNotSaveException(__('$publicHash && !$cardId' . self::ERROR_MESSAGE));
+                    }
+                } catch (\Throwable $th) {
+                    throw new \Magento\Framework\Exception\CouldNotSaveException(__('Error retrieving card id from public hash' . self::ERROR_MESSAGE));
+                }
+            }
+            if ($customer) {
+                $quote->assignCustomer($customer);
+            }
+
+            $phoneNumber = str_replace(" ", "-", $phoneNumber);
+            $phoneNumber = preg_replace("/\D+/", "", $phoneNumber);
+
+            if (preg_match('/(\d{3})(\d{3})(\d{4})$/', $phoneNumber, $matches)) {
+                $phoneNumber = $matches[1] . "-" . $matches[2] . "-" . $matches[3];
+            } else {
+                $phoneNumber = $phoneNumber;
+            }
+
+            if (substr_count($phoneNumber, "-") == 3) {
+                $phoneNumber = substr($phoneNumber, strpos($phoneNumber, "-") + 1);
+            }
+
+            $data = [
+                "amount" => 0,
+                "currency" => "USD",
+                "capture" => $capture,
+                "payment_method" => [
+                    "card" => $cardId,
+                ],
+                "customer" => [
+                    "external_id" => "",
+                    "business_name" => "",
+                    "first_name" => $billingAddress->getFirstName(),
+                    "last_name" => $billingAddress->getLastName(),
+                    "email" => $email,
+                    "phone" => $phoneNumber,
+                ],
+                "billing_details" => [
+                    "address_line_1" => $billingAddress->getStreet()[0],
+                    "address_line_2" => array_key_exists(
+                        1,
+                        $billingAddress->getStreet()
+                    )
+                        ? $billingAddress->getStreet()[1]
+                        : "",
+                    "city" => $billingAddress->getCity(),
+                    "state" => $billingAddress->getRegionId(),
+                    "postal_code" => $billingAddress->getPostcode(),
+                    "country" => $billingAddress->getCountryId(),
+                ],
+                "shipping_address" => [
+                    "address_line_1" => $shippingAddress->getStreet()[0],
+                    "address_line_2" => array_key_exists(
+                        1,
+                        $shippingAddress->getStreet()
+                    )
+                        ? $shippingAddress->getStreet()[1]
+                        : "",
+                    "city" => $shippingAddress->getCity(),
+                    "state" => $shippingAddress->getRegionId(),
+                    "postal_code" => $shippingAddress->getPostcode(),
+                    "country" => $shippingAddress->getCountryId(),
+                ],
+            ];
+
+            $quote->getPayment()->importData(["method" => Config::CODE]);
+            $quote->setPaymentMethod(Config::CODE)
+                ->setInventoryProcessed(false)
+                ->collectTotals()
+                ->save();
+
+            // Create Order From Quote
+            $orderId = $this->cartManagement->placeOrder($quote->getId());
+
+            $order = $this->orderRepository->get($orderId);
+
+            $data["amount"] = $quote->getGrandTotal() * 100;
+
+            $data["external_id"] = $order->getIncrementId();
+            /*
+            @var \PublicSquare\Payments\Api\Authenticated\Payments $request
+             */
+            $request = $this->paymentsRequestFactory->create(["payment" => $data]);
+            $response = $request->getResponseData();
+
+            if (!array_key_exists("id", $response)) {
+                throw new \Magento\Framework\Exception\CouldNotSaveException(
+                    __(implode(",", $response["errors"]))
+                );
+            } else if (array_key_exists("errors", $response)) {
+                dd($response);
+                throw new \Magento\Framework\Exception\CouldNotSaveException(
+                    __("The payment for order #%1 cannot be processed.", $orderId)
+                );
+            } else if (array_key_exists("fraud_details", $response) && $response["fraud_details"]["decision"] === "reject") {
+                $order->cancel()->save();
+                throw new \Magento\Framework\Exception\CouldNotSaveException(
+                    __("The payment for order #%1 cannot be processed.", $orderId)
+                );
+            }
+
+            // Create transaction
+            $transactionId = $this->createTransaction($order, $response, $capture);
+
+            $this->invoiceOrder($order, $transactionId, $capture);
+
+            if ($customer && $saveCard) {
+                // TODO: Question: do we log the exception here but still let the order process? I don't think we want to fail the while thing here.
+                // Also, I wonder how we can report errors or other messages.
+                $this->savePaymentMethod($customer->getId(), $response['payment_method']);
+            }
+
+            if ($orderId) {
+                $result["order_id"] = $orderId;
+            } else {
+                $result = ["error" => 1, "msg" => "Your custom message"];
+            }
+            return $result;
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            throw new \Magento\Framework\Exception\PaymentException(new \Magento\Framework\Phrase($e->getMessage()));
         }
-        if ($customer) {
-            $quote->assignCustomer($customer);
-        }
-
-        $phoneNumber = str_replace(" ", "-", $phoneNumber);
-        $phoneNumber = preg_replace("/\D+/", "", $phoneNumber);
-
-        if (preg_match('/(\d{3})(\d{3})(\d{4})$/', $phoneNumber, $matches)) {
-            $phoneNumber = $matches[1] . "-" . $matches[2] . "-" . $matches[3];
-        } else {
-            $phoneNumber = $phoneNumber;
-        }
-
-        if (substr_count($phoneNumber, "-") == 3) {
-            $phoneNumber = substr($phoneNumber, strpos($phoneNumber, "-") + 1);
-        }
-
-        $data = [
-            "amount" => 0,
-            "currency" => "USD",
-            "capture" => $capture,
-            "payment_method" => [
-                "card" => $cardId,
-            ],
-            "customer" => [
-                "external_id" => "",
-                "business_name" => "",
-                "first_name" => $billingAddress->getFirstName(),
-                "last_name" => $billingAddress->getLastName(),
-                "email" => $email,
-                "phone" => $phoneNumber,
-            ],
-            "billing_details" => [
-                "address_line_1" => $billingAddress->getStreet()[0],
-                "address_line_2" => array_key_exists(
-                    1,
-                    $billingAddress->getStreet()
-                )
-                    ? $billingAddress->getStreet()[1]
-                    : "",
-                "city" => $billingAddress->getCity(),
-                "state" => $billingAddress->getRegionId(),
-                "postal_code" => $billingAddress->getPostcode(),
-                "country" => $billingAddress->getCountryId(),
-            ],
-            "shipping_address" => [
-                "address_line_1" => $shippingAddress->getStreet()[0],
-                "address_line_2" => array_key_exists(
-                    1,
-                    $shippingAddress->getStreet()
-                )
-                    ? $shippingAddress->getStreet()[1]
-                    : "",
-                "city" => $shippingAddress->getCity(),
-                "state" => $shippingAddress->getRegionId(),
-                "postal_code" => $shippingAddress->getPostcode(),
-                "country" => $shippingAddress->getCountryId(),
-            ],
-        ];
-
-        $quote->getPayment()->importData(["method" => Config::CODE]);
-        $quote->setPaymentMethod(Config::CODE)
-            ->setInventoryProcessed(false)
-            ->collectTotals()
-            ->save();
-
-        // Create Order From Quote
-        $orderId = $this->cartManagement->placeOrder($quote->getId());
-
-        $order = $this->orderRepository->get($orderId);
-
-        $data["amount"] = $quote->getGrandTotal() * 100;
-
-        $data["external_id"] = $order->getIncrementId();
-        /*
-        @var \PublicSquare\Payments\Api\Authenticated\Payments $request
-         */
-        $request = $this->paymentsRequestFactory->create(["payment" => $data]);
-        $response = $request->getResponseData();
-
-        if (!array_key_exists("id", $response)) {
-            throw new \Magento\Framework\Exception\CouldNotSaveException(
-                __(implode(",", $response["errors"]))
-            );
-        } else if (array_key_exists("errors", $response)) {
-            dd($response);
-            throw new \Magento\Framework\Exception\CouldNotSaveException(
-                __("The payment for order #%1 cannot be processed.", $orderId)
-            );
-        } else if (array_key_exists("fraud_details", $response) && $response["fraud_details"]["decision"] === "reject") {
-            $order->cancel()->save();
-            throw new \Magento\Framework\Exception\CouldNotSaveException(
-                __("The payment for order #%1 cannot be processed.", $orderId)
-            );
-        }
-
-        // Create transaction
-        $transactionId = $this->createTransaction($order, $response, $capture);
-
-        $this->invoiceOrder($order, $transactionId, $capture);
-
-        if ($customer && $saveCard) {
-            $this->savePaymentMethod($customer->getId(), $response['payment_method']);
-        }
-
-        if ($orderId) {
-            $result["order_id"] = $orderId;
-        } else {
-            $result = ["error" => 1, "msg" => "Your custom message"];
-        }
-        return $result;
     } //end createApplication()
 
     private function invoiceOrder(
@@ -345,10 +363,14 @@ class Payments implements PaymentsInterface
         $invoice->register();
 
         if ($save) {
-            $this->invoiceRepository->save($invoice);
-            $this->orderRepository->save($order);
-            $this->sendInvoiceEmail($invoice);
-            $invoice->save();
+            try {
+                $this->invoiceRepository->save($invoice);
+                $this->orderRepository->save($order);
+                $this->sendInvoiceEmail($invoice);
+                $invoice->save();
+            } catch(\Exception $e) {
+                throw new SaveInvoiceException($e->getMessage(), $e->getCode(), $e);
+            }
         }
 
         return $invoice;
@@ -362,6 +384,7 @@ class Payments implements PaymentsInterface
         }
         catch (\Exception $e)
         {
+            $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
             // $this->logError($e->getMessage(), $e->getTraceAsString());
         }
 
@@ -409,29 +432,35 @@ class Payments implements PaymentsInterface
             $order->save();
             return  $transaction->save()->getTransactionId();
         } catch (Exception $e) {
-            //log errors here
+            // log errors here? .. logging handled in parent class
+            // $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            throw new CreateTransactionException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
     private function savePaymentMethod($customerId, $paymentData) {
-        $paymentToken = $this->creditCardTokenFactory->create();
-        
-        // Use the exp_month and exp_year to generate the expiration date
-        $expirationDate = date('Y-m-t 23:59:59', strtotime($paymentData['card']['exp_year'] . '-' . $paymentData['card']['exp_month']));
-        $paymentToken->setExpiresAt($expirationDate);
-        $paymentToken->setGatewayToken($paymentData['card']['id']);
-        $paymentToken->setTokenDetails(json_encode([
-            'type'              => $paymentData['card']['brand'],
-            'maskedCC'          => $paymentData['card']['last4'],
-            'expirationDate'    => $paymentData['card']['exp_month'].'/'.$paymentData['card']['exp_year'],
-        ]));
-        $paymentToken->setIsActive(true);
-        $paymentToken->setIsVisible(true);
-        $paymentToken->setPaymentMethodCode(Config::CODE);
-        $paymentToken->setWebsiteId($this->storeManager->getStore()->getWebsiteId());
-        $paymentToken->setCustomerId($customerId);
-        $paymentToken->setPublicHash($this->generatePublicHash($paymentToken));
-        $this->paymentTokenRepository->save($paymentToken);
+        try {
+            $paymentToken = $this->creditCardTokenFactory->create();
+
+            // Use the exp_month and exp_year to generate the expiration date
+            $expirationDate = date('Y-m-t 23:59:59', strtotime($paymentData['card']['exp_year'] . '-' . $paymentData['card']['exp_month']));
+            $paymentToken->setExpiresAt($expirationDate);
+            $paymentToken->setGatewayToken($paymentData['card']['id']);
+            $paymentToken->setTokenDetails(json_encode([
+                'type' => $paymentData['card']['brand'],
+                'maskedCC' => $paymentData['card']['last4'],
+                'expirationDate' => $paymentData['card']['exp_month'] . '/' . $paymentData['card']['exp_year'],
+            ]));
+            $paymentToken->setIsActive(true);
+            $paymentToken->setIsVisible(true);
+            $paymentToken->setPaymentMethodCode(Config::CODE);
+            $paymentToken->setWebsiteId($this->storeManager->getStore()->getWebsiteId());
+            $paymentToken->setCustomerId($customerId);
+            $paymentToken->setPublicHash($this->generatePublicHash($paymentToken));
+            $this->paymentTokenRepository->save($paymentToken);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
+        }
     }
 
     /**
