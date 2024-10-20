@@ -329,7 +329,7 @@ class Payments implements PaymentsInterface
             $this->invoiceOrder($order, $transactionId, $capture);
 
             if ($customer && $saveCard) {
-                // TODO: Question: do we log the exception here but still let the order process? I don't think we want to fail the while thing here.
+                // TODO: Question: do we log the exception here but still let the order process? I don't think we want to fail since payment was successful.
                 // Also, I wonder how we can report errors or other messages.
                 $this->savePaymentMethod($customer->getId(), $response['payment_method']);
             }
