@@ -16,7 +16,7 @@ use Magento\Vault\Model\VaultPaymentInterface;
 
 class Form extends Cc
 {
-    protected $_template = 'PublicSquare_Payments::form/cc.phtml';
+    // protected $_template = 'PublicSquare_Payments::form/cc.phtml';
     /**
      * @var Quote
      */

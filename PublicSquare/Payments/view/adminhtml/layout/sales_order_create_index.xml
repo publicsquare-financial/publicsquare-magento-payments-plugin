@@ -18,7 +18,7 @@
                    as="publicsquare_payments_payment_script"
                    template="PublicSquare_Payments::payment/script.phtml"
                    class="PublicSquare\Payments\Block\Payment"
-                   after="billing_method"/>
+                   before="billing_method"/>
         </referenceBlock>
     </body>
 </page>

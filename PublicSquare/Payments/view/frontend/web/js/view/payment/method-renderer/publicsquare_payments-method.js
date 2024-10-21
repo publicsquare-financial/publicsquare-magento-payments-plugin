@@ -44,7 +44,6 @@ define(
                 this.vaultEnabler = new VaultEnabler();
                 this.vaultEnabler.setPaymentCode(this.getVaultCode());
                 this.vaultEnabler.isActivePaymentTokenEnabler(false);
-                console.log('quote', quote, quote.billingAddress());
                 return self
             },
             onContainerRendered: function () {
@@ -70,7 +69,6 @@ define(
                         // Submit the payment
                         await self.placeOrderWithCardId(card.id)
                     } catch (error) {
-                        console.log(error)
                         fullScreenLoader.stopLoader();
                         messageList.addErrorMessage({
                             message: $t(error.responseJSON && error.responseJSON.message ? error.responseJSON.message : self.errorMessage)

@@ -35,3 +35,10 @@
 .publicsquare-financial-section.section-config.active > .admin__collapsible-block + input + fieldset {
   margin-left: 40px;
 }
+
+#publicsquare-elements-form {
+  margin-bottom: 1em;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  padding: 4px 4px 4px 12px;
+}

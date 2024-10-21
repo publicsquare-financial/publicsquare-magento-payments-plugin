@@ -9,20 +9,43 @@
 $code = $block->escapeHtml($block->getCode());
 
 ?>
-<script>
+
+<script nonce="<?= $block->getNonce() ?>">
     //<![CDATA[
     require(
         [
-            'PublicSquare_Payments/js/publicsquare_payments',
+            'PublicSquare_Payments/js/publicsquare',
             'jquery',
-            'domReady!'
-        ], function(publicsquare, $) {
-            console.log('publicsquare', publicsquare);
+        ], function(PublicSquare, $) {
             var config = <?= /* @noEscape */ $block->getPaymentConfig() ?>,
-                payment,
-                form = $('#payment_form_<?= /* @noEscape */ $code ?>');
+                form = $('#payment_form_<?= /* @noEscape */ $code ?>'),
+                elementsFormSelector = '#publicsquare-elements-form',
+                element = $(elementsFormSelector),
+                payment;
 
             config.active = form.length > 0 && !form.is(':hidden');
+
+            payment = new PublicSquare(config);
+
+            // const targetElement = element.get(0); 
+
+            // const observer = new IntersectionObserver(entries => {
+            //     entries.forEach(entry => {
+            //         if (entry.isIntersecting && !element.children().length) {
+            //             // Element is visible
+            //             console.log('Element is now visible'); 
+            //             // Do something when the element becomes visible
+            //             setTimeout(() => {
+            //                 publicsquare.initElements({
+            //                     apiKey: config.pk || '',
+            //                     selector: elementsFormSelector
+            //                 }, () => { })
+            //             }, 1000)
+            //         }
+            //     });
+            // });
+
+            // observer.observe(targetElement);
         });
     //]]>
 </script>
