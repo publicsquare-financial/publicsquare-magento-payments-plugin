@@ -5,9 +5,7 @@ current_directory="$PWD"
 
 cd $(dirname $0)/..
 
-#docker cp PublicSquare publicsquare-magento-payments-plugin-app-1:/var/www/html/app/code/
-bin/magento sampledata:deploy
-bin/magento admin:user:create --admin-user=admin --admin-password=AdminPassword123 --admin-email=admin@example.com --admin-firstname=admin --admin-lastname=admin
+docker cp PublicSquare publicsquare-magento-payments-plugin-app-1:/var/www/html/app/code/
 
 echo "ADDITIONAL INSTALLATION INSTRUCTIONS:"
 
