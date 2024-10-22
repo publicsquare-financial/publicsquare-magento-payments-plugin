@@ -301,19 +301,32 @@ class Payments implements PaymentsInterface
             $request = $this->paymentsRequestFactory->create(["payment" => $data]);
             $response = $request->getResponseData();
 
-            if (!array_key_exists("id", $response)) {
+            if (!empty($response['status']) && $response['status'] == 'declined') {
+                $errorMessage = !empty($response['declined_reason']) ? $response['declined_reason'] : 'Declined';
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __(implode(",", $response["errors"]))
+                    __($errorMessage)
                 );
-            } else if (array_key_exists("errors", $response)) {
-                dd($response);
+            }
+            else if (!empty($response['status']) && $response['status'] == 400) {
+                $errorMessage = !empty($response['detail']) ? $response['detail'] : 'Payment error';
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __("The payment for order #%1 cannot be processed.", $orderId)
+                    __($errorMessage)
+                );
+            }
+            else if (array_key_exists("errors", $response)) {
+                //dd($response);
+                throw new \Magento\Framework\Exception\CouldNotSaveException(
+                    __(sprintf("The payment for order #%d cannot be processed. ", $orderId)) . __(implode(",", $response["errors"]))
                 );
             } else if (array_key_exists("fraud_details", $response) && $response["fraud_details"]["decision"] === "reject") {
                 $order->cancel()->save();
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __("The payment for order #%1 cannot be processed.", $orderId)
+                    __(sprintf("The payment for order #%d cannot be processed.", $orderId))
+                );
+            }
+            else if (!array_key_exists("id", $response)) {
+                throw new \Magento\Framework\Exception\CouldNotSaveException(
+                    __(implode(",", $response["errors"]))
                 );
             }
 
@@ -336,7 +349,8 @@ class Payments implements PaymentsInterface
             return $result;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            throw new \Magento\Framework\Exception\PaymentException(new \Magento\Framework\Phrase($e->getMessage()));
+            throw $e;
+            //throw new \Magento\Framework\Exception\PaymentException(new \Magento\Framework\Phrase($e->getMessage()));
         }
     } //end createApplication()
 
