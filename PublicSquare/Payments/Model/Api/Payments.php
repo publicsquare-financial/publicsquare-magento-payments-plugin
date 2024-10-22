@@ -123,9 +123,6 @@ class Payments implements PaymentsInterface
      */
     protected $tokenManagement;
 
-//    /**
-//     * @var \Psr\Log\LoggerInterface
-//     */
     /** @var \PublicSquare\Payments\Logger\Logger */
     protected $logger;
 
