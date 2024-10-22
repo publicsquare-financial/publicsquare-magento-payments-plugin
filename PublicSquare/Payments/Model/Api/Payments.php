@@ -346,7 +346,6 @@ class Payments implements PaymentsInterface
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
             throw $e;
-            //throw new \Magento\Framework\Exception\PaymentException(new \Magento\Framework\Phrase($e->getMessage()));
         }
     } //end createApplication()
 
@@ -387,7 +386,6 @@ class Payments implements PaymentsInterface
             return true;
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            // $this->logError($e->getMessage(), $e->getTraceAsString());
         }
 
         return false;
@@ -433,8 +431,6 @@ class Payments implements PaymentsInterface
             $order->save();
             return $transaction->save()->getTransactionId();
         } catch (Exception $e) {
-            // log errors here? .. logging handled in parent class
-            // $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
             throw new CreateTransactionException($e->getMessage(), $e->getCode(), $e);
         }
     }
