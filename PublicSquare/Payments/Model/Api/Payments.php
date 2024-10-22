@@ -318,7 +318,8 @@ class Payments implements PaymentsInterface
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
                     __(sprintf("The payment for order #%d cannot be processed. ", $orderId)) . __(implode(",", $response["errors"]))
                 );
-            } else if (array_key_exists("fraud_details", $response) && $response["fraud_details"]["decision"] === "reject") {
+            }
+            else if (array_key_exists("fraud_details", $response) && $response["fraud_details"]["decision"] === "reject") {
                 $order->cancel()->save();
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
                     __(sprintf("The payment for order #%d cannot be processed.", $orderId))
@@ -336,8 +337,6 @@ class Payments implements PaymentsInterface
             $this->invoiceOrder($order, $transactionId);
 
             if ($customer && $saveCard) {
-                // TODO: Question: do we log the exception here but still let the order process? I don't think we want to fail since payment was successful.
-                // Also, I wonder how we can report errors or other messages.
                 $this->savePaymentMethod($customer->getId(), $response['payment_method']);
             }
 
@@ -354,8 +353,7 @@ class Payments implements PaymentsInterface
         }
     } //end createApplication()
 
-    private
-    function invoiceOrder(
+    private function invoiceOrder(
         $order,
         $transactionId,
         $save = true
@@ -385,8 +383,7 @@ class Payments implements PaymentsInterface
         return $invoice;
     }
 
-    private
-    function sendInvoiceEmail($invoice)
+    private function sendInvoiceEmail($invoice)
     {
         try {
             $this->invoiceSender->send($invoice);
@@ -399,8 +396,7 @@ class Payments implements PaymentsInterface
         return false;
     }
 
-    public
-    function createTransaction($order = null, $paymentData = array())
+    public function createTransaction($order = null, $paymentData = array())
     {
         try {
             //get payment object from order object
@@ -446,8 +442,7 @@ class Payments implements PaymentsInterface
         }
     }
 
-    private
-    function savePaymentMethod($customerId, $paymentData)
+    private function savePaymentMethod($customerId, $paymentData)
     {
         try {
             $paymentToken = $this->creditCardTokenFactory->create();
@@ -479,8 +474,7 @@ class Payments implements PaymentsInterface
      * @param PaymentTokenInterface $paymentToken
      * @return string
      */
-    protected
-    function generatePublicHash(PaymentTokenInterface $paymentToken)
+    protected function generatePublicHash(PaymentTokenInterface $paymentToken)
     {
         $hashKey = $paymentToken->getGatewayToken();
         if ($paymentToken->getCustomerId()) {
@@ -494,8 +488,7 @@ class Payments implements PaymentsInterface
         return $this->encryptor->getHash($hashKey);
     }
 
-    private
-    function getCardIdFromPublicHash($publicHash, $customerId): string
+    private function getCardIdFromPublicHash($publicHash, $customerId): string
     {
         $paymentToken = $this->tokenManagement->getByPublicHash($publicHash, $customerId);
         return $paymentToken->getGatewayToken();
