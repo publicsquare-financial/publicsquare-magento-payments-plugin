@@ -348,6 +348,8 @@ class Payments implements PaymentsInterface
             }
             return $result;
         } catch (\Exception $e) {
+            $quote->setIsActive(1); // keep the items in the cart
+            $quote->save();
             $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
             throw $e;
         }
