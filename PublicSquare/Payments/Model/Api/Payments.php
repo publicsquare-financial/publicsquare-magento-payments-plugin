@@ -199,12 +199,19 @@ class Payments implements PaymentsInterface
             $shippingAddress = $quote->getShippingAddress();
             $phoneNumber = $billingAddress->getTelephone();
             $email = $billingAddress->getEmail();
+            $customer = $quote->getCustomer();
 
-            try {
-                $customer = $this->customerRepository->get($email);
-            } catch (\Magento\Framework\Exception\NoSuchEntityException $th) {
-                $customer = null;
+            // If the setting to lookup a customer by email is enabled, try to find an existing customer with that email
+            if (!$customer && $this->configHelper->getGuestCheckoutCustomerLookup()) {
+                try {
+                    $customer = $this->customerRepository->get($email);
+                    // If a customer is found, assign them to the quote
+                    if ($customer) {
+                        $quote->setCustomer($customer);
+                    }
+                } catch (\Magento\Framework\Exception\NoSuchEntityException $th) {}
             }
+
             // publicHash will be provided if the payment method is from the vault
             if ($publicHash && $customer) {
                 try {
@@ -215,9 +222,6 @@ class Payments implements PaymentsInterface
                 } catch (\Throwable $th) {
                     throw new \Magento\Framework\Exception\CouldNotSaveException(__('Error retrieving card id from public hash' . self::ERROR_MESSAGE));
                 }
-            }
-            if ($customer) {
-                $quote->setCustomer($customer);
             }
 
             $phoneNumber = str_replace(" ", "-", $phoneNumber);

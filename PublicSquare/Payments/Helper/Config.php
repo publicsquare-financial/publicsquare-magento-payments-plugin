@@ -33,7 +33,7 @@ class Config extends AbstractHelper
     const PUBLICSQUARE_PAYMENT_ACTION                       = 'payment/publicsquare_payments/payment_action';
     const PUBLICSQUARE_LOGGING_CONFIG_PATH                  = 'payment/publicsquare_payments/debug';
     const PUBLICSQUARE_CARD_IMAGES_BASE_PATH                = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
-    
+    const PUBLICSQUARE_CUSTOMER_LOOKUP                       = 'payment/publicsquare_payments/customer_lookup';
     /**
      * @var \Magento\Framework\Serialize\Serializer\Json
      */
@@ -142,6 +142,21 @@ class Config extends AbstractHelper
         return (bool) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_LOGGING_CONFIG_PATH, $scopeType, $scopeCode);
     } //end getPublicSquareLoggingEnabled()
+
+    /**
+     * Get setting for customer lookup during checkout
+     *
+     * @param  string $scopeType
+     * @param  null   $scopeCode
+     * @return boolean
+     */
+    public function getGuestCheckoutCustomerLookup(
+        $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+        $scopeCode = null
+    ): bool {
+        return (bool) $this->scopeConfig
+            ->getValue(self::PUBLICSQUARE_CUSTOMER_LOOKUP, $scopeType, $scopeCode);
+    } //end getGuestCheckoutCustomerLookup()
 
     /**
      * Get publicsquare payment capture action
