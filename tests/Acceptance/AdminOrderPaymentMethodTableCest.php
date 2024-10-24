@@ -12,4 +12,10 @@ class AdminOrderPaymentMethodTableCest extends AdminOrderDetailPage
         $this->_goToOrderDetail($I);
         $this->_paymentInformationTableIsVisible($I);
     }
+
+    public function paymentDetailsLinkHasCorrectUrl(AcceptanceTester $I)
+    {
+        $this->_goToOrderDetail($I);
+        $this->_paymentDetailsLinkHasCorrectUrl($I);
+    }
 }
