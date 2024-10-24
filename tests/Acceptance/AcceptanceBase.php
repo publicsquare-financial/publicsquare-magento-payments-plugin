@@ -49,8 +49,40 @@ class AcceptanceBase
         $I->click('#system_config_tabs div.config-nav-block:nth-child(5)');
         $I->waitForText('Payment Methods');
         $I->click('Payment Methods');
+
+        // click on button.
+        $I->click('#payment_us_publicsquare_payments-head');
+        $I->waitForText('PublicSquare Secret API key');
+
+        $I->uncheckOption('#payment_us_publicsquare_payments_payment_action_inherit');
+
+        // select sale
+        $I->selectOption('select#payment_us_publicsquare_payments_payment_action', 'sale');
+        $I->click('Save Config');
+        $I->waitForText('You saved the configuration');
+        $I->see('You saved the configuration');
+    }
+
+    protected function _adminEnableAuthorize(AcceptanceTester $I): void
+    {
+        $I->amOnPage('/admin');
+
+        // login page
+        $I->fillField('#username', 'admin');
+        $I->fillField('#login', 'AdminPassword123');
+        $I->click('.form-actions .action-login');
+
+        $I->waitForText('Dashboard');
+        $I->click('#menu-magento-backend-stores a');
+        $I->waitForText('Configuration');
+        $I->waitForText('Terms and Conditions');
+        $I->click('.submenu .item-system-config a');
+        $I->waitForText('Country Options');
+        $I->click('#system_config_tabs div.config-nav-block:nth-child(5)');
+        $I->waitForText('Payment Methods');
+        $I->click('Payment Methods');
         //$I->selectOption('select#payment_us_recommended_solutions_magento_payments_legacy_apple_pay_payment_action', 'authorize_capture');
-        $I->selectOption('select#payment_us_recommended_solutions_magento_payments_legacy_hosted_fields_payment_action', 'authorize_capture');
+        $I->selectOption('select#payment_us_recommended_solutions_magento_payments_legacy_hosted_fields_payment_action', 'authorize');
         $I->click('Save Config');
         $I->waitForText('You saved the configuration');
         $I->see('You saved the configuration');
