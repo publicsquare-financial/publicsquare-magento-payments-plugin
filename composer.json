@@ -2,7 +2,6 @@
   "name": "publicsquare-financial/magento-payments-plugin",
   "description": "The Magento plugin provides a one-click install into PublicSquare's payment gateway for credit and debit card processing.",
   "type": "composer-plugin",
-  "require": {},
   "autoload": {
     "psr-4": {
       "Tests\\": "tests/"
@@ -11,7 +10,8 @@
   "require-dev": {
     "codeception/codeception": "^5.1",
     "codeception/module-asserts": "*",
-    "codeception/module-webdriver": "^4.0"
+    "codeception/module-webdriver": "^4.0",
+    "codeception/module-db": "^3.1"
   },
   "config": {
     "allow-plugins": {

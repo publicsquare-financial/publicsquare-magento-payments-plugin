@@ -2,22 +2,24 @@
 
 namespace Tests\Acceptance;
 
+
 use Tests\Support\AcceptanceTester;
 
-class CheckoutCest extends AcceptanceBase
+class CheckoutWithAuthorizeCaptureCest extends AcceptanceBase
 {
-    public function checkoutWorks(AcceptanceTester $I)
+    public function checkoutWithAuthorizeCaptureEnabledWorks(AcceptanceTester $I)
     {
         $this->_initialize($I);
 
-        // add product.
-        $this->_addProductToCart($I);
+        // Step 1: Setup your acceptance test to set the "Payment capture action" in plugin settings to "Authorize & Capture"
+        $this->_adminEnableAuthorizeCapture($I);
 
-        // do checkout
+        // Step 2: Run through a checkout
+        $this->_addProductToCart($I);
         $this->_goToCheckout($I);
         $this->_checkoutWithCard($I);
 
-        // verify order was created and paid.
+        // Step 3: Confirm that the order is paid
         $I->seeInDatabase('sales_order', ['customer_email' => $this->customerEmail]);
         $I->seeInDatabase('sales_order', [
             'customer_email' => $this->customerEmail,

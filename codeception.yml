@@ -10,3 +10,9 @@ actor_suffix: Tester
 extensions:
     enabled:
         - Codeception\Extension\RunFailed
+modules:
+    enabled:
+        - Db:
+              dsn: 'mysql:host=127.0.0.1;dbname=magento'
+              user: 'root'
+              password: 'magento'
