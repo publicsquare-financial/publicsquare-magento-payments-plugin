@@ -29,4 +29,10 @@ class AdminOrderDetailPage extends AcceptanceBase
     $I->see('CVV Response');
     $I->see('Fraud Decision');
   }
+
+  protected function _paymentDetailsLinkHasCorrectUrl(AcceptanceTester $I) {
+    $I->waitForElementVisible('.payment-details-link');
+    $url = $I->grabAttributeFrom('.payment-details-link', 'href');
+    $I->assertTrue(str_starts_with($url, 'https://portal.publicsquare.com/payments/'));
+  }
 }
