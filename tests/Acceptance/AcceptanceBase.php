@@ -31,16 +31,20 @@ class AcceptanceBase
         $I->click('#proceed-link');
     }
 
-    protected function _adminEnableAuthorizeCapture(AcceptanceTester $I): void
+    protected function _adminLogin(AcceptanceTester $I): void
     {
         $I->amOnPage('/admin');
-
         // login page
         $I->fillField('#username', 'admin');
         $I->fillField('#login', 'AdminPassword123');
         $I->click('.form-actions .action-login');
-
         $I->waitForText('Dashboard');
+    }
+
+    protected function _adminEnableAuthorizeCapture(AcceptanceTester $I): void
+    {
+        $this->_adminLogin($I);
+       
         $I->click('#menu-magento-backend-stores a');
         $I->waitForText('Configuration');
         $I->waitForText('Terms and Conditions');
@@ -123,6 +127,7 @@ class AcceptanceBase
         $I->waitForElementClickable($firstRadio);
         $I->click($firstRadio);
         $I->click('Next');
+        $I->waitForText('Payment Method');
     }
 
     protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I)

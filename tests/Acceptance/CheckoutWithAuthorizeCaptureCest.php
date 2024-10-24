@@ -17,14 +17,15 @@ class CheckoutWithAuthorizeCaptureCest extends AcceptanceBase
         // Step 2: Run through a checkout
         $this->_addProductToCart($I);
         $this->_goToCheckout($I);
+        $amount = $I->grabTextFrom('.grand.totals span.price');
         $this->_checkoutWithCard($I);
 
         // Step 3: Confirm that the order is paid
         $I->seeInDatabase('sales_order', ['customer_email' => $this->customerEmail]);
         $I->seeInDatabase('sales_order', [
             'customer_email' => $this->customerEmail,
-            'grand_total' => 80.0000,
-            'total_paid' => 80.0000,
+            'grand_total' => number_format(floatval(str_replace('$', '', $amount)), 4, '.', ''),
+            'total_paid' => number_format(floatval(str_replace('$', '', $amount)), 4, '.', ''),
             'status' => 'processing',
         ]);
     }

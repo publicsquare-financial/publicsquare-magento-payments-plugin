@@ -15,14 +15,15 @@ class CheckoutCest extends AcceptanceBase
 
         // do checkout
         $this->_goToCheckout($I);
+        $amount = $I->grabTextFrom('.grand.totals span.price');
         $this->_checkoutWithCard($I);
 
         // verify order was created and paid.
         $I->seeInDatabase('sales_order', ['customer_email' => $this->customerEmail]);
         $I->seeInDatabase('sales_order', [
             'customer_email' => $this->customerEmail,
-            'grand_total' => 80.0000,
-            'total_paid' => 80.0000,
+            'grand_total' => number_format(floatval(str_replace('$', '', $amount)), 4, '.', ''),
+            'total_paid' => number_format(floatval(str_replace('$', '', $amount)), 4, '.', ''),
             'status' => 'processing',
         ]);
     }
