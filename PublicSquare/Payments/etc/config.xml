@@ -25,6 +25,7 @@
                 <card_types>amex,visa,mastercard,discover</card_types>
                 <payment_action>sale</payment_action>
                 <avs_check>1</avs_check>
+                <customer_lookup>1</customer_lookup>
                 <!-- What can we do? -->
                 <is_gateway>1</is_gateway>
                 <can_authorize>1</can_authorize>

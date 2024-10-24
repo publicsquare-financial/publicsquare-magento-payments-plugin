@@ -74,6 +74,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/publicsquare_payments_cc_vault/active</config_path>
                 </field>
+                <field id="customer_lookup" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Guest Checkout Customer Lookup</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Whether to lookup an existing customer by email address and assign them to the order if found.]]></comment>
+                </field>
             </group>
         </section>
     </system>
