@@ -194,6 +194,7 @@ class Payments implements PaymentsInterface
      */
     public function createPayment($cardId = '', $saveCard = false, $publicHash = '')
     {
+        $hasCommitted = false;
         try {
 
             if (!$cardId && !$publicHash) {
@@ -341,11 +342,14 @@ class Payments implements PaymentsInterface
                 );
             }
 
+            // commit once we have a successful transaction
+            $this->resourceConnection->getConnection()->commit();
+            $hasCommitted = true;
+
             // Create transaction
             $transactionId = $this->createTransaction($order, $response);
 
-            // commit once we have a successful transaction
-            $this->resourceConnection->getConnection()->commit();
+
 
             $this->invoiceOrder($order, $transactionId);
 
@@ -360,7 +364,9 @@ class Payments implements PaymentsInterface
             }
             return $result;
         } catch (\Exception $e) {
-            $this->resourceConnection->getConnection()->rollBack();
+            if (!$hasCommitted) {
+                $this->resourceConnection->getConnection()->rollBack();
+            }
             $quote->setIsActive(1); // keep the items in the cart
             $quote->save();
             $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
