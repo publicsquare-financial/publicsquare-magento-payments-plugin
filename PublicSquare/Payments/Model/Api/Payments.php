@@ -34,6 +34,7 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Vault\Api\PaymentTokenManagementInterface;
 use PublicSquare\Payments\Exception\CreateTransactionException;
+use Magento\Framework\App\ResourceConnection;
 
 class Payments implements PaymentsInterface
 {
@@ -126,6 +127,9 @@ class Payments implements PaymentsInterface
     /** @var \PublicSquare\Payments\Logger\Logger */
     protected $logger;
 
+    /** @var ResourceConnection */
+    protected $resourceConnection;
+
     /**
      * Exclude segment from CartTotal
      *
@@ -156,6 +160,7 @@ class Payments implements PaymentsInterface
         PaymentTokenManagementInterface                          $tokenManagement,
         //\Psr\Log\LoggerInterface $logger,
         \PublicSquare\Payments\Logger\Logger                     $logger,
+        ResourceConnection                                       $resourceConnection,
     )
     {
         $this->paymentsRequestFactory = $paymentsRequestFactory;
@@ -176,6 +181,7 @@ class Payments implements PaymentsInterface
         $this->encryptor = $encryptor;
         $this->tokenManagement = $tokenManagement;
         $this->logger = $logger;
+        $this->resourceConnection = $resourceConnection;
     } //end __construct()
 
     /**
@@ -188,11 +194,15 @@ class Payments implements PaymentsInterface
      */
     public function createPayment($cardId = '', $saveCard = false, $publicHash = '')
     {
+        $hasCommitted = false;
         try {
 
             if (!$cardId && !$publicHash) {
                 throw new \Magento\Framework\Exception\CouldNotSaveException(__('!$cardId && !$publicHash' . self::ERROR_MESSAGE));
             }
+
+            // start transaction here.
+            $this->resourceConnection->getConnection()->beginTransaction();
 
             $quote = $this->checkoutSession->getQuote();
             $billingAddress = $quote->getBillingAddress();
@@ -315,7 +325,6 @@ class Payments implements PaymentsInterface
                 );
             }
             else if (array_key_exists("errors", $response)) {
-                //dd($response);
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
                     __(sprintf("The payment for order #%d cannot be processed. ", $orderId)) . __(implode(",", $response["errors"]))
                 );
@@ -331,6 +340,10 @@ class Payments implements PaymentsInterface
                     __(implode(",", $response["errors"]))
                 );
             }
+
+            // commit once we have a successful transaction
+            $this->resourceConnection->getConnection()->commit();
+            $hasCommitted = true;
 
             // Create transaction
             $transactionId = $this->createTransaction($order, $response);
@@ -348,6 +361,9 @@ class Payments implements PaymentsInterface
             }
             return $result;
         } catch (\Exception $e) {
+            if (!$hasCommitted) {
+                $this->resourceConnection->getConnection()->rollBack();
+            }
             $quote->setIsActive(1); // keep the items in the cart
             $quote->save();
             $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);

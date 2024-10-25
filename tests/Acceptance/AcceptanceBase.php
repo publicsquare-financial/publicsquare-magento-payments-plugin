@@ -145,19 +145,19 @@ class AcceptanceBase
         $I->switchToIframe();
     }
 
-    protected function _checkoutWithCard(AcceptanceTester $I)
+    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
     {
         $this->_makeSurePaymentMethodIsVisible($I);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
-        $I->fillField('//*[@id="cardNumber"]', '4242424242424242');
+        $I->fillField('//*[@id="cardNumber"]', $cardNumber);
         $I->fillField('//*[@id="expirationDate"]', '12/29');
         $I->fillField('//*[@id="cvc"]', '123');
         $I->switchToIframe();
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
-        $I->waitForText('Thank you for your purchase!');
+        $I->waitForText($waitString);
     }
 }
