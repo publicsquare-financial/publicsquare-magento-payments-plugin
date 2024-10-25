@@ -27,4 +27,21 @@ class CheckoutCest extends AcceptanceBase
             'status' => 'processing',
         ]);
     }
+
+    public function makeSureFailedCHargeDoesNotCreateASalesOrder(AcceptanceTester $I)
+    {
+        $this->_initialize($I);
+
+        // add product.
+        $this->_addProductToCart($I);
+
+        // do checkout
+        $this->_goToCheckout($I);
+        $amount = $I->grabTextFrom('.grand.totals span.price');
+        $this->_checkoutWithCard($I, '4000000000000002', 'Decline');
+
+        // verify order was not created.
+        $I->dontSeeInDatabase('sales_order', ['customer_email' => $this->customerEmail]);
+
+    }
 }
