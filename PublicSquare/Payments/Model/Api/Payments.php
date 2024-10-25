@@ -325,7 +325,6 @@ class Payments implements PaymentsInterface
                 );
             }
             else if (array_key_exists("errors", $response)) {
-                //dd($response);
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
                     __(sprintf("The payment for order #%d cannot be processed. ", $orderId)) . __(implode(",", $response["errors"]))
                 );
@@ -348,8 +347,6 @@ class Payments implements PaymentsInterface
 
             // Create transaction
             $transactionId = $this->createTransaction($order, $response);
-
-
 
             $this->invoiceOrder($order, $transactionId);
 
