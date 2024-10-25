@@ -297,14 +297,7 @@ class Payments implements PaymentsInterface
                 ->collectTotals()
                 ->save();
 
-            // Create Order From Quote
-            $orderId = $this->cartManagement->placeOrder($quote->getId());
-
-            $order = $this->orderRepository->get($orderId);
-
             $data["amount"] = $quote->getGrandTotal() * 100;
-
-            $data["external_id"] = $order->getIncrementId();
 
             /*
             @var \PublicSquare\Payments\Api\Authenticated\Payments $request
@@ -340,6 +333,10 @@ class Payments implements PaymentsInterface
                     __(implode(",", $response["errors"]))
                 );
             }
+
+            // Create Order From Quote
+            $orderId = $this->cartManagement->placeOrder($quote->getId());
+            $order = $this->orderRepository->get($orderId);
 
             // commit once we have a successful transaction
             $this->resourceConnection->getConnection()->commit();
