@@ -309,12 +309,15 @@ class Payments implements PaymentsInterface
                 // Payment was declined
                 $this->logger->info('PSQ Payment declined', ['response' => $request->getSanitizedResponseData()]);
                 throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be processed. Reason: '.$response['declined_reason']));
-            } else if ($response["fraud_details"]["decision"] === "reject") {
+            } else if (!empty($response["fraud_details"]["decision"]) && $response["fraud_details"]["decision"] === "reject") {
                 // Payment failed fraud check
                 $this->logger->info('PSQ Payment fraud check rejected', ['response' => $request->getSanitizedResponseData()]);
                 throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be completed. Please verify your details and try again.'));
             } else if (array_key_exists("errors", $response)) {
                 // Payment failed for some other reason
+                $this->logger->info('PSQ Payment failure', ['response' => $request->getSanitizedResponseData()]);
+                throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be completed. Please verify your details and try again.'));
+            } else if (!empty($response['status']) && $response['status'] === 400 && !empty($response['title']) && $response['title'] === 'Error') {
                 $this->logger->info('PSQ Payment failure', ['response' => $request->getSanitizedResponseData()]);
                 throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be completed. Please verify your details and try again.'));
             }
