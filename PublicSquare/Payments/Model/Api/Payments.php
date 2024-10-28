@@ -305,33 +305,18 @@ class Payments implements PaymentsInterface
             $request = $this->paymentsRequestFactory->create(["payment" => $data]);
             $response = $request->getResponseData();
 
-            if (!empty($response['status']) && $response['status'] == 'declined') {
-                $errorMessage = !empty($response['declined_reason']) ? $response['declined_reason'] : 'Declined';
-                throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __($errorMessage)
-                );
-            }
-            else if (!empty($response['status']) && $response['status'] == 400) {
-                $errorMessage = !empty($response['detail']) ? $response['detail'] : 'Payment error';
-                throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __($errorMessage)
-                );
-            }
-            else if (array_key_exists("errors", $response)) {
-                throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __(sprintf("The payment for order #%d cannot be processed. ", $orderId)) . __(implode(",", $response["errors"]))
-                );
-            }
-            else if (array_key_exists("fraud_details", $response) && $response["fraud_details"]["decision"] === "reject") {
-                $order->cancel()->save();
-                throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __(sprintf("The payment for order #%d cannot be processed.", $orderId))
-                );
-            }
-            else if (!array_key_exists("id", $response)) {
-                throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __(implode(",", $response["errors"]))
-                );
+            if (array_key_exists('declined_reason', $response)) {
+                // Payment was declined
+                $this->logger->info('PSQ Payment declined', ['response' => $request->getSanitizedResponseData()]);
+                throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be processed. Reason: '.$response['declined_reason']));
+            } else if ($response["fraud_details"]["decision"] === "reject") {
+                // Payment failed fraud check
+                $this->logger->info('PSQ Payment fraud check rejected', ['response' => $request->getSanitizedResponseData()]);
+                throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be completed. Please verify your details and try again.'));
+            } else if (array_key_exists("errors", $response)) {
+                // Payment failed for some other reason
+                $this->logger->info('PSQ Payment failure', ['response' => $request->getSanitizedResponseData()]);
+                throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be completed. Please verify your details and try again.'));
             }
 
             // Create Order From Quote
@@ -363,7 +348,7 @@ class Payments implements PaymentsInterface
             }
             $quote->setIsActive(1); // keep the items in the cart
             $quote->save();
-            $this->logger->error($e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            $this->logger->warning($e->getMessage(), ['trace' => $e->getTraceAsString()]);
             throw $e;
         }
     } //end createApplication()

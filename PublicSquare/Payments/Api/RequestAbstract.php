@@ -221,6 +221,16 @@ abstract class RequestAbstract
         return $data;
     } //end getResponseData()
 
+    /**
+     * Get sanitized response data without PII
+     *
+     * @return array
+     */
+    public function getSanitizedResponseData(): array
+    {
+        return array_intersect_key($this->getResponseData(), array_flip(['id', 'errors', 'fraud_details', 'status', 'environment', 'transaction_id', 'amount', 'account_id', 'refunded']));
+    } //end getSanitizedResponseData()
+
     public function is_ssl()
     {
         if (isset($_SERVER['HTTPS'])) {

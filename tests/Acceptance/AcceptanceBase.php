@@ -143,6 +143,7 @@ class AcceptanceBase
         $I->waitForElementVisible('//*[@id="expirationDate"]');
         $I->waitForElementVisible('//*[@id="cvc"]');
         $I->switchToIframe();
+        $I->waitForElementNotVisible('img[alt="Loading..."]');
     }
 
     protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
