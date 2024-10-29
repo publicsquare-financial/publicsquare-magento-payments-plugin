@@ -44,7 +44,8 @@ class CaptureCommand implements CommandInterface
         {
             $request = $this->paymentCaptureRequestFactory->create(['payment' => [
                 'payment_id' => $transactionId,
-                'amount' => $amount
+                'amount' => $amount,
+                'external_id' => $payment->getOrder()->getIncrementId(),
             ]]);
             $response = $request->getResponseData();
             if ($response['status'] != 'succeeded')
