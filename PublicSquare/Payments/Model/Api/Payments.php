@@ -313,11 +313,8 @@ class Payments implements PaymentsInterface
                 // Payment failed fraud check
                 $this->logger->info('PSQ Payment fraud check rejected', ['response' => $request->getSanitizedResponseData()]);
                 throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be completed. Please verify your details and try again.'));
-            } else if (array_key_exists("errors", $response)) {
+            } else if (array_key_exists("errors", $response) || $request->getResponse()->getStatusCode() > 299) {
                 // Payment failed for some other reason
-                $this->logger->info('PSQ Payment failure', ['response' => $request->getSanitizedResponseData()]);
-                throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be completed. Please verify your details and try again.'));
-            } else if (!empty($response['status']) && $response['status'] === 400 && !empty($response['title']) && $response['title'] === 'Error') {
                 $this->logger->info('PSQ Payment failure', ['response' => $request->getSanitizedResponseData()]);
                 throw new \Magento\Framework\Exception\CouldNotSaveException(__('The payment could not be completed. Please verify your details and try again.'));
             }
