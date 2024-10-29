@@ -41,10 +41,20 @@ class AcceptanceBase
         $I->waitForText('Dashboard');
     }
 
+    protected function _customerLogin(AcceptanceTester $I): void
+    {
+        $I->amOnPage('/customer/account/login');
+        // login page
+        $I->fillField('#email', 'roni_cost@example.com');
+        $I->fillField('#password', 'roni_cost3@example.com');
+        $I->click('.form-login .action.login.primary');
+        $I->waitForText('My Account');
+    }
+
     protected function _adminEnableAuthorizeCapture(AcceptanceTester $I): void
     {
         $this->_adminLogin($I);
-       
+
         $I->click('#menu-magento-backend-stores a');
         $I->waitForText('Configuration');
         $I->waitForText('Terms and Conditions');
@@ -90,6 +100,15 @@ class AcceptanceBase
         $I->click('Save Config');
         $I->waitForText('You saved the configuration');
         $I->see('You saved the configuration');
+    }
+
+    protected function _customerGoToAnOrder(AcceptanceTester $I): void
+    {
+        $this->_customerLogin($I);
+        $I->amOnPage('/sales/order/history/');
+        $I->waitForText('My Orders');
+        $I->click('View Order');
+        $I->waitForText('Payment Method');
     }
 
 
