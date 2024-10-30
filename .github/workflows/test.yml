@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and test codeception tests
     services:
-      selenium:
-        image: selenium/standalone-chrome
-        options: --shm-size=2gb
-        ports:
-          - 7900:7900
-          - 4444:4444
+#      selenium:
+#        image: selenium/standalone-chrome
+#        options: --shm-size=2gb
+#        ports:
+#          - 7900:7900
+#          - 4444:4444
       db:
         image: docker://mysql:8.0
         env:
@@ -64,9 +64,30 @@ jobs:
       id-token: write
       contents: write
     steps:
+#      - name: Start selenoid
+#        uses: Xotabu4/selenoid-github-action@v2
       - id: checkout
         name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: $
+          extensions: curl, mbstring, openssl, pdo, pdo_sqlite
+          ini-values: memory_limit=-1, date.timezone='UTC'
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
+
+      - name: Run tests
+        run: php vendor/bin/codecept run
+
 
       - id: install
         name: Install
