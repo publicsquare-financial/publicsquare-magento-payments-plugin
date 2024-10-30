@@ -1,14 +1,15 @@
 name: Test
 
-on:
-  push:
-    # Trigger deployment to staging on commit to master
-    #branches: [master]
-    branches:
-      - '*'
-    # Trigger deployment when a commit is tagged
-    tags:
-      - '*'
+#on:
+#  push:
+#    # Trigger deployment to staging on commit to master
+#    #branches: [master]
+#    branches:
+#      - '*'
+#    # Trigger deployment when a commit is tagged
+#    tags:
+#      - '*'
+on: push
 jobs:
   test:
     runs-on: ubuntu-latest
