@@ -26,7 +26,7 @@
         </arguments>
     </type>
 
-    <virtualType name="PublicSquare\Payments\Logger\Handler\Financial" type="Magento\Framework\Logger\Handler\Base">
+    <!-- <virtualType name="PublicSquare\Payments\Logger\Handler\Financial" type="Magento\Framework\Logger\Handler\Base">
         <arguments>
             <argument name="fileName" xsi:type="string">/var/log/publicsquare-debug.log</argument>
         </arguments>
@@ -43,9 +43,9 @@
 
     <type name="PublicSquare\Payments\Api\RequestAbstract">
         <arguments>
-            <argument name="logger" xsi:type="object">PublicSquare\Payments\Logger\Financial</argument>
+            <argument name="logger" xsi:type="object">PublicSquare\Payments\Logger\Handler</argument>
         </arguments>
-    </type>
+    </type> -->
 
     <preference for="PublicSquare\Payments\Api\Data\CustomerInterface" type="PublicSquare\Payments\Model\Data\Customer" />
     <preference for="PublicSquare\Payments\Api\PaymentsInterface" type="PublicSquare\Payments\Model\Api\Payments" />
