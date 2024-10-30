@@ -29,7 +29,7 @@ abstract class RequestAbstract
     protected $configHelper;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var \PublicSquare\Payments\Logger\Logger
      */
     protected $logger;
 
@@ -41,19 +41,29 @@ abstract class RequestAbstract
     /**
      * @var array
      */
-    protected $data = [];
+    protected $requestData;
+
+    /**
+     * @var array
+     */
+    protected $responseData;
+
+    /**
+     * @var \Laminas\Http\Response
+     */
+    protected $response;
 
     /**
      * RequestAbstract constructor.
      *
-     * @param \Laminas\Http\ClientFactory         $clientFactory
-     * @param \PublicSquare\Payments\Helper\Config $configHelper
-     * @param \Psr\Log\LoggerInterface         $logger
+     * @param \Laminas\Http\ClientFactory           $clientFactory
+     * @param \PublicSquare\Payments\Helper\Config  $configHelper
+     * @param \PublicSquare\Payments\Logger\Logger  $logger
      */
     public function __construct(
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
-        \Psr\Log\LoggerInterface $logger
+        \PublicSquare\Payments\Logger\Logger $logger
     ) {
         $this->clientFactory = $clientFactory->create();
         $this->clientFactory = $clientFactory;
@@ -88,30 +98,20 @@ abstract class RequestAbstract
 
         return $host . '/' . $path;
     } //end getUri()
-    
+
     protected function getUrii(): string
     {
         return $this->configHelper->getUrii();
     } //end getUrii()
 
     /**
-     * Get request data, if applicable
+     * Set request response, if applicable
      *
-     * @return array
+     * @param \Laminas\Http\Response $response
      */
-    public function getData(): array
+    public function setResponse(\Laminas\Http\Response $response)
     {
-        return $this->data;
-    } //end getData()
-
-    /**
-     * Set request data, if applicable
-     *
-     * @param array $data
-     */
-    public function setData(array $data)
-    {
-        $this->data = $data;
+        $this->response = $response;
     } //end setData()
 
     /**
@@ -125,13 +125,20 @@ abstract class RequestAbstract
     } //end prepareRequest()
 
     /**
+     * Validate the response was successful
+     *
+     * @return bool
+     */
+    abstract protected function validateResponse(mixed $data): bool;
+
+    /**
      * Get request headers array
      *
      * @return array
      */
     protected function getHeaders(): array
     {
-        $cl_data = $this->getData();
+        $cl_data = $this->requestData;
         if (isset($cl_data['callBackUrl'])) {
             $redirect = $cl_data['callBackUrl'];
         } else {
@@ -160,46 +167,40 @@ abstract class RequestAbstract
      */
     public function getResponse(): \Laminas\Http\Response
     {
+        if (!isset($this->response)) {
+            /*
+            @var \Laminas\Http\Client $client
+            */
+            $client = $this->clientFactory->create();
+            $this->getUri();
+            $client->setUri($this->getUri());
+            $client->setOptions(
+                ['timeout' => 10]
+            );
+            $client->setMethod($this->getMethod());
+            $client->setHeaders($this->getHeaders());
 
-        /*
-        @var \Laminas\Http\Client $client
-         */
-        $client = $this->clientFactory->create();
-        $this->getUri();
-        $client->setUri($this->getUri());
-        $client->setOptions(
-            ['timeout' => 30]
-        );
-        $client->setMethod($this->getMethod());
-        $client->setHeaders($this->getHeaders());
-        $crdvLog=[];
+            if (!empty($this->requestData)) {
+                $requestBody = json_encode($this->requestData);
+                $client->setRawBody($requestBody);
+            }
 
-        if (!empty($this->getData())) {
-            $requestBody = json_encode($this->getData());
-            $crdvLog["step"] = "=============== S T E P - 1 ===============\n";
-            $crdvLog["request_data"] = $this->getData();
-            $client->setRawBody($requestBody);
-        }
+            $this->prepareRequest($client);
 
-        $this->prepareRequest($client);
+            /*
+            @var \Laminas\Http\Response $response
+            */
+            $response = $client->send();
+            $this->setResponse($response);
+            $this->responseData = json_decode($this->response->getBody(), true);
 
-        /*
-        @var \Laminas\Http\Response $response
-         */
-        $response = $client->send();
-
-        $data = json_decode($response->getBody(), true);
-        if (is_null($data)) {
-            throw new \Exception("Something went wrong with the PublicSquare api. Status code: ".$response->getStatusCode()." ".implode(',', $this->getHeaders()));
-        } else if (array_key_exists("publicId", $data)) {
-            $crdvLog["response_code"] = $response->getStatusCode();
-            $crdvLog["response_data"] = $data;
-            if (isset($crdvLog["step"])) {
-                $this->debugLog($crdvLog["step"]."\n".json_encode($crdvLog["request_data"])."Response Code - ".$crdvLog["response_code"]."\nResponse Data - \n".json_encode($data));
+            if (is_null($this->responseData)) {
+                throw new \Exception("Something went wrong. Please try again.");
+            } else {
+                $this->validateResponse($this->responseData);
             }
         }
-
-        return $response;
+        return $this->response;
     } //end getResponse()
 
     /**
@@ -212,10 +213,10 @@ abstract class RequestAbstract
     {
         $response = $this->getResponse();
 
-        $data = json_decode($response->getBody(), true);
+        $data = $this->responseData;
 
         if (is_null($data) && json_last_error() !== JSON_ERROR_NONE) {
-            throw new ApiException(__('Error decoding PublicSquare response body: %1', json_last_error()));
+            throw new ApiException(__('Error decoding response body: %1', json_last_error()));
         }
 
         return $data;
@@ -228,7 +229,7 @@ abstract class RequestAbstract
      */
     public function getSanitizedResponseData(): array
     {
-        return array_intersect_key($this->getResponseData(), array_flip(['id', 'errors', 'fraud_details', 'status', 'environment', 'transaction_id', 'amount', 'account_id', 'refunded']));
+        return array_intersect_key($this->getResponseData(), array_flip(['id', 'errors', 'fraud_details', 'status', 'environment', 'transaction_id', 'amount', 'account_id', 'refunded', 'declined_reason']));
     } //end getSanitizedResponseData()
 
     public function is_ssl()
