@@ -89,6 +89,10 @@ jobs:
         name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
 
+      - id: fix-permissions
+        name: fix the file permissions
+        run: bin/fixowns && bin/fixperms
+
       - id: make-verify
         name: Install Magento using make verify
         run: make verify
