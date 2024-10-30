@@ -70,7 +70,8 @@ jobs:
         name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install PHP
+      - id: install-php
+        name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -79,18 +80,16 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
-      - name: Validate composer.json and composer.lock
+      - id: composer-validate
+        name: Validate composer.json and composer.lock
         run: composer validate
 
-      - name: Install dependencies
+      - id: composer-install
+        name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
 
-      - name: Run tests
-        run: php vendor/bin/codecept run
-
-
-      - id: install
-        name: Install
+      - id: make-verify
+        name: Install Magento using make verify
         run: make verify
 
       - id: run-tests
