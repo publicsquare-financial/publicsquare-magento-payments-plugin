@@ -41,4 +41,11 @@
             </argument>
         </arguments>
     </type>
+
+    <virtualType name="PublicSquarePaymentsFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">PublicSquare\Payments\Helper\Config::CODE</argument>
+            <argument name="infoBlockType" xsi:type="string">PublicSquare\Payments\Block\Frontend\Info</argument>
+        </arguments>
+    </virtualType>
 </config>
