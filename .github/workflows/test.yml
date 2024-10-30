@@ -14,12 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and test codeception tests
     services:
-#      selenium:
-#        image: selenium/standalone-chrome
-#        options: --shm-size=2gb
-#        ports:
-#          - 7900:7900
-#          - 4444:4444
       db:
         image: docker://mysql:8.0
         env:
@@ -60,6 +54,12 @@ jobs:
         image: sj26/mailcatcher
         ports:
           - "1080:1080"
+#      selenium:
+#        image: selenium/standalone-chrome
+#        options: --shm-size=2gb
+#        ports:
+#          - 7900:7900
+#          - 4444:4444
     permissions:
       id-token: write
       contents: write
