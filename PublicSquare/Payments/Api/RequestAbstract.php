@@ -195,7 +195,7 @@ abstract class RequestAbstract
             $this->responseData = json_decode($this->response->getBody(), true);
 
             if (is_null($this->responseData)) {
-                throw new \Exception("Something went wrong with the PublicSquare api. Status code: ".$this->response->getStatusCode()." ".implode(',', $this->getHeaders()));
+                throw new \Exception("Something went wrong. Please try again.");
             } else {
                 $this->validateResponse($this->responseData);
             }
@@ -216,7 +216,7 @@ abstract class RequestAbstract
         $data = $this->responseData;
 
         if (is_null($data) && json_last_error() !== JSON_ERROR_NONE) {
-            throw new ApiException(__('Error decoding PublicSquare response body: %1', json_last_error()));
+            throw new ApiException(__('Error decoding response body: %1', json_last_error()));
         }
 
         return $data;

@@ -82,17 +82,16 @@ class CaptureCommand implements CommandInterface
                 ],
             ]);
             $response = $request->getResponseData();
-            if ($response["status"] == "succeeded") {
+            if (!empty($response["status"]) && $response["status"] == "succeeded") {
                 $payment->setAdditionalInformation(
                     \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
                     $response
                 );
+                $payment->setIsTransactionClosed(0);
+                $payment->save();
             }
         } catch (\Exception $e) {
             throw new LocalizedException($e);
         }
-
-        $payment->setIsTransactionClosed(0);
-        $payment->save();
     }
 }
