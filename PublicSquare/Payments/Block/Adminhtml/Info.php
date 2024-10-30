@@ -3,7 +3,7 @@
  * Copyright © PublicSquare, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace PublicSquare\Payments\Block;
+namespace PublicSquare\Payments\Block\Adminhtml;
 
 use Magento\Payment\Block\Info\Cc;
 
