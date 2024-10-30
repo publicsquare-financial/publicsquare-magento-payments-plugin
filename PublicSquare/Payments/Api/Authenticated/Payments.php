@@ -128,12 +128,13 @@ class Payments extends PublicSquareAPIRequestAbstract
 
     protected function validateResponse(mixed $data): bool
     {
-        if (in_array($data["status"], ["succeeded", "requires_capture"])) {
+        $status = $data["status"] ?? "";
+        if (in_array($status, ["succeeded", "requires_capture"])) {
             $this->logger->info("PSQ Payment succeeded", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
             return true;
-        } elseif ($data["status"] === "rejected") {
+        } elseif ($status === "rejected") {
             $this->logger->error("PSQ Payment rejected", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
@@ -142,7 +143,7 @@ class Payments extends PublicSquareAPIRequestAbstract
                     "The payment could not be completed. Please verify your details and try again."
                 )
             );
-        } elseif ($data["status"] === "declined") {
+        } elseif ($status === "declined") {
             $this->logger->error("PSQ Payment declined", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
