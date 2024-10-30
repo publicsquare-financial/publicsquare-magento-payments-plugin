@@ -28,17 +28,17 @@ jobs:
       redis:
         # Docker Hub image
         image: redis
-      opensearch:
-        image: markoshust/magento-opensearch:2.12-0
-        ports:
-          - 9200:9200
-          - 9300:9300
-        options: -e="discovery.type=single-node" -e "plugins.security.disabled=true"  -e "plugins.security.ssl.http.enabled=false" --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
-        env:
-          OPENSEARCH_HOST: opensearch
-          OPENSEARCH_PORT: 9200
-          # Prevent security patch conflicts with core M2 code
-          DISABLE_SECURITY_PLUGIN: true
+#      opensearch:
+#        image: markoshust/magento-opensearch:2.12-0
+#        ports:
+#          - 9200:9200
+#          - 9300:9300
+#        options: -e="discovery.type=single-node" -e "plugins.security.disabled=true"  -e "plugins.security.ssl.http.enabled=false" --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
+#        env:
+#          OPENSEARCH_HOST: opensearch
+#          OPENSEARCH_PORT: 9200
+#          # Prevent security patch conflicts with core M2 code
+#          DISABLE_SECURITY_PLUGIN: true
       rabbitmq:
         image: markoshust/magento-rabbitmq:3.12-0
         ports:
