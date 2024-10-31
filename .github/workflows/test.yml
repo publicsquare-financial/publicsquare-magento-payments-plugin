@@ -93,6 +93,10 @@ jobs:
         name: fix the file permissions
         run: bin/fixowns && bin/fixperms
 
+      - id: create-composer-auth-json
+        name: create composer auth.json file
+        run: pwd && ls -la && echo "$COMPOSER_AUTH_JSON" > var/composer_home/auth.json
+
       - id: make-verify
         name: Install Magento using make verify
         run: make verify
