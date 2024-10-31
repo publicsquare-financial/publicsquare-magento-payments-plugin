@@ -22,6 +22,8 @@ bin/setup-composer-auth
 
 bin/fixowns
 
+
+echo "Creating the magento project..."
 if [ "$EDITION" == "mageos-nightly" ]; then
   bin/clinotty composer create-project --stability alpha --repository-url=https://upstream-nightly.mage-os.org magento/project-community-edition .
 elif [ "$EDITION" == "mageos-mirror" ] || [ "$EDITION" == "mageos" ]; then
