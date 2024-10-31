@@ -45,6 +45,11 @@ class Payments implements PaymentsInterface
     private $paymentsRequestFactory;
 
     /**
+     * @var \PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory
+     */
+    private $paymentCancelFactory;
+
+    /**
      * @var \Magento\Checkout\Model\Session
      */
     private $checkoutSession;
@@ -142,6 +147,7 @@ class Payments implements PaymentsInterface
 
     public function __construct(
         \PublicSquare\Payments\Api\Authenticated\PaymentsFactory $paymentsRequestFactory,
+        \PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory $paymentCancelFactory,
         \Magento\Checkout\Model\Session $checkoutSession,
         CartTotalRepositoryInterface $cartTotalRepository,
         CartManagementInterface $cartManagement,
@@ -163,6 +169,7 @@ class Payments implements PaymentsInterface
         ResourceConnection $resourceConnection
     ) {
         $this->paymentsRequestFactory = $paymentsRequestFactory;
+        $this->paymentCancelFactory = $paymentCancelFactory;
         $this->checkoutSession = $checkoutSession;
         $this->cartTotalRepository = $cartTotalRepository;
         $this->cartManagement = $cartManagement;
@@ -200,7 +207,7 @@ class Payments implements PaymentsInterface
         try {
             if (!$cardId && !$publicHash) {
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
-                    __('!$cardId && !$publicHash' . self::ERROR_MESSAGE)
+                    __(self::ERROR_MESSAGE)
                 );
             }
 
@@ -236,15 +243,12 @@ class Payments implements PaymentsInterface
                     );
                     if (!$cardId) {
                         throw new \Magento\Framework\Exception\CouldNotSaveException(
-                            __('$publicHash && !$cardId' . self::ERROR_MESSAGE)
+                            __(self::ERROR_MESSAGE)
                         );
                     }
                 } catch (\Throwable $th) {
                     throw new \Magento\Framework\Exception\CouldNotSaveException(
-                        __(
-                            "Error retrieving card id from public hash" .
-                                self::ERROR_MESSAGE
-                        )
+                        __(self::ERROR_MESSAGE)
                     );
                 }
             }
@@ -270,13 +274,31 @@ class Payments implements PaymentsInterface
             ]);
             $response = $request->getResponseData();
 
-            // Create Order From Quote
-            $orderId = $this->cartManagement->placeOrder($quote->getId());
-            $order = $this->orderRepository->get($orderId);
+            try {
+                // Create Order From Quote
+                $orderId = $this->cartManagement->placeOrder($quote->getId());
+                $order = $this->orderRepository->get($orderId);
 
-            // commit once we have a successful transaction
-            $this->resourceConnection->getConnection()->commit();
-            $hasCommitted = true;
+                // commit once we have a successful transaction
+                $this->resourceConnection->getConnection()->commit();
+                $hasCommitted = true;
+            } catch (\Exception $e) {
+                $this->logger->error("placeOrder failed", [
+                    "error" => $e->getMessage(),
+                ]);
+                // Cancel the payment in PublicSquare because something went wrong while
+                // placing the order
+                $this->paymentCancelFactory
+                    ->create([
+                        "payment" => [
+                            "payment_id" => $response["id"],
+                        ],
+                    ])
+                    ->getResponse();
+                throw new \Magento\Framework\Exception\CouldNotSaveException(
+                    __(self::ERROR_MESSAGE)
+                );
+            }
 
             // Create transaction
             $transactionId = $this->createTransaction($order, $response);
@@ -305,7 +327,9 @@ class Payments implements PaymentsInterface
             $this->logger->warning($e->getMessage(), [
                 "trace" => $e->getTraceAsString(),
             ]);
-            throw new \Magento\Framework\Exception\CouldNotSaveException(__($e->getMessage()));
+            throw new \Magento\Framework\Exception\CouldNotSaveException(
+                __($e->getMessage())
+            );
         }
     } //end createApplication()
 
