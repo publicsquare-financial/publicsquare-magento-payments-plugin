@@ -264,7 +264,7 @@ class Payments implements PaymentsInterface
             @var \PublicSquare\Payments\Api\Authenticated\Payments $request
              */
             $request = $this->paymentsRequestFactory->create([
-                "amount" => $quote->getGrandTotal() * 100,
+                "amount" => $quote->getGrandTotal(),
                 "cardId" => $cardId,
                 "capture" => false,
                 "phone" => $billingAddress->getTelephone(),

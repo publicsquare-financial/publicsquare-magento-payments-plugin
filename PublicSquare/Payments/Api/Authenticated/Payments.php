@@ -30,7 +30,7 @@ class Payments extends PublicSquareAPIRequestAbstract
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
         \PublicSquare\Payments\Logger\Logger $logger,
-        int $amount,
+        float $amount,
         string $cardId,
         bool $capture,
         string $phone,
@@ -40,7 +40,7 @@ class Payments extends PublicSquareAPIRequestAbstract
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
         $this->requestData = [
-            "amount" => $amount,
+            "amount" => (int)($amount * 100),
             "currency" => "USD",
             // Authorize only, because the CaptureCommand will handle capturing the payment
             "capture" => $capture,
