@@ -44,7 +44,7 @@ bin/clinotty bin/magento indexer:reindex
 echo "Setting basic URL and generating SSL certificate..."
 bin/setup-domain "${DOMAIN}"
 
-bin/cli composer require markshust/magento2-module-disabletwofactorauth
+bin/clinotty composer require markshust/magento2-module-disabletwofactorauth
 bin/clinotty bin/magento module:enable MarkShust_DisableTwoFactorAuth
 bin/clinotty bin/magento module:enable PublicSquare_Payments
 bin/clinotty bin/magento setup:upgrade
