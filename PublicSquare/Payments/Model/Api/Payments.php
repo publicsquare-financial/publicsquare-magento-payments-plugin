@@ -277,6 +277,11 @@ class Payments implements PaymentsInterface
             try {
                 // Create Order From Quote
                 $orderId = $this->cartManagement->placeOrder($quote->getId());
+                $order = $this->orderRepository->get($orderId);
+
+                // commit once we have a successful transaction
+                $this->resourceConnection->getConnection()->commit();
+                $hasCommitted = true;
             } catch (\Exception $e) {
                 $this->logger->error("placeOrder failed", [
                     "error" => $e->getMessage(),
@@ -294,11 +299,6 @@ class Payments implements PaymentsInterface
                     __(self::ERROR_MESSAGE)
                 );
             }
-            $order = $this->orderRepository->get($orderId);
-
-            // commit once we have a successful transaction
-            $this->resourceConnection->getConnection()->commit();
-            $hasCommitted = true;
 
             // Create transaction
             $transactionId = $this->createTransaction($order, $response);
