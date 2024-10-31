@@ -95,7 +95,7 @@ jobs:
 
       - id: create-composer-auth-json
         name: create composer auth.json file
-        run: pwd && ls -la && echo "$COMPOSER_AUTH_JSON" > var/composer_home/auth.json
+        run: pwd && ls -la && mkdir -p var/composer_home && echo "$COMPOSER_AUTH_JSON" > var/composer_home/auth.json
 
       - id: make-verify
         name: Install Magento using make verify
