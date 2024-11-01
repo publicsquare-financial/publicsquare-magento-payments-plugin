@@ -34,6 +34,7 @@ class AcceptanceBase
     protected function _adminLogin(AcceptanceTester $I): void
     {
         $I->amOnPage('/admin');
+        $I->waitForElement('#username');
         // login page
         $I->fillField('#username', 'admin');
         $I->fillField('#login', 'AdminPassword123');

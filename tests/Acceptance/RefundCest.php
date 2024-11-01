@@ -20,7 +20,6 @@ class RefundCest extends AcceptanceBase
         $this->_goToCheckout($I);
         $amount = $I->grabTextFrom('.grand.totals span.price');
         $this->_checkoutWithCard($I);
-
         $this->_adminCreateRefund($I);
     }
 }
