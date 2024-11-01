@@ -139,9 +139,11 @@ class AcceptanceBase
         $I->waitForText('You created the credit memo');
     }
 
-    protected function _customerGoToAnOrder(AcceptanceTester $I): void
+    protected function _customerGoToAnOrder(AcceptanceTester $I, $doLogin=true): void
     {
-        $this->_customerLogin($I);
+        if ($doLogin) {
+            $this->_customerLogin($I);
+        }
         $I->amOnPage('/sales/order/history/');
         $I->waitForText('My Orders');
         $I->click('View Order');
@@ -179,6 +181,15 @@ class AcceptanceBase
         $I->fillField('city', 'Newark');
         $I->fillField('postcode', '19711');
         $I->fillField('telephone', '1234567890');
+        $firstRadio = '.table-checkout-shipping-method tbody tr:nth-child(1) input[type="radio"]';
+        $I->waitForElementClickable($firstRadio);
+        $I->click($firstRadio);
+        $I->click('Next');
+        $I->waitForText('Payment Method');
+    }
+
+    protected function _goToCheckoutWhileLoggedIn(AcceptanceTester $I) {
+        $I->amOnPage('/checkout');
         $firstRadio = '.table-checkout-shipping-method tbody tr:nth-child(1) input[type="radio"]';
         $I->waitForElementClickable($firstRadio);
         $I->click($firstRadio);
