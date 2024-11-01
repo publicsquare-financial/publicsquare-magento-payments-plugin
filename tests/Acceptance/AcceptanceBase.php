@@ -102,6 +102,43 @@ class AcceptanceBase
         $I->see('You saved the configuration');
     }
 
+    protected function _adminGoToOrder(AcceptanceTester $I): void
+    {
+        $this->_adminLogin($I);
+        $I->amOnPage('/admin/sales/order/index/');
+        $I->waitForText('Orders');
+        $I->waitForText('View');
+        $I->waitForElementClickable('.data-grid a');
+        $I->click('.data-grid a');
+    }
+
+    protected function _adminGoToOrderInvoice(AcceptanceTester $I): void
+    {
+        $this->_adminGoToOrder($I);
+
+        $I->waitForElementVisible('#sales_order_view_tabs_order_invoices');
+        $I->click('#sales_order_view_tabs_order_invoices');
+        $I->waitForText('View');
+        $I->waitForElementClickable('.data-grid a');
+        $I->click('.data-grid a');
+    }
+
+    protected function _adminGoToOrderCreditMemo(AcceptanceTester $I): void
+    {
+        $this->_adminGoToOrderInvoice($I);
+        $I->waitForText('Credit Memo');
+        $I->click('Credit Memo');
+    }
+
+    protected function _adminCreateRefund(AcceptanceTester $I): void
+    {
+        $this->_adminGoToOrderCreditMemo($I);
+
+        $I->waitForElementClickable('.submit-button.refund.primary');
+        $I->click('.submit-button.refund.primary');
+        $I->waitForText('You created the credit memo');
+    }
+
     protected function _customerGoToAnOrder(AcceptanceTester $I): void
     {
         $this->_customerLogin($I);
