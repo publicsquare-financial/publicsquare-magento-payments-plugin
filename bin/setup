@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -o errexit
 
+echo "Starting Setup ..."
+
 MEM_BYTES=$(docker info -f '{{.MemTotal}}')
 MEM_MB=$(( MEM_BYTES / 1000000 ))
 # When Docker Desktop is set to 6GB in the GUI, it is reported as 6227 MB
@@ -23,6 +25,8 @@ bin/clinotty composer config --no-plugins allow-plugins.laminas/laminas-dependen
 
 echo "Uninstalling Magento..."
 bin/clinotty bin/magento setup:uninstall -n
+
+bin/fixowns
 
 echo "Running, Magento setup:install..."
 bin/setup-install "${DOMAIN}"

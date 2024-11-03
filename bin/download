@@ -43,3 +43,5 @@ if [ $? != 0 ]; then
 else
     bin/clinotty [ ! -f "./var/composer_home/auth.json" ] && bin/clinotty mkdir -p ./var/composer_home && bin/clinotty cp /var/www/.composer/auth.json ./var/composer_home/auth.json
 fi
+
+echo "Finished download..."
