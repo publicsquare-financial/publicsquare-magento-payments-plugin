@@ -64,10 +64,10 @@ echo "Turning on developer mode..."
 bin/clinotty bin/magento deploy:mode:set developer
 
 #bin/cli bin/magento sampledata:deploy
-git clone git@github.com:magento/magento2-sample-data.git
-php -f magento2-sample-data/dev/tools/build-sample-data.php -- --ce-source="src/magento-site"
-bin/fixowns
-bin/fixperms
+#git clone git@github.com:magento/magento2-sample-data.git
+#php -f magento2-sample-data/dev/tools/build-sample-data.php -- --ce-source="src/magento-site"
+#bin/fixowns
+#bin/fixperms
 bin/clinotty bin/magento admin:user:create --admin-user=admin --admin-password=AdminPassword123 --admin-email=admin@example.com --admin-firstname=admin --admin-lastname=admin
 
 bin/clinotty bin/magento setup:upgrade
