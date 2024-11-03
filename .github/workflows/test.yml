@@ -113,4 +113,4 @@ jobs:
 
       - id: run-tests
         name: Run Integration Tests
-        run: php vendor/bin/codecept run --steps
+        run: php vendor/bin/codecept run --debug
