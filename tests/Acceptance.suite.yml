@@ -9,7 +9,7 @@ modules:
         - WebDriver:
             url: https://magento.test/
             browser: chrome
-            host: selenium
+            host: 127.0.0.1
             port: 4444
             # comment out the next 3 lines if you don't want headless chrome
             capabilities:
