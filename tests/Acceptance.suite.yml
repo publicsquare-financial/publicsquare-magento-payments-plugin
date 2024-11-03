@@ -8,7 +8,6 @@ modules:
     enabled:
         - WebDriver:
             url: https://magento.test/
-            host: selenium
             browser: chrome
             # comment out the next 3 lines if you don't want headless chrome
             capabilities:
