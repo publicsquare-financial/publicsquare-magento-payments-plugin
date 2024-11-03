@@ -18,6 +18,8 @@ fi
 bin/start --no-dev
 [ $? != 0 ] && echo "Failed to start Docker services" && exit
 
+bin/fixowns
+
 bin/setup-composer-auth
 
 bin/fixowns
