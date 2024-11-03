@@ -7,8 +7,7 @@ hash composer 2>/dev/null && IS_COMPOSER_ON_HOST=true
 if [ -n "$ADOBE_ACCESS_PUBLIC_KEY" ] && [ -n "$ADOBE_ACCESS_PRIVATE_KEY" ]; then
   echo "setting $MAGENTO_USERNAME_PROP from env var"
   echo "setting $MAGENTO_PASSWORD_PROP from env var"
-  bin/clinotty composer config --global $MAGENTO_USERNAME_PROP $ADOBE_ACCESS_PUBLIC_KEY 2>/dev/null
-  bin/clinotty composer config --global $MAGENTO_PASSWORD_PROP $ADOBE_ACCESS_PRIVATE_KEY 2>/dev/null
+  echo "composer config --global http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY}" | bin/clinotty bash -
 else
   echo "ADOBE_ACCESS_PUBLIC_KEY and ADOBE_ACCESS_PRIVATE_KEY are not set. "
 fi
