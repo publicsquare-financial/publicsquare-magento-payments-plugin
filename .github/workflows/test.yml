@@ -93,17 +93,21 @@ jobs:
         name: fix the file permissions
         run: bin/fixowns && bin/fixperms
 
-      - id: create-composer-auth-json
-        name: create composer auth.json file
+#      - id: create-composer-auth-json
+#        name: create composer auth.json file
+#        env:
+#          ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
+#          ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
+#          COMPOSER_AUTH_JSON: ${{ secrets.COMPOSER_AUTH_JSON }}
+#        #run: composer config --global http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY} | bin/clinotty bash -
+#        run: pwd && ls -la && mkdir -p var/composer_home && echo "$COMPOSER_AUTH_JSON" > var/composer_home/auth.json && cat var/composer_home/auth.json && ls -la var/composer_home/auth.json
+
+      - id: make-verify
+        name: Install Magento using make verify
         env:
           ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
           ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
           COMPOSER_AUTH_JSON: ${{ secrets.COMPOSER_AUTH_JSON }}
-        #run: composer config --global http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY} | bin/clinotty bash -
-        run: pwd && ls -la && mkdir -p var/composer_home && echo "$COMPOSER_AUTH_JSON" > var/composer_home/auth.json && cat var/composer_home/auth.json
-
-      - id: make-verify
-        name: Install Magento using make verify
         run: make verify
 
       - id: run-tests
