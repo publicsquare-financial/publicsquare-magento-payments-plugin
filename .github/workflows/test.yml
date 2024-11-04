@@ -111,6 +111,10 @@ jobs:
           COMPOSER_AUTH_JSON: ${{ secrets.COMPOSER_AUTH_JSON }}
         run: make verify
 
+      - id: see-services-running
+        name: netstat to see services listening on ports
+        run : apt install net-tools && netstat -lp
+
       - id: run-tests
         name: Run Integration Tests
         run: php vendor/bin/codecept run --debug
