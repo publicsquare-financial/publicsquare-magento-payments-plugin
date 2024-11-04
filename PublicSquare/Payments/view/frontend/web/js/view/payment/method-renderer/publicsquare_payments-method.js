@@ -66,7 +66,6 @@ define(
                         const card = await this.createCard(
                             `${billingAddress.firstname} ${billingAddress.lastname}`
                         )
-                        console.log("FOOBAR in placeOrder() ", JSON.stringify({quote, billingAddress}));
 
                         const { guestEmail: email } = quote;
                         // Submit the payment
