@@ -64,7 +64,7 @@ class Payments extends PublicSquareAPIRequestAbstract
                     ? $billingAddress->getStreet()[1]
                     : "",
                 "city" => $billingAddress->getCity(),
-                "state" => $billingAddress->getRegionId(),
+                "state" => $billingAddress->getRegionCode(),
                 "postal_code" => $billingAddress->getPostcode(),
                 "country" => $billingAddress->getCountryId(),
             ],
@@ -77,7 +77,7 @@ class Payments extends PublicSquareAPIRequestAbstract
                     ? $shippingAddress->getStreet()[1]
                     : "",
                 "city" => $shippingAddress->getCity(),
-                "state" => $shippingAddress->getRegionId(),
+                "state" => $shippingAddress->getRegionCode(),
                 "postal_code" => $shippingAddress->getPostcode(),
                 "country" => $shippingAddress->getCountryId(),
             ],
