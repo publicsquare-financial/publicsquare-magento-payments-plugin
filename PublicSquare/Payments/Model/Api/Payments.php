@@ -219,6 +219,17 @@ class Payments implements PaymentsInterface
             $email = $billingAddress->getEmail();
             $customer = $quote->getCustomer();
 
+            if (!$email) {
+                $postData = json_decode(file_get_contents('php://input'), true);
+                if (!empty($postData['email'])) {
+                    $email = filter_var(trim($postData['email']), FILTER_SANITIZE_EMAIL);
+                    $quote->setCustomerEmail($email);
+                    $quote->save();
+                    $billingAddress->setEmail($email);
+                    $billingAddress->save();
+                }
+            }
+
             // If the setting to lookup a customer by email is enabled, try to find an existing customer with that email
             if (
                 !$customer &&

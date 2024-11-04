@@ -66,8 +66,11 @@ define(
                         const card = await this.createCard(
                             `${billingAddress.firstname} ${billingAddress.lastname}`
                         )
+                        console.log("FOOBAR in placeOrder() ", JSON.stringify({quote, billingAddress}));
+
+                        const { guestEmail: email } = quote;
                         // Submit the payment
-                        await self.placeOrderWithCardId(card.id)
+                        await self.placeOrderWithCardId(card.id, email)
                     } catch (error) {
                         console.log(error)
                         fullScreenLoader.stopLoader();
@@ -82,7 +85,7 @@ define(
                     return false
                 }
             },
-            placeOrderWithCardId: function (cardId) {
+            placeOrderWithCardId: function (cardId, email) {
                 var self = this;
                 var serviceUrl = urlBuilder.createUrl('/publicsquare_payments/payments', {});
 
@@ -90,7 +93,8 @@ define(
                     serviceUrl,
                     JSON.stringify({
                         cardId,
-                        saveCard: this.vaultEnabler.isActivePaymentTokenEnabler()
+                        saveCard: this.vaultEnabler.isActivePaymentTokenEnabler(),
+                        email
                     })
                 ).done(function (response) {
                     // Handle successful order placement
