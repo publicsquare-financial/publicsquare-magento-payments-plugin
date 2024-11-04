@@ -162,6 +162,14 @@ class AcceptanceBase
         $I->waitForText('shopping cart');
     }
 
+    protected function _changeCartQuantity(AcceptanceTester $I, $quantity = 10)
+    {
+        $I->amOnPage('/checkout/cart');
+        $I->waitForElementVisible('input[data-role="cart-item-qty"]');
+        $I->fillField('input[data-role="cart-item-qty"]', $quantity);
+        $I->click('button[name="update_cart_action"]');
+        $I->waitForElementNotVisible('img[alt="Loading..."]');
+    }
 
     protected function _generateUniqueEmail()
     {
@@ -195,7 +203,6 @@ class AcceptanceBase
         $I->waitForElementClickable($firstRadio);
         $I->click($firstRadio);
         $I->click('Next');
-        $I->waitForText('Payment Method');
     }
 
     protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I)

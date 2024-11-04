@@ -40,7 +40,7 @@ class Payments extends PublicSquareAPIRequestAbstract
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
         $this->requestData = [
-            "amount" => (int)($amount * 100),
+            "amount" => (int)ceil($amount * 100),
             "currency" => "USD",
             // Authorize only, because the CaptureCommand will handle capturing the payment
             "capture" => $capture,
