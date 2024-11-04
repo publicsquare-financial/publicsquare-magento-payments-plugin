@@ -39,7 +39,7 @@ class CaptureCommand implements CommandInterface
     public function execute(array $commandSubject)
     {
         $payment = $commandSubject["payment"]->getPayment();
-        $amount = $commandSubject["amount"] * 100;
+        $amount = ceil($commandSubject["amount"] * 100);
         // throw new LocalizedException(__('CaptureCommand => '.json_encode(get_object_vars($payment)).' '.$payment->getLastTransId().' '.json_encode($payment->getOrder()->getId())));
         $tid = $payment->getLastTransId();
         $transaction = $this->transactionRepository->get($tid);
