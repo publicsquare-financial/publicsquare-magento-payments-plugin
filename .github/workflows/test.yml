@@ -113,7 +113,7 @@ jobs:
 
       - id: see-services-running
         name: netstat to see services listening on ports
-        run : apt install net-tools && netstat -lp
+        run : sudo apt install net-tools && sudo netstat -lp
 
       - id: run-tests
         name: Run Integration Tests
