@@ -195,13 +195,16 @@ class Payments implements PaymentsInterface
      *
      * @param string $cardId
      * @param bool $saveCard
+     * @param string $publicHash
+     * @param string $email
      * @return string
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
     public function createPayment(
         $cardId = "",
         $saveCard = false,
-        $publicHash = ""
+        $publicHash = "",
+        $email = null
     ) {
         $hasCommitted = false;
         try {
@@ -216,19 +219,12 @@ class Payments implements PaymentsInterface
 
             $quote = $this->checkoutSession->getQuote();
             $billingAddress = $quote->getBillingAddress();
-            $email = $billingAddress->getEmail();
-            $customer = $quote->getCustomer();
-
-            if (!$email) {
-                $postData = json_decode(file_get_contents('php://input'), true);
-                if (!empty($postData['email'])) {
-                    $email = filter_var(trim($postData['email']), FILTER_SANITIZE_EMAIL);
-                    $quote->setCustomerEmail($email);
-                    $quote->save();
-                    $billingAddress->setEmail($email);
-                    $billingAddress->save();
-                }
+            if ($billingAddress->getEmail()) {
+                $email = $billingAddress->getEmail();
+                $quote->setCustomerEmail($email);
+                $billingAddress->setEmail($email);
             }
+            $customer = $quote->getCustomer();
 
             // If the setting to lookup a customer by email is enabled, try to find an existing customer with that email
             if (

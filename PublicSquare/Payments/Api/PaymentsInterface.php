@@ -20,8 +20,9 @@ interface PaymentsInterface
       * @param string $cardId = null
       * @param bool $saveCard = false
       * @param string $publicHash = null
+      * @param string $email = null
       * @return string
-      * @throws \Magento\Framework\Exception\LocalizedException
+      * @throws \Magento\Framework\Exception\CouldNotSaveException
       */
-    public function createPayment($cardId = null, $saveCard = false, $publicHash = null);
+    public function createPayment($cardId = null, $saveCard = false, $publicHash = null, $email = null);
 }//end interface
