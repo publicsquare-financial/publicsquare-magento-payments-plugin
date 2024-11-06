@@ -262,7 +262,10 @@ class Payments implements PaymentsInterface
                 }
             }
 
-            $quote->getPayment()->importData(["method" => Config::CODE]);
+            $payment = $quote->getPayment();
+            $payment->setQuote($quote);
+            $payment->importData(["method" => Config::CODE]);
+            
             $quote
                 ->setPaymentMethod(Config::CODE)
                 ->setInventoryProcessed(false)
@@ -270,7 +273,9 @@ class Payments implements PaymentsInterface
                 ->save();
 
             $shippingAddress = $quote->getShippingAddress();
-            if (empty($shippingAddress->getFirstname()) || empty($shippingAddress->getLastname())) {
+            if ($quote->getIsVirtual()) {
+                $shippingAddress = null;
+            } else if (empty($shippingAddress->getFirstname()) || empty($shippingAddress->getLastname())) {
                 $this->logger->warning('Shipping address first/last name is empty', ['quoteId' => $quote->getId(), 'quoteAddressId' => $shippingAddress->getId()]);
             }
             /*
@@ -282,7 +287,7 @@ class Payments implements PaymentsInterface
                 "capture" => false,
                 "phone" => $billingAddress->getTelephone(),
                 "email" => $emailToUse,
-                "shippingAddress" => $quote->getShippingAddress(),
+                "shippingAddress" => $shippingAddress,
                 "billingAddress" => $billingAddress,
             ]);
             $response = $request->getResponseData();
