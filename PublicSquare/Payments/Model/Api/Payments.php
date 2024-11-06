@@ -198,7 +198,6 @@ class Payments implements PaymentsInterface
      * @param string $publicHash
      * @param string $email
      * @return string
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
     public function createPayment(
         $cardId = "",
@@ -219,10 +218,13 @@ class Payments implements PaymentsInterface
 
             $quote = $this->checkoutSession->getQuote();
             $billingAddress = $quote->getBillingAddress();
-            if (empty($billingAddress->getEmail()) && !empty($email)) {
-                $email = $billingAddress->getEmail();
-                $quote->setCustomerEmail($email);
-                $billingAddress->setEmail($email);
+            $emailToUse = $billingAddress->getEmail();
+            // Override the billing address email if it's empty and an email was provided
+            if (empty($emailToUse) && !empty($email)) {
+                $this->logger->warning('Email overridden', ['quoteId' => $quote->getId(), 'quoteAddressId' => $billingAddress->getId()]);
+                $emailToUse = $email;
+                $quote->setCustomerEmail($emailToUse);
+                $billingAddress->setEmail($emailToUse);
             }
             $customer = $quote->getCustomer();
 
@@ -232,7 +234,7 @@ class Payments implements PaymentsInterface
                 $this->configHelper->getGuestCheckoutCustomerLookup()
             ) {
                 try {
-                    $customer = $this->customerRepository->get($email);
+                    $customer = $this->customerRepository->get($emailToUse);
                     // If a customer is found, assign them to the quote
                     if ($customer) {
                         $quote->setCustomer($customer);
@@ -267,6 +269,10 @@ class Payments implements PaymentsInterface
                 ->collectTotals()
                 ->save();
 
+            $shippingAddress = $quote->getShippingAddress();
+            if (empty($shippingAddress->getFirstname()) || empty($shippingAddress->getLastname())) {
+                $this->logger->warning('Shipping address first/last name is empty', ['quoteId' => $quote->getId(), 'quoteAddressId' => $shippingAddress->getId()]);
+            }
             /*
             @var \PublicSquare\Payments\Api\Authenticated\Payments $request
              */
@@ -275,7 +281,7 @@ class Payments implements PaymentsInterface
                 "cardId" => $cardId,
                 "capture" => false,
                 "phone" => $billingAddress->getTelephone(),
-                "email" => $email,
+                "email" => $emailToUse,
                 "shippingAddress" => $quote->getShippingAddress(),
                 "billingAddress" => $billingAddress,
             ]);
@@ -325,7 +331,7 @@ class Payments implements PaymentsInterface
                 $result = ["error" => 1, "msg" => "Your custom message"];
             }
             return $result;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if (!$hasCommitted) {
                 $this->resourceConnection->getConnection()->rollBack();
             }
