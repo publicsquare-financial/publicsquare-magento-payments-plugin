@@ -35,7 +35,7 @@ class Payments extends PublicSquareAPIRequestAbstract
         bool $capture,
         string $phone,
         string $email,
-        \Magento\Quote\Model\Quote\Address $shippingAddress,
+        \Magento\Quote\Model\Quote\Address $shippingAddress = null,
         \Magento\Quote\Model\Quote\Address $billingAddress
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
@@ -68,7 +68,9 @@ class Payments extends PublicSquareAPIRequestAbstract
                 "postal_code" => $billingAddress->getPostcode(),
                 "country" => $billingAddress->getCountryId(),
             ],
-            "shipping_address" => [
+        ];
+        if ($shippingAddress) {
+            $this->requestData['shipping_address'] = [
                 "address_line_1" => $shippingAddress->getStreet()[0],
                 "address_line_2" => array_key_exists(
                     1,
@@ -80,8 +82,8 @@ class Payments extends PublicSquareAPIRequestAbstract
                 "state" => $shippingAddress->getRegionCode(),
                 "postal_code" => $shippingAddress->getPostcode(),
                 "country" => $shippingAddress->getCountryId(),
-            ],
-        ];
+            ];
+        }
     } //end __construct()
 
     static function formatPhoneNumber(string $rawPhoneNumber): string {
