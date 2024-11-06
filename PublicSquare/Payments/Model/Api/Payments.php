@@ -219,7 +219,7 @@ class Payments implements PaymentsInterface
 
             $quote = $this->checkoutSession->getQuote();
             $billingAddress = $quote->getBillingAddress();
-            if ($billingAddress->getEmail()) {
+            if (empty($billingAddress->getEmail()) && !empty($email)) {
                 $email = $billingAddress->getEmail();
                 $quote->setCustomerEmail($email);
                 $billingAddress->setEmail($email);
