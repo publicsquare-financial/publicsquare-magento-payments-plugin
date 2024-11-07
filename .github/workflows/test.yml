@@ -139,8 +139,11 @@ jobs:
         with:
           node-version: 18
 
-      - name: install selelium standalone
-        run: npm install selenium-standalone -g && selenium-standalone install && selenium-standalone start
+      - name: install selenium standalone
+        run: npm install selenium-standalone -g && selenium-standalone install
+
+      - name: start selenium standalone
+      - run: selenium-standalone start > /dev/null 2>&1 &
 
 
       - id: run-tests
