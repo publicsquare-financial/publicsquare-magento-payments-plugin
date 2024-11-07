@@ -18,9 +18,9 @@ jobs:
       selenium:
         image: selenium/standalone-chrome
         options: --shm-size=2gb
-#        ports:
-#          - 7900:7900
-#          - 4444:4444
+        ports:
+          - 7900:7900
+          - 4444:4444
 #      db:
 #        image: docker://mysql:8.0
 #        env:

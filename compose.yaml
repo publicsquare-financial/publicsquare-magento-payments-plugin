@@ -56,6 +56,71 @@ services:
     image: sj26/mailcatcher
     ports:
       - "1080:1080"
+#  chrome:
+#    image: selenium/node-chrome:beta
+#    platform: linux/amd64
+#    shm_size: 2gb
+#    depends_on:
+#      - selenium-hub
+#    environment:
+#      - SE_EVENT_BUS_HOST=selenium-hub
+#      - SE_EVENT_BUS_PUBLISH_PORT=4442
+#      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+#  edge:
+#    image: selenium/node-edge:beta
+#    platform: linux/amd64
+#    shm_size: 2gb
+#    depends_on:
+#      - selenium-hub
+#    environment:
+#      - SE_EVENT_BUS_HOST=selenium-hub
+#      - SE_EVENT_BUS_PUBLISH_PORT=4442
+#      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+#
+#  firefox:
+#    image: selenium/node-firefox:beta
+#    platform: linux/amd64
+#    shm_size: 2gb
+#    depends_on:
+#      - selenium-hub
+#    environment:
+#      - SE_EVENT_BUS_HOST=selenium-hub
+#      - SE_EVENT_BUS_PUBLISH_PORT=4442
+#      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+
+#  selenium-hub:
+#    image: selenium/hub:latest
+#    platform: linux/amd64
+#    container_name: selenium-hub
+#    ports:
+#      - "4442:4442"
+#      - "4443:4443"
+#      - "4444:4444"
+
+
+#  selenium:
+#    image: selenium/standalone-chrome:latest
+#    #image: seleniarm/standalone-chromium
+#    platform: linux/amd64
+#    hostname: selenium
+#    privileged: true
+#    shm_size: 2g
+#    #networks: ['host']
+#    ports:
+#      - "4444:4444"
+#      - "7900:7900"
+#    environment:
+#      - SE_VNC_NO_PASSWORD=1
+#      - SE_NODE_MAX_SESSIONS=3
+
+
+#  selenium:
+#    image: aerokube/selenoid:latest-release
+#    platform: linux/amd64
+#    ports:
+#      - "4444:4444"
+#      - "5900:5900"
 
 volumes:
   appdata:
