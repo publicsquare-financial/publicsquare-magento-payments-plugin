@@ -185,17 +185,17 @@ jobs:
         run : sudo apt install net-tools && sudo netstat -lp
 
       - name: check selenium status
-        run: curl -s http://127.0.0.1:4444/wd/hub/status
+        run: curl -s "http://127.0.0.1:4444/wd/hub/status"
 
 
       - name: Wait for Selenium 127.0.0.1:4444
         run: |
           for i in {1..10}; do
-            if curl -s http://127.0.0.1:4444/wd/hub/status | jq ".value.ready" | grep 'true'; then
+            if curl -s "http://127.0.0.1:4444/wd/hub/status" | jq ".value.ready" | grep 'true'; then
               echo "Selenium is ready!"
               break
             fi
-            echo $(curl -s http://localhost:4444/wd/hub/status)
+            echo $(curl -s "http://localhost:4444/wd/hub/status")
             echo "Waiting for Selenium to be ready..."
             sleep 3
           done
