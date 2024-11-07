@@ -18,7 +18,7 @@ jobs:
     services:
       selenium:
         image: selenium/standalone-chrome
-        options: --shm-size=2gb
+        options: --shm-size=2gb --no-sandbox
         ports:
           - 7900:7900
           - 4444:4444
@@ -81,6 +81,26 @@ jobs:
 #            echo "Waiting for Selenium to be ready..."
 #            sleep 3
 #          done
+      - name: Wait for Selenium 127.0.0.1:4444
+        run: |
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:4444/wd/hub/status | grep '"ready":true'; then
+              echo "Selenium is ready!"
+              break
+            fi
+            echo "Waiting for Selenium to be ready..."
+            sleep 3
+          done
+      - name: Wait for Selenium localhost:4444
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:4444/wd/hub/status | grep '"ready":true'; then
+              echo "Selenium is ready!"
+              break
+            fi
+            echo "Waiting for Selenium to be ready..."
+            sleep 3
+          done
       - id: checkout-code
         name: Checkout code
         uses: actions/checkout@v4
@@ -148,16 +168,17 @@ jobs:
 #
 
 
-      - name: Wait for Selenium
+      - name: Wait for Selenium 127.0.0.1:4444
         run: |
           for i in {1..10}; do
-            if curl -s http://localhost:4444/wd/hub/status | grep '"ready":true'; then
+            if curl -s http://127.0.0.1:4444/wd/hub/status | grep '"ready":true'; then
               echo "Selenium is ready!"
               break
             fi
             echo "Waiting for Selenium to be ready..."
             sleep 3
           done
+      
 
       - id: run-tests
         name: Run Integration Tests
