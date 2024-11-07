@@ -97,26 +97,14 @@ jobs:
       - name: netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp
 
-
-
       - name: Wait for Selenium 127.0.0.1:4444
         run: |
           for i in {1..10}; do
-            if curl -s http://127.0.0.1:4444/wd/hub/status | grep '"ready":true'; then
+            if curl -s http://127.0.0.1:4444/wd/hub/status | jq ".value.ready" | grep 'true'; then
               echo "Selenium is ready!"
               break
             fi
-            curl -s http://127.0.0.1:4444/wd/hub/status
-            echo "Waiting for Selenium to be ready..."
-            sleep 3
-          done
-      - name: Wait for Selenium selenium:4444
-        run: |
-          for i in {1..10}; do
-            if curl -s http://selenium:4444/wd/hub/status | grep '"ready":true'; then
-              echo "Selenium is ready!"
-              break
-            fi
+            curl -s http://localhost:4444/wd/hub/status | jq ".value" | grep 'message'
             echo "Waiting for Selenium to be ready..."
             sleep 3
           done
@@ -195,10 +183,11 @@ jobs:
       - name: Wait for Selenium 127.0.0.1:4444
         run: |
           for i in {1..10}; do
-            if curl -s http://127.0.0.1:4444/wd/hub/status | grep '"ready":true'; then
+            if curl -s http://127.0.0.1:4444/wd/hub/status | jq ".value.ready" | grep 'true'; then
               echo "Selenium is ready!"
               break
             fi
+            curl -s http://localhost:4444/wd/hub/status | jq ".value" | grep 'message'
             echo "Waiting for Selenium to be ready..."
             sleep 3
           done
