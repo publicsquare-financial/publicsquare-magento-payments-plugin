@@ -12,7 +12,8 @@ name: Test
 on: push
 jobs:
   test:
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: selenium
 #    container: ubuntu
     name: Build and test codeception tests
     services:
@@ -84,6 +85,10 @@ jobs:
 #            echo "Waiting for Selenium to be ready..."
 #            sleep 3
 #          done
+      - id: see-services-running
+        name: netstat to see services listening on ports
+        run : sudo apt install net-tools && sudo netstat -lp
+
       - name: Wait for Selenium 127.0.0.1:4444
         run: |
           for i in {1..10}; do
@@ -170,6 +175,9 @@ jobs:
 #        run: selenium-standalone start > /dev/null 2>&1 &
 #
 
+      - id: see-services-running
+        name: netstat to see services listening on ports
+        run : sudo apt install net-tools && sudo netstat -lp
 
       - name: Wait for Selenium 127.0.0.1:4444
         run: |
