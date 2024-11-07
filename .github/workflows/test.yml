@@ -16,16 +16,16 @@ jobs:
     runs-on: selenium
 #    container: ubuntu
     name: Build and test codeception tests
-    services:
-      selenium:
-        image: selenium/standalone-chrome
-        options: --shm-size=2gb
-        #options: --shm-size=2gb -e SE_OPTS="--session-timeout 3600"
-        ports:
-          - 7900:7900
-          - 4444:4444
-        env:
-          SE_OPTS: "--session-timeout 3600"
+#    services:
+#      selenium:
+#        image: selenium/standalone-chrome
+#        options: --shm-size=2gb
+#        #options: --shm-size=2gb -e SE_OPTS="--session-timeout 3600"
+#        ports:
+#          - 7900:7900
+#          - 4444:4444
+#        env:
+#          SE_OPTS: "--session-timeout 3600"
 
 
 #      db:
@@ -85,6 +85,13 @@ jobs:
 #            echo "Waiting for Selenium to be ready..."
 #            sleep 3
 #          done
+
+      - name: start selenium via docker
+        run: |
+         /usr/bin/docker pull selenium/standalone-chrome
+         /usr/bin/docker run --name seleniumstandalonechrome --label 62261d -p 7900:7900 -p 4444:4444 --shm-size=2gb -e "SE_OPTS=--session-timeout 3600" -e GITHUB_ACTIONS=true -e CI=true selenium/standalone-chrome
+        
+
       - name: netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp
 
