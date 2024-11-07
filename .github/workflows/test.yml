@@ -12,8 +12,8 @@ name: Test
 on: push
 jobs:
   test:
-    #runs-on: ubuntu-latest
-    runs-on: selenium
+    runs-on: ubuntu-latest
+#    runs-on: selenium
 #    container: ubuntu
     name: Build and test codeception tests
     services:
@@ -99,6 +99,7 @@ jobs:
 
       - name: Wait for Selenium 127.0.0.1:4444
         run: |
+          which jq
           for i in {1..10}; do
             if curl -s http://127.0.0.1:4444/wd/hub/status | jq ".value.ready" | grep 'true'; then
               echo "Selenium is ready!"
