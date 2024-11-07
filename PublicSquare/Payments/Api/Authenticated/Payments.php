@@ -35,8 +35,8 @@ class Payments extends PublicSquareAPIRequestAbstract
         bool $capture,
         string $phone,
         string $email,
-        \Magento\Quote\Model\Quote\Address $shippingAddress = null,
-        \Magento\Quote\Model\Quote\Address $billingAddress
+        \Magento\Quote\Model\Quote\Address $billingAddress,
+        $shippingAddress = null
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
         $this->requestData = [
