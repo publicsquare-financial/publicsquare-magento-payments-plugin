@@ -15,12 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and test codeception tests
     services:
-      selenium:
-        image: selenium/standalone-chrome
-        options: --shm-size=2gb
-        ports:
-          - 7900:7900
-          - 4444:4444
+#      selenium:
+#        image: selenium/standalone-chrome
+#        options: --shm-size=2gb
+#        ports:
+#          - 7900:7900
+#          - 4444:4444
+
+
 #      db:
 #        image: docker://mysql:8.0
 #        env:
@@ -121,9 +123,26 @@ jobs:
           COMPOSER_AUTH_JSON: ${{ secrets.COMPOSER_AUTH_JSON }}
         run: make verify
 
-      - id: see-services-running
-        name: netstat to see services listening on ports
-        run : sudo apt install net-tools && sudo netstat -lp
+
+
+#      - id: see-services-running
+#        name: netstat to see services listening on ports
+#        run : sudo apt install net-tools && sudo netstat -lp
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: install selelium standalone
+      - run: npm install selenium-standalone -g && selenium-standalone install && selenium-standalone start
+
 
       - id: run-tests
         name: Run Integration Tests
