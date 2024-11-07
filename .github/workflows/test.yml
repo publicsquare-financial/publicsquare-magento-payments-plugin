@@ -68,6 +68,16 @@ jobs:
     steps:
 #      - name: Start selenoid
 #        uses: Xotabu4/selenoid-github-action@v2
+      - name: Wait for Selenium
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:4444/wd/hub/status | grep '"ready":true'; then
+              echo "Selenium is ready!"
+              break
+            fi
+            echo "Waiting for Selenium to be ready..."
+            sleep 3
+          done
       - id: checkout-code
         name: Checkout code
         uses: actions/checkout@v4
