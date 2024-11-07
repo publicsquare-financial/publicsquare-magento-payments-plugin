@@ -147,6 +147,18 @@ jobs:
 #        run: selenium-standalone start > /dev/null 2>&1 &
 #
 
+
+      - name: Wait for Selenium
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:4444/wd/hub/status | grep '"ready":true'; then
+              echo "Selenium is ready!"
+              break
+            fi
+            echo "Waiting for Selenium to be ready..."
+            sleep 3
+          done
+
       - id: run-tests
         name: Run Integration Tests
         run: php vendor/bin/codecept run --debug
