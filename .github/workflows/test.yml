@@ -97,6 +97,10 @@ jobs:
       - name: netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp
 
+
+      - name: Wait for Selenium 127.0.0.1:4444
+        run: curl -s http://localhost:4444/wd/hub/status
+
       - name: Wait for Selenium 127.0.0.1:4444
         run: |
           which jq
