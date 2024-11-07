@@ -104,7 +104,7 @@ jobs:
               echo "Selenium is ready!"
               break
             fi
-            curl -s http://localhost:4444/wd/hub/status | jq ".value" | grep 'message'
+            curl -s http://localhost:4444/wd/hub/status
             echo "Waiting for Selenium to be ready..."
             sleep 3
           done
