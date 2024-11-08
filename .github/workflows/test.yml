@@ -16,18 +16,18 @@ jobs:
 #    runs-on: selenium
 #    container: ubuntu
     name: Build and test codeception tests
-    services:
-      selenium:
-        image: selenium/standalone-chrome
-        options: --shm-size=2gb
-        #options: --shm-size=2gb -e SE_OPTS="--session-timeout 3600"
-        ports:
-          - 7900:7900
-          - 4444:4444
-        env:
-          SE_OPTS: "--session-timeout 3600"
-          SE_ENABLE_TRACING: "false"
-          SE_SESSION_REQUEST_TIMEOUT: "3600"
+#    services:
+#      selenium:
+#        image: selenium/standalone-chrome
+#        options: --shm-size=2gb
+#        #options: --shm-size=2gb -e SE_OPTS="--session-timeout 3600"
+#        ports:
+#          - 7900:7900
+#          - 4444:4444
+#        env:
+#          SE_OPTS: "--session-timeout 3600"
+#          SE_ENABLE_TRACING: "false"
+#          SE_SESSION_REQUEST_TIMEOUT: "3600"
 
 
 #      db:
@@ -100,20 +100,20 @@ jobs:
         run : sudo apt install net-tools && sudo netstat -lp
 
 
-      - name: check selenium status
-        run: echo $(curl -s "http://127.0.0.1:4444/wd/hub/status")
-
-      - name: Wait for Selenium 127.0.0.1:4444
-        run: |
-          for i in {1..10}; do
-            if curl -s "http://127.0.0.1:4444/wd/hub/status" | jq ".value.ready" | grep 'true'; then
-              echo "Selenium is ready!"
-              break
-            fi
-            echo $(curl -s "http://localhost:4444/wd/hub/status")
-            echo "Waiting for Selenium to be ready..."
-            sleep 3
-          done
+#      - name: check selenium status
+#        run: echo $(curl -s "http://127.0.0.1:4444/wd/hub/status")
+#
+#      - name: Wait for Selenium 127.0.0.1:4444
+#        run: |
+#          for i in {1..10}; do
+#            if curl -s "http://127.0.0.1:4444/wd/hub/status" | jq ".value.ready" | grep 'true'; then
+#              echo "Selenium is ready!"
+#              break
+#            fi
+#            echo $(curl -s "http://localhost:4444/wd/hub/status")
+#            echo "Waiting for Selenium to be ready..."
+#            sleep 3
+#          done
           
 
       - id: checkout-code
@@ -186,9 +186,13 @@ jobs:
       - name: netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp
 
+
+      - name: start selenium via docker cli
+        run: docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-chrome:latest
+
+
       - name: check selenium status
         run: echo $(curl -s "http://127.0.0.1:4444/wd/hub/status")
-
 
       - name: Wait for Selenium 127.0.0.1:4444
         run: |
