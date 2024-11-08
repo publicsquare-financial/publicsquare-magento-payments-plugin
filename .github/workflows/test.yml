@@ -8,8 +8,8 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - name: netstat to see services listening on ports
-        run : sudo apt install net-tools && sudo netstat -lp
+      - name: create hosts entry for magento.test
+        run: sudo echo "127.0.0.1 magento.test" | sudo tee -a /etc/hosts
 
       - id: checkout-code
         name: Checkout code
