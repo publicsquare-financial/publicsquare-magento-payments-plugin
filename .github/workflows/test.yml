@@ -1,120 +1,15 @@
 name: Test
-
-#on:
-#  push:
-#    # Trigger deployment to staging on commit to master
-#    #branches: [master]
-#    branches:
-#      - '*'
-#    # Trigger deployment when a commit is tagged
-#    tags:
-#      - '*'
 on: push
 jobs:
   test:
     runs-on: ubuntu-latest
-#    runs-on: selenium
-#    container: ubuntu
     name: Build and test codeception tests
-#    services:
-#      selenium:
-#        image: selenium/standalone-chrome
-#        options: --shm-size=2gb
-#        #options: --shm-size=2gb -e SE_OPTS="--session-timeout 3600"
-#        ports:
-#          - 7900:7900
-#          - 4444:4444
-#        env:
-#          SE_OPTS: "--session-timeout 3600"
-#          SE_ENABLE_TRACING: "false"
-#          SE_SESSION_REQUEST_TIMEOUT: "3600"
-
-
-#      db:
-#        image: docker://mysql:8.0
-#        env:
-#          MYSQL_ROOT_PASSWORD: magento
-#          MYSQL_DATABASE: magento
-#          MYSQL_USER: magento
-#          MYSQL_PASSWORD: magento
-#        ports:
-#          - 3306:3306
-#        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-#      redis:
-#        # Docker Hub image
-#        image: redis
-##      opensearch:
-##        image: markoshust/magento-opensearch:2.12-0
-##        ports:
-##          - 9200:9200
-##          - 9300:9300
-##        options: -e="discovery.type=single-node" -e "plugins.security.disabled=true"  -e "plugins.security.ssl.http.enabled=false" --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
-##        env:
-##          OPENSEARCH_HOST: opensearch
-##          OPENSEARCH_PORT: 9200
-##          # Prevent security patch conflicts with core M2 code
-##          DISABLE_SECURITY_PLUGIN: true
-#      rabbitmq:
-#        image: markoshust/magento-rabbitmq:3.12-0
-#        ports:
-#          - 15672:15672
-#          - 5672:5672
-#        env:
-#          RABBITMQ_HOST: rabbitmq
-#          RABBITMQ_PORT: 5672
-#          RABBITMQ_MANAGEMENT_PORT: 15672
-#          RABBITMQ_DEFAULT_USER: magento
-#          RABBITMQ_DEFAULT_PASS: magento
-#          RABBITMQ_DEFAULT_VHOST: /
-#      mailcatcher:
-#        image: sj26/mailcatcher
-#        ports:
-#          - "1080:1080"
-
     permissions:
       id-token: write
       contents: write
     steps:
-#      - name: Start selenoid
-#        uses: Xotabu4/selenoid-github-action@v2
-#      - name: Wait for Selenium
-#        run: |
-#          for i in {1..10}; do
-#            if curl -s http://localhost:4444/wd/hub/status | grep '"ready":true'; then
-#              echo "Selenium is ready!"
-#              break
-#            fi
-#            echo "Waiting for Selenium to be ready..."
-#            sleep 3
-#          done
-
-
-# this works but just hangs there because the service is running in the foreground.
-#      - name: start selenium via docker
-#        run: |
-#         /usr/bin/docker pull selenium/standalone-chrome
-#         /usr/bin/docker run --name seleniumstandalonechrome --label 62261d -p 7900:7900 -p 4444:4444 --shm-size=2gb -e "SE_OPTS=--session-timeout 3600" -e GITHUB_ACTIONS=true -e CI=true selenium/standalone-chrome
-#
-
       - name: netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp
-
-
-#      - name: check selenium status
-#        run: echo $(curl -s "http://127.0.0.1:4444/wd/hub/status")
-#
-#      - name: Wait for Selenium 127.0.0.1:4444
-#        run: |
-#          for i in {1..10}; do
-#            if curl -s "http://127.0.0.1:4444/wd/hub/status" | jq ".value.ready" | grep 'true'; then
-#              echo "Selenium is ready!"
-#              break
-#            fi
-#            echo $(curl -s "http://localhost:4444/wd/hub/status")
-#            echo "Waiting for Selenium to be ready..."
-#            sleep 3
-#          done
-          
 
       - id: checkout-code
         name: Checkout code
@@ -142,54 +37,18 @@ jobs:
         name: fix the file permissions
         run: bin/fixowns && bin/fixperms
 
-#      - id: create-composer-auth-json
-#        name: create composer auth.json file
-#        env:
-#          ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
-#          ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
-#          COMPOSER_AUTH_JSON: ${{ secrets.COMPOSER_AUTH_JSON }}
-#        #run: composer config --global http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY} | bin/clinotty bash -
-#        run: pwd && ls -la && mkdir -p var/composer_home && echo "$COMPOSER_AUTH_JSON" > var/composer_home/auth.json && cat var/composer_home/auth.json && ls -la var/composer_home/auth.json
-
       - id: make-verify
         name: Install Magento using make verify
         env:
           ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
           ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
-          COMPOSER_AUTH_JSON: ${{ secrets.COMPOSER_AUTH_JSON }}
         run: make verify
-
-
-
-#      - id: see-services-running
-#        name: netstat to see services listening on ports
-#        run : sudo apt install net-tools && sudo netstat -lp
-
-#      - name: Set up JDK 17
-#        uses: actions/setup-java@v3
-#        with:
-#          java-version: '17'
-#          distribution: 'temurin'
-#
-#      - uses: actions/setup-node@v4
-#        with:
-#          node-version: 18
-#
-#      - name: install selenium standalone
-#        run: npm install selenium-standalone -g && selenium-standalone install
-#
-#      - name: start selenium standalone
-#        run: selenium-standalone start > /dev/null 2>&1 &
-#
-
-
-      - name: netstat to see services listening on ports
-        run : sudo apt install net-tools && sudo netstat -lp
-
 
       - name: start selenium via docker cli
         run: docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-chrome:latest
 
+      - name: netstat to see services listening on ports
+        run : sudo apt install net-tools && sudo netstat -lp
 
       - name: check selenium status
         run: echo $(curl -s "http://127.0.0.1:4444/wd/hub/status")
@@ -205,8 +64,15 @@ jobs:
             echo "Waiting for Selenium to be ready..."
             sleep 3
           done
-      
 
       - id: run-tests
         name: Run Integration Tests
-        run: php vendor/bin/codecept run --debug
+        run: php vendor/bin/codecept run Acceptance --debug
+
+
+      - name: artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: /home/runner/work/publicsquare-magento-payments-plugin/publicsquare-magento-payments-plugin/tests/_output/
+
