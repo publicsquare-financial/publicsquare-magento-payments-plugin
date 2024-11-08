@@ -27,6 +27,7 @@ jobs:
         env:
           SE_OPTS: "--session-timeout 3600"
           SE_ENABLE_TRACING: "false"
+          SE_SESSION_REQUEST_TIMEOUT: "3600"
 
 
 #      db:
