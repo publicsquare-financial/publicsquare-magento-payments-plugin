@@ -9,7 +9,7 @@ modules:
 #        - PhpBrowser:
 #            url: https://magento.test/
         - WebDriver:
-            url: https://magento.test/
+            url: https://magento.test
             browser: chrome
             host: 127.0.0.1
 #            host: 172.18.0.4
