@@ -65,6 +65,9 @@ jobs:
             sleep 3
           done
 
+      - name: curl https://magento.test
+        run: curl -k -I https://magento.test
+
       - id: run-tests
         name: Run Integration Tests
         run: php vendor/bin/codecept run Acceptance --debug
