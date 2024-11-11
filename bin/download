@@ -38,6 +38,9 @@ else
   bin/clinotty composer create-project --repository=https://repo.magento.com/ magento/project-"${EDITION}"-edition="${VERSION}" .
 fi
 
+echo "installing magento sample data..."
+bin/clinotty bin/magento sampledata:deploy
+
 if [ $? != 0 ]; then
     echo -e "${BLUE}Please check the installation guide at ${YELLOW}https://github.com/markshust/docker-magento#install-fails-because-project-directory-is-not-empty${BLUE} for troubleshooting.${NC}"
 else
