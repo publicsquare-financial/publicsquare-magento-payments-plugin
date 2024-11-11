@@ -10,6 +10,5 @@ class EnableAndConfigurePublicSquarePaymentsCest extends AcceptanceBase
     {
         $this->_initialize($I);
         $this->_adminEnableAndConfigurePublicSquarePayments($I);
-        $I->pause();
     }
 }

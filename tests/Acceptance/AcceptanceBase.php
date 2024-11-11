@@ -33,7 +33,6 @@ class AcceptanceBase
         }
     }
 
-
     protected function _getPastBrowserWarning(AcceptanceTester $I): void
     {
         // TODO: make this conditional to execute only if we see the warning.
@@ -69,6 +68,13 @@ class AcceptanceBase
         $this->_adminLogin($I);
 
         $this->_clickElementIfExists($I, '.admin__form-loading-mask');
+        try {
+            $I->see("Allow Adobe to collect usage data");
+            $I->click("Don't Allow");
+        } catch (\Exception $e) {
+            // do nothing
+        }
+
 
         //$I->waitForElementVisible('#menu-magento-backend-stores a');
         $I->waitForElementClickable('#menu-magento-backend-stores a', 20);
