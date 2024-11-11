@@ -14,6 +14,7 @@ modules:
             host: 127.0.0.1
 #            host: 172.18.0.4
             port: 4444
+            window_size: 1920x1080
             # comment out the next 3 lines if you don't want headless chrome
             capabilities:
                 goog:chromeOptions:
