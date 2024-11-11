@@ -38,24 +38,16 @@ jobs:
         name: fix the file permissions
         run: bin/fixowns && bin/fixperms
 
-#      - id: make-verify
-#        name: Install Magento using make verify
-#        env:
-#          ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
-#          ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
-#        run: make verify
-
-
-      - name: download magento
+      - id: make-verify
+        name: Install Magento using make verify
         env:
           ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
           ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
-        run: |
-          rm -rf src/magento-site
-          bin/download
+        run: make verify
 
-      - name: Setup Debug Session
-        uses: csexton/debugger-action@master
+
+#      - name: Setup Debug Session
+#        uses: csexton/debugger-action@master
       
 
       - name: start selenium via docker cli
