@@ -43,6 +43,8 @@ jobs:
         env:
           ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
           ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
+          PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
+          PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
         run: make verify
 
 
@@ -80,6 +82,15 @@ jobs:
 
       - name: curl https://magento.test
         run: curl -k https://magento.test
+
+      - id: run-tests
+        name: Run Integration Tests
+        env:
+          PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
+          PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
+        run: |
+          env
+          php vendor/bin/codecept run Acceptance EnableAndConfigurePublicSquarePayments --debug
 
       - id: run-tests
         name: Run Integration Tests

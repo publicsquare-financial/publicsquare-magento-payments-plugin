@@ -51,7 +51,7 @@ class AcceptanceBase
         $I->waitForText('My Account');
     }
 
-    protected function _adminEnableAuthorizeCapture(AcceptanceTester $I): void
+    protected function _goToPublicSquarePayments(AcceptanceTester $I): void
     {
         $this->_adminLogin($I);
 
@@ -67,6 +67,11 @@ class AcceptanceBase
         // click on button.
         $I->click('#payment_us_publicsquare_payments-head');
         $I->waitForText('PublicSquare Secret API key');
+    }
+
+    protected function _adminEnableAuthorizeCapture(AcceptanceTester $I): void
+    {
+        $this->_goToPublicSquarePayments($I);
 
         $I->uncheckOption('#payment_us_publicsquare_payments_payment_action_inherit');
 
@@ -76,6 +81,33 @@ class AcceptanceBase
         $I->waitForText('You saved the configuration');
         $I->see('You saved the configuration');
     }
+
+
+    protected function _adminEnableAndConfigurePublicSquarePayments(AcceptanceTester $I): void
+    {
+        $this->_goToPublicSquarePayments($I);
+
+        $I->uncheckOption('#payment_us_publicsquare_payments_active_inherit');
+
+        // select sale
+        $I->selectOption('select#payment_us_publicsquare_payments_active', '1');
+
+        $public_key = getenv("PUBLICSQUARE_PUBLIC_KEY");
+        $secret_key = getenv("PUBLICSQUARE_SECRET_KEY");
+        echo "public_key=$public_key, secret_key=$secret_key\n";
+        if ($public_key && $secret_key) {
+            echo "Setting the PublicSquare public_key and secret_key\n";
+            $I->fillField("#payment_us_publicsquare_payments_publicsquare_api_public_key", $public_key);
+            $I->fillField("#payment_us_publicsquare_payments_publicsquare_api_secret_key", $secret_key);
+        }
+
+        $I->click('Save Config');
+        $I->waitForText('You saved the configuration');
+        $I->see('You saved the configuration');
+    }
+
+
+
 
     protected function _adminEnableAuthorize(AcceptanceTester $I): void
     {

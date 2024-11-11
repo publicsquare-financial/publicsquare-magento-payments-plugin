@@ -9,19 +9,6 @@ class CheckoutCest extends AcceptanceBase
     const GENERIC_DECLINE_MESSAGE = 'The payment could not be processed. Reason: ';
     const GENERIC_FRAUDULENT_MESSAGE = 'The payment could not be completed. Please verify your details and try again.';
 
-
-    public function myCustomTest1(AcceptanceTester $I)
-    {
-        $I->amOnPage('/');
-        try {
-            $I->see('Your connection is not private');
-            $this->_getPastBrowserWarning($I);
-        } catch (\Exception $e) {
-            // do nothing if we don't see 'Your connection is not private'
-        }
-    }
-
-
     public function checkoutWorks(AcceptanceTester $I)
     {
         $this->_initialize($I);
