@@ -12,18 +12,7 @@ class CheckoutCest extends AcceptanceBase
 
     public function myCustomTest1(AcceptanceTester $I)
     {
-        $I->amOnPage('http://magento.test/');
-        try {
-            $I->see('Your connection is not private');
-            $this->_getPastBrowserWarning($I);
-        } catch (\Exception $e) {
-            // do nothing if we don't see 'Your connection is not private'
-        }
-    }
-
-    public function myCustomTest2(AcceptanceTester $I)
-    {
-        $I->amOnPage('https://magento.test/');
+        $I->amOnPage('/');
         try {
             $I->see('Your connection is not private');
             $this->_getPastBrowserWarning($I);

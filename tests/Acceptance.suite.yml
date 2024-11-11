@@ -17,7 +17,13 @@ modules:
             # comment out the next 3 lines if you don't want headless chrome
             capabilities:
                 goog:chromeOptions:
-                    args: [ "--headless" ]
+                    args: [
+                        "--headless",
+                        "--disable-gpu",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--ignore-certificate-errors"
+                    ]
         - \Codeception\Module\Asserts
 # Add Codeception\Step\Retry trait to AcceptanceTester to enable retries
 step_decorators:
