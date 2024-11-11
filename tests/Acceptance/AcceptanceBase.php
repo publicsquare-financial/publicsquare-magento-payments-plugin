@@ -56,7 +56,7 @@ class AcceptanceBase
     {
         $this->_adminLogin($I);
         //$I->waitForElementVisible('#menu-magento-backend-stores a');
-        $I->waitForElementClickable('#menu-magento-backend-stores a');
+        $I->waitForElementClickable('#menu-magento-backend-stores a', 20);
         $I->click('#menu-magento-backend-stores a');
         $I->waitForText('Configuration');
         $I->waitForText('Terms and Conditions');
