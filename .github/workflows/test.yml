@@ -12,12 +12,10 @@ jobs:
       - name: create hosts entry for magento.test
         run: sudo echo "127.0.0.1 magento.test" | sudo tee -a /etc/hosts
 
-      - id: checkout-code
-        name: Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - id: install-php
-        name: Install PHP
+      - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -26,16 +24,13 @@ jobs:
           coverage: xdebug
           tools: composer:v2
 
-      - id: composer-validate
-        name: Validate composer.json and composer.lock
+      - name: Validate composer.json and composer.lock
         run: composer validate
 
-      - id: composer-install
-        name: Install dependencies
+      - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
 
-      - id: fix-permissions
-        name: fix the file permissions
+      - name: fix the file permissions
         run: bin/fixowns && bin/fixperms
 
       - id: make-verify
@@ -80,11 +75,7 @@ jobs:
       - name: curl headers of https://magento.test
         run: curl -k -I https://magento.test
 
-      - name: curl https://magento.test
-        run: curl -k https://magento.test
-
-      - id: run-tests
-        name: Run Integration Tests
+      - name: Run Integration Tests
         env:
           PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
           PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
@@ -92,8 +83,7 @@ jobs:
           env
           php vendor/bin/codecept run Acceptance EnableAndConfigurePublicSquarePayments --debug
 
-      - id: run-tests
-        name: Run Integration Tests
+      - name: Run Integration Tests
         run: php vendor/bin/codecept run Acceptance --debug
 
 
