@@ -54,6 +54,11 @@ abstract class RequestAbstract
     protected $response;
 
     /**
+     * @var string
+     */
+    protected $idempotencyKey;
+
+    /**
      * RequestAbstract constructor.
      *
      * @param \Laminas\Http\ClientFactory           $clientFactory
@@ -175,7 +180,7 @@ abstract class RequestAbstract
             $this->getUri();
             $client->setUri($this->getUri());
             $client->setOptions(
-                ['timeout' => 10]
+                ['timeout' => 15]
             );
             $client->setMethod($this->getMethod());
             $client->setHeaders($this->getHeaders());

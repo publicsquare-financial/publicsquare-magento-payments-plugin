@@ -21,8 +21,8 @@ define([
   "mage/translate",
   "Magento_Vault/js/view/payment/vault-enabler",
   "Magento_Ui/js/model/messageList",
-  'Magento_Customer/js/model/customer',
-  "Magento_Checkout/js/model/place-order"
+  "Magento_Customer/js/model/customer",
+  "Magento_Checkout/js/model/place-order",
 ], function (
   $,
   Component,
@@ -36,7 +36,7 @@ define([
   VaultEnabler,
   messageList,
   customer,
-  placeOrderService
+  placeOrderService,
 ) {
   "use strict";
 
@@ -52,6 +52,8 @@ define([
       vaultName: "publicsquare_payments",
       errorMessage:
         "Something went wrong. Please try again or contact support for assistance.",
+      submitting: false,
+      idempotencyKey: null,
     },
     initialize: function () {
       var self = this;
@@ -59,16 +61,17 @@ define([
       this.vaultEnabler = new VaultEnabler();
       this.vaultEnabler.setPaymentCode(this.getVaultCode());
       this.vaultEnabler.isActivePaymentTokenEnabler(false);
+      self.idempotencyKey = self.generateIdempotencyKey();
       return self;
     },
     onContainerRendered: function () {
-    // This runs when the container div on the checkout page renders
+      // This runs when the container div on the checkout page renders
       publicsquare.initElements(
         {
           apiKey: this.apiKey,
           selector: this.elementsFormSelector,
         },
-        () => { },
+        () => {},
       );
     },
     createCard: function (cardholder_name) {
@@ -76,7 +79,9 @@ define([
     },
     placeOrder: async function () {
       const self = this;
-      if (this.validate() && additionalValidators.validate()) {
+      if (self.submitting) return;
+      if (self.validate() && additionalValidators.validate()) {
+        self.submitting = true;
         fullScreenLoader.startLoader();
         const billingAddress = quote.billingAddress();
         try {
@@ -95,7 +100,9 @@ define([
                 : self.errorMessage,
             ),
           });
+          self.idempotencyKey = self.generateIdempotencyKey();
         }
+        self.submitting = false;
       } else {
         messageList.addErrorMessage({
           message: $t("Please check your checkout details."),
@@ -116,8 +123,9 @@ define([
           cardId,
           saveCard: this.vaultEnabler.isActivePaymentTokenEnabler(),
           ...(!customer.isLoggedIn() && { email: quote.guestEmail }),
+          idempotencyKey: self.idempotencyKey,
         },
-        messageList
+        messageList,
       ).then(() => {
         const maskId = window.checkoutConfig.quoteData.entity_id;
         const successUrl = `${window.checkoutConfig.payment.publicsquare_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? "refercust" : "refergues"}=${maskId}`;
@@ -164,6 +172,11 @@ define([
      */
     getCode: function () {
       return this.code;
+    },
+    generateIdempotencyKey() {
+      const timestamp = Date.now().toString();
+      const random = Math.random().toString(36).substr(2, 9);
+      return timestamp + random;
     },
   });
 });

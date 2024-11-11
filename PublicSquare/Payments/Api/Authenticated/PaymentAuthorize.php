@@ -12,7 +12,7 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
-class Payments extends PublicSquareAPIRequestAbstract
+class PaymentAuthorize extends PublicSquareAPIRequestAbstract
 {
     const PATH = "payments";
 
@@ -36,9 +36,13 @@ class Payments extends PublicSquareAPIRequestAbstract
         string $phone,
         string $email,
         \Magento\Quote\Model\Quote\Address $billingAddress,
-        $shippingAddress = null
+        $shippingAddress = null,
+        $idempotencyKey = null
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
+        if ($idempotencyKey) {
+            $this->idempotencyKey = hash('sha256', $idempotencyKey.'-'.$email.'-authorize');
+        }
         $this->requestData = [
             "amount" => (int)ceil($amount * 100),
             "currency" => "USD",
