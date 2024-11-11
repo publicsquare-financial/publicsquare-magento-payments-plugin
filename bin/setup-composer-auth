@@ -12,6 +12,7 @@ if [ -n "$ADOBE_ACCESS_PUBLIC_KEY" ] && [ -n "$ADOBE_ACCESS_PRIVATE_KEY" ]; then
   echo "setting $MAGENTO_USERNAME_PROP from env var"
   echo "setting $MAGENTO_PASSWORD_PROP from env var"
   echo "composer config --global http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY}" | bin/clinotty bash -
+  echo "composer config http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY}" | bin/clinotty bash -
   # Also make sure alternate auth.json is setup (Magento uses this internally)
   bin/clinotty [ -d "./var/composer_home" ] && bin/clinotty cp /var/www/.composer/auth.json ./var/composer_home/auth.json
 else
