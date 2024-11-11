@@ -68,12 +68,7 @@ class AcceptanceBase
         $this->_adminLogin($I);
 
         $this->_clickElementIfExists($I, '.admin__form-loading-mask');
-        try {
-            $I->see("Allow Adobe to collect usage data");
-            $I->click("Don't Allow");
-        } catch (\Exception $e) {
-            // do nothing
-        }
+        $this->_clickElementIfExists($I, '.admin-usage-notification .action-secondary');
 
 
         //$I->waitForElementVisible('#menu-magento-backend-stores a');
