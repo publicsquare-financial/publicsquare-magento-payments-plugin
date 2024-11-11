@@ -49,6 +49,10 @@ abstract class PublicSquareAPIRequestAbstract extends \PublicSquare\Payments\Api
 
         $headers['X-API-KEY'] = $this->configHelper->getSecretAPIKey();
 
+        if (!empty($this->idempotencyKey)) {
+            $headers['IDEMPOTENCY-KEY'] = substr($this->idempotencyKey, 0, 50);
+        }
+
         return $headers;
     }//end getHeaders()
 }//end class

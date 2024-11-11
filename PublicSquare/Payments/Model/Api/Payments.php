@@ -40,7 +40,7 @@ class Payments implements PaymentsInterface
 {
     const ERROR_MESSAGE = "Unfortunately, we were unable to process your payment. Please try again or contact support for assistance.";
     /**
-     * @var \PublicSquare\Payments\Api\Authenticated\PaymentsFactory
+     * @var \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory
      */
     private $paymentsRequestFactory;
 
@@ -146,7 +146,7 @@ class Payments implements PaymentsInterface
     ];
 
     public function __construct(
-        \PublicSquare\Payments\Api\Authenticated\PaymentsFactory $paymentsRequestFactory,
+        \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory $paymentsRequestFactory,
         \PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory $paymentCancelFactory,
         \Magento\Checkout\Model\Session $checkoutSession,
         CartTotalRepositoryInterface $cartTotalRepository,
@@ -197,13 +197,15 @@ class Payments implements PaymentsInterface
      * @param bool $saveCard
      * @param string $publicHash
      * @param string $email
+     * @param string $idempotencyKey
      * @return string
      */
     public function createPayment(
         $cardId = "",
         $saveCard = false,
         $publicHash = "",
-        $email = null
+        $email = null,
+        $idempotencyKey = null
     ) {
         $hasCommitted = false;
         try {
@@ -265,7 +267,7 @@ class Payments implements PaymentsInterface
             $payment = $quote->getPayment();
             $payment->setQuote($quote);
             $payment->importData(["method" => Config::CODE]);
-            
+
             $quote
                 ->setPaymentMethod(Config::CODE)
                 ->setInventoryProcessed(false)
@@ -282,6 +284,7 @@ class Payments implements PaymentsInterface
             @var \PublicSquare\Payments\Api\Authenticated\Payments $request
              */
             $request = $this->paymentsRequestFactory->create([
+                "idempotencyKey" => $idempotencyKey,
                 "amount" => $quote->getGrandTotal(),
                 "cardId" => $cardId,
                 "capture" => false,
