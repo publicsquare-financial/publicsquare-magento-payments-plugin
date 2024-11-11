@@ -65,8 +65,11 @@ jobs:
             sleep 3
           done
 
-      - name: curl https://magento.test
+      - name: curl headers of https://magento.test
         run: curl -k -I https://magento.test
+
+      - name: curl https://magento.test
+        run: curl -k https://magento.test
 
       - id: run-tests
         name: Run Integration Tests
