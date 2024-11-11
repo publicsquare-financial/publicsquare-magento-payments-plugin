@@ -8,6 +8,13 @@ jobs:
       id-token: write
       contents: write
     steps:
+      - name: Start Selenium
+        run: |
+          # Install net-tools if needed
+          sudo apt-get update && sudo apt-get install -y net-tools
+
+          HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
+          echo "Host IP: $HOST_IP"
       - name: create hosts entry for magento.test
         run: sudo echo "127.0.0.1 magento.test" | sudo tee -a /etc/hosts
 
