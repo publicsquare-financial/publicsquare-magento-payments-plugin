@@ -44,8 +44,12 @@ jobs:
           ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
         run: make verify
 
+
+      - name: Create Docker Bridge network
+        run: docker network create magento-test-network
+
       - name: start selenium via docker cli
-        run: docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-chrome:latest
+        run: docker run -d -p 4444:4444 -p 7900:7900 --network magento-test-network --shm-size="2g" selenium/standalone-chrome:latest
 
       - name: netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp
