@@ -5,19 +5,12 @@ hash composer 2>/dev/null && IS_COMPOSER_ON_HOST=true
 
 # set the composer config vars if these env vars are set.
 if [ -n "$ADOBE_ACCESS_PUBLIC_KEY" ] && [ -n "$ADOBE_ACCESS_PRIVATE_KEY" ]; then
-
-  bin/clinotty ls -la /var/www/.composer
-  bin/clinotty whoami
-
+  echo "ADOBE_ACCESS_PUBLIC_KEY and ADOBE_ACCESS_PRIVATE_KEY are set."
   echo "setting $MAGENTO_USERNAME_PROP from env var"
   echo "setting $MAGENTO_PASSWORD_PROP from env var"
   echo "composer config --global http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY}" | bin/clinotty bash -
   echo "composer config http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY}" | bin/clinotty bash -
-  echo "START: contents of /var/www/.composer/auth.json"
-  cat /var/www/.composer/auth.json
-  echo "END: contents of /var/www/.composer/auth.json"
-  # Also make sure alternate auth.json is setup (Magento uses this internally)
-  bin/clinotty [ -d "./var/composer_home" ] && bin/clinotty cp /var/www/.composer/auth.json ./var/composer_home/auth.json
+  bin/clinotty cp /var/www/.composer/auth.json /var/www/html/var/composer_home/auth.json
 else
   echo "ADOBE_ACCESS_PUBLIC_KEY and ADOBE_ACCESS_PRIVATE_KEY are not set. "
 fi

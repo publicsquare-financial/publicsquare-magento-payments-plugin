@@ -38,6 +38,10 @@ else
   bin/clinotty composer create-project --repository=https://repo.magento.com/ magento/project-"${EDITION}"-edition="${VERSION}" .
 fi
 
+
+
+
+
 echo "installing magento sample data..."
 bin/clinotty bin/magento sampledata:deploy
 
