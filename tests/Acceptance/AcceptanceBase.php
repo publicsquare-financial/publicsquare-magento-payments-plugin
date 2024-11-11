@@ -34,6 +34,7 @@ class AcceptanceBase
     protected function _adminLogin(AcceptanceTester $I): void
     {
         $I->amOnPage('/admin');
+
         // login page
         $I->fillField('#username', 'admin');
         $I->fillField('#login', 'AdminPassword123');
@@ -55,6 +56,7 @@ class AcceptanceBase
     {
         $this->_adminLogin($I);
 
+        $I->waitForElementVisible('#menu-magento-backend-stores a');
         $I->click('#menu-magento-backend-stores a');
         $I->waitForText('Configuration');
         $I->waitForText('Terms and Conditions');
