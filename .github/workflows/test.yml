@@ -45,20 +45,12 @@ jobs:
           ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
         run: make verify
 
-
-      - name: Start Selenium
-          run: |
-            # Install net-tools if needed
-            sudo apt-get update && sudo apt-get install -y net-tools
-        
-            HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
-            echo "Host IP: $HOST_IP"
-
-#      - name: Create Docker Bridge network
-#        run: docker network create magento-test-network
-
       - name: start selenium via docker cli
-        run: docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" selenium/standalone-chrome:latest
+        run: |
+          sudo apt-get update && sudo apt-get install -y net-tools
+          HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
+          echo "Host IP: $HOST_IP"
+          docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" selenium/standalone-chrome:latest
 
       - name: netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp
