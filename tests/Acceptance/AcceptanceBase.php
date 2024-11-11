@@ -11,6 +11,7 @@ class AcceptanceBase
     protected $customerEmail = "";  // this will be dynamicaly produced
 
 
+
     protected function _initialize(AcceptanceTester $I): void
     {
         $I->amOnPage('/');
@@ -21,6 +22,17 @@ class AcceptanceBase
             // do nothing if we don't see 'Your connection is not private'
         }
     }
+
+    protected function _clickElementIfExists(AcceptanceTester $I, $selector): void
+    {
+        try {
+            $I->seeElement($selector);
+            $I->click($selector);
+        } catch (\Exception $e) {
+            // do nothing
+        }
+    }
+
 
     protected function _getPastBrowserWarning(AcceptanceTester $I): void
     {
@@ -55,6 +67,9 @@ class AcceptanceBase
     protected function _goToPublicSquarePayments(AcceptanceTester $I): void
     {
         $this->_adminLogin($I);
+
+        $this->_clickElementIfExists($I, '.admin__form-loading-mask');
+
         //$I->waitForElementVisible('#menu-magento-backend-stores a');
         $I->waitForElementClickable('#menu-magento-backend-stores a', 20);
         $I->click('#menu-magento-backend-stores a');
