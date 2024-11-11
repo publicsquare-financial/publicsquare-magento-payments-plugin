@@ -55,8 +55,8 @@ class AcceptanceBase
     protected function _goToPublicSquarePayments(AcceptanceTester $I): void
     {
         $this->_adminLogin($I);
-
         $I->waitForElementVisible('#menu-magento-backend-stores a');
+        $I->waitForElementClickable('#menu-magento-backend-stores a');
         $I->click('#menu-magento-backend-stores a');
         $I->waitForText('Configuration');
         $I->waitForText('Terms and Conditions');
