@@ -45,8 +45,8 @@ jobs:
         run: make verify
 
 
-      - name: Setup Debug Session
-        uses: csexton/debugger-action@master
+#      - name: Setup Debug Session
+#        uses: csexton/debugger-action@master
       
 
       - name: start selenium via docker cli
