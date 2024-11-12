@@ -10,6 +10,7 @@ if [ -n "$ADOBE_ACCESS_PUBLIC_KEY" ] && [ -n "$ADOBE_ACCESS_PRIVATE_KEY" ]; then
   echo "setting $MAGENTO_PASSWORD_PROP from env var"
   echo "composer config --global http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY}" | bin/clinotty bash -
   echo "composer config http-basic.repo.magento.com ${ADOBE_ACCESS_PUBLIC_KEY} ${ADOBE_ACCESS_PRIVATE_KEY}" | bin/clinotty bash -
+  bin/clinotty mkdir -p /var/www/html/var/composer_home
   bin/clinotty cp /var/www/.composer/auth.json /var/www/html/var/composer_home/auth.json
 else
   echo "ADOBE_ACCESS_PUBLIC_KEY and ADOBE_ACCESS_PRIVATE_KEY are not set. "
