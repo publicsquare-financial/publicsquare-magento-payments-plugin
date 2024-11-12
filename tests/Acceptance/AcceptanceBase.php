@@ -69,6 +69,14 @@ class AcceptanceBase
         $I->waitForText('My Account');
     }
 
+    protected function _waitForLoading(AcceptanceTester $I): void
+    {
+        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $I->waitForElementNotVisible('.loading-mask');
+        $I->waitForElementNotVisible('.admin__form-loading-mask');
+        $I->waitForElementNotVisible('.admin__data-grid-loading-mask');
+    }
+
     protected function _goToPublicSquarePayments(AcceptanceTester $I): void
     {
         $this->_adminLogin($I);
@@ -76,11 +84,7 @@ class AcceptanceBase
         $this->_clickElementIfExists($I, '.admin__form-loading-mask');
         $this->_clickElementIfExists($I, '.admin-usage-notification .action-secondary');
 
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
-        $I->waitForElementNotVisible('.loading-mask');
-        $I->waitForElementNotVisible('.admin__form-loading-mask');
-        $I->waitForElementNotVisible('.admin__data-grid-loading-mask');
-
+        $this->_waitForLoading($I);
 
         //$I->waitForElementVisible('#menu-magento-backend-stores a');
         $I->waitForElementClickable('#menu-magento-backend-stores a', 30);
@@ -219,7 +223,7 @@ class AcceptanceBase
         $I->waitForElementVisible('input[name="product[price]"]');
         $I->fillField('input[name="product[price]"]', '75');
         $I->click('Save');
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $this->_waitForLoading($I);
     }
 
     protected function _customerGoToAnOrder(AcceptanceTester $I, $doLogin=true): void
@@ -258,7 +262,7 @@ class AcceptanceBase
         $I->waitForElementVisible('input[data-role="cart-item-qty"]');
         $I->fillField('input[data-role="cart-item-qty"]', $quantity);
         $I->click('button[name="update_cart_action"]');
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $this->_waitForLoading($I);
     }
 
     protected function _generateUniqueEmail()
@@ -315,7 +319,7 @@ class AcceptanceBase
         $I->waitForElementVisible('//*[@id="expirationDate"]');
         $I->waitForElementVisible('//*[@id="cvc"]');
         $I->switchToIframe();
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $this->_waitForLoading($I);
     }
 
     protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
@@ -346,7 +350,7 @@ class AcceptanceBase
         $I->fillField('.payment-method._active input[name="postcode"]', '19711');
         $I->fillField('.payment-method._active input[name="telephone"]', '1234567890');
         $I->click('.payment-method._active button.action-update');
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $this->_waitForLoading($I);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
