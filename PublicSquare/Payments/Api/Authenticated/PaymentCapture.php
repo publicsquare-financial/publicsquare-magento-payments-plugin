@@ -14,14 +14,9 @@ namespace PublicSquare\Payments\Api\Authenticated;
 
 // use PublicSquare\Payments\Api\Data\ApplicationInfoInterface;
 
-class PaymentCapture extends AuthenticatedRequestAbstract
+class PaymentCapture extends PublicSquareAPIRequestAbstract
 {
     const PATH = 'payments/capture';
-
-    /**
-     * @var array
-     */
-    protected $data;
 
     protected $clientFactory;
     protected $configHelper;
@@ -31,11 +26,11 @@ class PaymentCapture extends AuthenticatedRequestAbstract
     public function __construct(
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
-        \Psr\Log\LoggerInterface $logger,
+        \PublicSquare\Payments\Logger\Logger $logger,
         array $payment = []
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
-        $this->data = $payment;
+        $this->requestData = $payment;
     }//end __construct()
 
     /**
@@ -47,7 +42,7 @@ class PaymentCapture extends AuthenticatedRequestAbstract
     {
         return static::PATH;
     }//end getPath()
-    
+
     /**
      * Get request method
      *
@@ -58,8 +53,14 @@ class PaymentCapture extends AuthenticatedRequestAbstract
         return \Laminas\Http\Request::METHOD_POST;
     }//end getMethod()
 
-    public function getData(): array
+    protected function validateResponse(mixed $data): bool
     {
-        return $this->data;
-    }//end getData()
+        if ($this->getResponse()->isSuccess()) {
+            $this->logger->info("PSQ Payment capture succeeded", ["response" => $this->getSanitizedResponseData()]);
+            return true;
+        } else {
+            $this->logger->error("PSQ Payment capture failed", ["response" => $this->getSanitizedResponseData()]);
+            throw new \Exception("The payment capture could not be completed. Please verify your details and try again.");
+        }
+    } //end validateResponse()
 }//end class

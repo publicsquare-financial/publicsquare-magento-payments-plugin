@@ -12,14 +12,9 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
-class Refunds extends AuthenticatedRequestAbstract
+class Refunds extends PublicSquareAPIRequestAbstract
 {
     const PATH = 'refunds';
-
-    /**
-     * @var array
-     */
-    protected $data;
 
     protected $clientFactory;
     protected $configHelper;
@@ -29,11 +24,11 @@ class Refunds extends AuthenticatedRequestAbstract
     public function __construct(
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
-        \Psr\Log\LoggerInterface $logger,
+        \PublicSquare\Payments\Logger\Logger $logger,
         array $refund = []
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
-        $this->data = $refund;
+        $this->requestData = $refund;
     }//end __construct()
 
     /**
@@ -45,7 +40,7 @@ class Refunds extends AuthenticatedRequestAbstract
     {
         return static::PATH;
     }//end getPath()
-    
+
     /**
      * Get request method
      *
@@ -56,8 +51,14 @@ class Refunds extends AuthenticatedRequestAbstract
         return \Laminas\Http\Request::METHOD_POST;
     }//end getMethod()
 
-    public function getData(): array
+    protected function validateResponse(mixed $data): bool
     {
-        return $this->data;
-    }//end getData()
+        if ($this->getResponse()->isSuccess()) {
+            $this->logger->info("PSQ Refund succeeded", ["response" => $this->getSanitizedResponseData()]);
+            return true;
+        } else {
+            $this->logger->error("PSQ Refund failed", ["response" => $this->getSanitizedResponseData()]);
+            throw new \Exception("The refund could not be completed. Please verify your details and try again.");
+        }
+    } //end validateResponse()
 }//end class

@@ -4,16 +4,16 @@ namespace PublicSquare\Payments\Gateway\Command;
 
 use Magento\Payment\Gateway\CommandInterface;
 use Magento\Framework\Exception\LocalizedException;
-use PublicSquare\Payments\Api\Authenticated\PaymentsFactory;
+use PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory;
 
 class AuthorizeCommand implements CommandInterface
 {
     /**
-     * @var \PublicSquare\Payments\Api\Authenticated\PaymentsFactory
+     * @var \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory
      */
     private $paymentsRequestFactory;
 
-    public function __construct(PaymentsFactory $paymentsRequestFactory) {
+    public function __construct(PaymentAuthorizeFactory $paymentsRequestFactory) {
         $this->paymentsRequestFactory = $paymentsRequestFactory;
     }
 

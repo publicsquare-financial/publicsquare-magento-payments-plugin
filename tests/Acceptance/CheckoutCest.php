@@ -31,7 +31,7 @@ class CheckoutCest extends AcceptanceBase
         ]);
     }
 
-    public function makeSureFailedCHargeDoesNotCreateASalesOrder(AcceptanceTester $I)
+    public function makeSureFailedChargeDoesNotCreateASalesOrder(AcceptanceTester $I)
     {
         $this->_initialize($I);
 

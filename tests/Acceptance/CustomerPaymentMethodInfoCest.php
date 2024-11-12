@@ -10,15 +10,19 @@ class CustomerPaymentMethodInfoCest extends AcceptanceBase
     {
         $this->_initialize($I);
 
+        $this->_customerLogin($I);
+
         // add product.
         $this->_addProductToCart($I);
 
-        // // do checkout
-        $this->_goToCheckout($I);
+        $this->_goToCheckoutWhileLoggedIn($I);
+
         $this->_checkoutWithCard($I);
 
+
         // check order payment method info
-        $this->_customerGoToAnOrder($I);
+        $this->_customerGoToAnOrder($I, false);
+
         $I->see('Credit/Debit Card');
         $I->see('Credit Card Type');
         $I->see('visa');

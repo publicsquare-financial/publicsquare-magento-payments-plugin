@@ -12,14 +12,14 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
-abstract class AuthenticatedRequestAbstract extends \PublicSquare\Payments\Api\RequestAbstract
+abstract class PublicSquareAPIRequestAbstract extends \PublicSquare\Payments\Api\RequestAbstract
 {
     /**
      * AuthenticatedRequestAbstract constructor.
      *
      * @param \Laminas\Http\ClientFactory         $clientFactory
      * @param \PublicSquare\Payments\Helper\Config $configHelper
-     * @param \Psr\Log\LoggerInterface         $logger
+     * @param \PublicSquare\Payments\Logger\Logger        $logger
      */
      protected $clientFactory;
      protected $configHelper;
@@ -28,7 +28,7 @@ abstract class AuthenticatedRequestAbstract extends \PublicSquare\Payments\Api\R
     public function __construct(
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
-        \Psr\Log\LoggerInterface $logger,
+        \PublicSquare\Payments\Logger\Logger $logger,
     ) {
         parent::__construct(
             $clientFactory,
@@ -48,6 +48,10 @@ abstract class AuthenticatedRequestAbstract extends \PublicSquare\Payments\Api\R
         $headers = parent::getHeaders();
 
         $headers['X-API-KEY'] = $this->configHelper->getSecretAPIKey();
+
+        if (!empty($this->idempotencyKey)) {
+            $headers['IDEMPOTENCY-KEY'] = substr($this->idempotencyKey, 0, 50);
+        }
 
         return $headers;
     }//end getHeaders()
