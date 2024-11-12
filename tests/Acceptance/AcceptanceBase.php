@@ -46,11 +46,16 @@ class AcceptanceBase
     {
         $I->amOnPage('/admin');
 
-        // login page
-        $I->fillField('#username', 'admin');
-        $I->fillField('#login', 'AdminPassword123');
-        $I->click('.form-actions .action-login');
-        $I->waitForText('Dashboard');
+        try {
+            $I->see("Dashboard");   // skip logging in if we are already logged in.
+        }
+        catch (\Exception $e) {
+            // login page
+            $I->fillField('#username', 'admin');
+            $I->fillField('#login', 'AdminPassword123');
+            $I->click('.form-actions .action-login');
+            $I->waitForText('Dashboard');
+        }
     }
 
     protected function _customerLogin(AcceptanceTester $I): void
