@@ -71,6 +71,7 @@ class AcceptanceBase
         $this->_clickElementIfExists($I, '.admin-usage-notification .action-secondary');
 
         $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $I->waitForElementNotVisible('.loading-mask');
 
         //$I->waitForElementVisible('#menu-magento-backend-stores a');
         $I->waitForElementClickable('#menu-magento-backend-stores a', 30);
