@@ -78,6 +78,9 @@ class AcceptanceBase
 
         $I->waitForElementNotVisible('img[alt="Loading..."]');
         $I->waitForElementNotVisible('.loading-mask');
+        $I->waitForElementNotVisible('.admin__form-loading-mask');
+        $I->waitForElementNotVisible('.admin__data-grid-loading-mask');
+
 
         //$I->waitForElementVisible('#menu-magento-backend-stores a');
         $I->waitForElementClickable('#menu-magento-backend-stores a', 30);
