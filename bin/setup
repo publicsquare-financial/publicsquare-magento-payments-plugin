@@ -63,7 +63,9 @@ bin/clinotty bin/magento cache:flush
 echo "Turning on developer mode..."
 bin/clinotty bin/magento deploy:mode:set developer
 
-#bin/clinotty bin/magento sampledata:deploy
+
+bin/setup-sample-data
+
 #git clone git@github.com:magento/magento2-sample-data.git
 #php -f magento2-sample-data/dev/tools/build-sample-data.php -- --ce-source="src/magento-site"
 #bin/fixowns

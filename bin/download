@@ -39,12 +39,6 @@ else
 fi
 
 
-bin/clinotty cp /var/www/.composer/auth.json /var/www/html/var/composer_home/auth.json
-
-
-echo "installing magento sample data..."
-bin/clinotty bin/magento sampledata:deploy
-
 if [ $? != 0 ]; then
     echo -e "${BLUE}Please check the installation guide at ${YELLOW}https://github.com/markshust/docker-magento#install-fails-because-project-directory-is-not-empty${BLUE} for troubleshooting.${NC}"
 else

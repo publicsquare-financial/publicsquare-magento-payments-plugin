@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -o errexit
+
+echo "installing magento sample data..."
+bin/clinotty mkdir -p /var/www/html/var/composer_home
+bin/clinotty cp /var/www/.composer/auth.json /var/www/html/var/composer_home/auth.json
+bin/clinotty bin/magento sampledata:deploy
