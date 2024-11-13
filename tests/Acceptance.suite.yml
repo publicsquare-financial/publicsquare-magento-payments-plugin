@@ -20,9 +20,9 @@ modules:
                 goog:chromeOptions:
                     args: [
                         "--headless",
-                        "--disable-gpu",
-                        "--no-sandbox",
-                        "--disable-dev-shm-usage",
+#                        "--disable-gpu",
+#                        "--no-sandbox",
+#                        "--disable-dev-shm-usage",
                         "--ignore-certificate-errors"
                     ]
         - \Codeception\Module\Asserts
