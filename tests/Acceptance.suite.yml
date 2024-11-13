@@ -26,6 +26,7 @@ modules:
                         "--ignore-certificate-errors"
                     ]
         - \Codeception\Module\Asserts
+        - \Tests\Support\Helper\DbHelper
 # Add Codeception\Step\Retry trait to AcceptanceTester to enable retries
 step_decorators:
     - Codeception\Step\ConditionalAssertion

@@ -58,7 +58,7 @@ __THIS;
     protected function _initialize(AcceptanceTester $I): void
     {
         $I->amOnPage('/');
-        $I->_getPastBrowserWarning($I);
+        $this->_getPastBrowserWarning($I);
     }
 
     protected function _clickElementIfExists(AcceptanceTester $I, $selector): void
