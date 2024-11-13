@@ -60,8 +60,8 @@ bin/fixperms
 echo "Clearing the cache to apply updates..."
 bin/clinotty bin/magento cache:flush
 
-echo "Turning on developer mode..."
-bin/clinotty bin/magento deploy:mode:set developer
+#echo "Turning on developer mode..."
+#bin/clinotty bin/magento deploy:mode:set developer
 
 
 bin/setup-sample-data

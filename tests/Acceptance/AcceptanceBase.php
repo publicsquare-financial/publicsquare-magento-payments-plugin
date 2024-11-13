@@ -10,17 +10,55 @@ class AcceptanceBase
 
     protected $customerEmail = "";  // this will be dynamicaly produced
 
+    protected $rollbackTransactions = true;
 
+    //public function _before(\Codeception\TestInterface $test)
+    public function _before(AcceptanceTester $I)
+    {
+        if ($this->rollbackTransactions) {
+            echo "Beginning SQL Transaction. \n";
+            $I->startDatabaseTransaction();
+        }
+    }
+
+    //public function _after(\Codeception\TestInterface $test)
+    public function _after(AcceptanceTester $I)
+    {
+        if ($this->rollbackTransactions) {
+            echo "Rolling back SQL Transaction. \n";
+            $I->rollbackDatabaseTransaction();
+        }
+    }
+
+
+    protected function _updateItemAvailableStock(AcceptanceTester $I, string $sku, int $qty): void
+    {
+
+
+//        SELECT * FROM
+//cataloginventory_stock_item item_stock
+//join cataloginventory_stock_status status_stock on (item_stock.product_id = status_stock.product_id)
+//join catalog_product_entity e on (e.entity_id = item_stock.product_id)
+//WHERE e.sku='MP09';
+
+        $sql = <<<__THIS
+UPDATE 
+cataloginventory_stock_item item_stock 
+join cataloginventory_stock_status status_stock on (item_stock.product_id = status_stock.product_id)
+join catalog_product_entity e on (e.entity_id = item_stock.product_id)
+SET item_stock.qty = $qty, item_stock.is_in_stock = 1,
+status_stock.qty = $qty, status_stock.stock_status = 1
+WHERE e.sku='$sku';
+__THIS;
+
+        $I->executeOnDatabase($sql);
+
+    }
 
     protected function _initialize(AcceptanceTester $I): void
     {
         $I->amOnPage('/');
-        try {
-            $I->see('Your connection is not private');
-            $this->_getPastBrowserWarning($I);
-        } catch (\Exception $e) {
-            // do nothing if we don't see 'Your connection is not private'
-        }
+        $I->_getPastBrowserWarning($I);
     }
 
     protected function _clickElementIfExists(AcceptanceTester $I, $selector): void
@@ -35,11 +73,15 @@ class AcceptanceBase
 
     protected function _getPastBrowserWarning(AcceptanceTester $I): void
     {
-        // TODO: make this conditional to execute only if we see the warning.
-        // get past cert error page
-        $I->click('button[id="details-button"]');
-        $I->waitForElementClickable('#proceed-link');
-        $I->click('#proceed-link');
+        try {
+            $I->see('Your connection is not private');
+            // get past cert error page
+            $I->click('button[id="details-button"]');
+            $I->waitForElementClickable('#proceed-link');
+            $I->click('#proceed-link');
+        } catch (\Exception $e) {
+            // do nothing if we don't see 'Your connection is not private'
+        }
     }
 
     protected function _adminLogin(AcceptanceTester $I): void
@@ -71,7 +113,7 @@ class AcceptanceBase
 
     protected function _waitForLoading(AcceptanceTester $I): void
     {
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $I->waitForElementNotVisible('img[alt="Loading..."]', 30);
         $I->waitForElementNotVisible('.loading-mask');
         $I->waitForElementNotVisible('.admin__form-loading-mask');
         $I->waitForElementNotVisible('.admin__data-grid-loading-mask');
@@ -222,6 +264,7 @@ class AcceptanceBase
         $I->fillField('input[name="product[sku]"]', 'gift-card');
         $I->waitForElementVisible('input[name="product[price]"]');
         $I->fillField('input[name="product[price]"]', '75');
+        $I->fillField('input[name="product[quantity_and_stock_status][qty]"]', '100');
         $I->click('Save');
         $this->_waitForLoading($I);
     }
