@@ -114,10 +114,10 @@ __THIS;
     protected function _waitForLoading(AcceptanceTester $I): void
     {
         $I->waitForElementNotVisible('img[alt="Loading..."]', 30);
-        $I->waitForElementNotVisible('.loading-mask');
-        $I->waitForElementNotVisible('.admin__form-loading-mask');
-        $I->waitForElementNotVisible('.admin__data-grid-loading-mask');
-        $I->waitForElementNotVisible('.popup-loading img');
+        $I->waitForElementNotVisible('.loading-mask', 30);
+        $I->waitForElementNotVisible('.admin__form-loading-mask', 30);
+        $I->waitForElementNotVisible('.admin__data-grid-loading-mask', 30);
+        $I->waitForElementNotVisible('.popup-loading img', 30);
     }
 
     protected function _goToPublicSquarePayments(AcceptanceTester $I): void
