@@ -20,10 +20,11 @@ modules:
                 goog:chromeOptions:
                     args: [
                         "--headless",
-#                        "--disable-gpu",
-#                        "--no-sandbox",
-#                        "--disable-dev-shm-usage",
-                        "--ignore-certificate-errors"
+                        "--disable-gpu",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--ignore-certificate-errors",
+                        "--disable-software-rasterizer"
                     ]
         - \Codeception\Module\Asserts
         - \Tests\Support\Helper\DbHelper
