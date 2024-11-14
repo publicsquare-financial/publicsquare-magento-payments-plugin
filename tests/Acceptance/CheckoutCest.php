@@ -22,12 +22,13 @@ class CheckoutCest extends AcceptanceBase
         $this->_checkoutWithCard($I);
 
         // verify order was created and paid.
-        $I->seeInDatabase('sales_order', ['customer_email' => $this->customerEmail]);
         $I->seeInDatabase('sales_order', [
             'customer_email' => $this->customerEmail,
             'grand_total' => number_format(floatval(str_replace('$', '', $amount)), 4, '.', ''),
             'total_paid' => number_format(floatval(str_replace('$', '', $amount)), 4, '.', ''),
             'status' => 'processing',
+            // Added to confirm this was a guest checkout
+            'customer_group_id' => 0
         ]);
     }
 

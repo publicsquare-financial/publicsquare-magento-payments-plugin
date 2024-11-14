@@ -35,6 +35,7 @@ use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Vault\Api\PaymentTokenManagementInterface;
 use PublicSquare\Payments\Exception\CreateTransactionException;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Quote\Model\QuoteManagement;
 
 class Payments implements PaymentsInterface
 {
@@ -245,6 +246,11 @@ class Payments implements PaymentsInterface
                 }
             }
 
+            if (!$customer) {
+                // Explicitly set the checkout method to guest if no customer is found
+                $quote->setCheckoutMethod(QuoteManagement::METHOD_GUEST);
+            }
+
             // publicHash will be provided if the payment method is from the vault
             if ($publicHash && $customer) {
                 try {
@@ -373,7 +379,6 @@ class Payments implements PaymentsInterface
                 $this->invoiceRepository->save($invoice);
                 $this->orderRepository->save($order);
                 $this->sendInvoiceEmail($invoice);
-                $invoice->save();
             } catch (\Exception $e) {
                 throw new SaveInvoiceException(
                     $e->getMessage(),
