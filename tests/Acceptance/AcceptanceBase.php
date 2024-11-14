@@ -266,6 +266,7 @@ __THIS;
         $I->waitForElementVisible('input[name="product[price]"]');
         $I->fillField('input[name="product[price]"]', '75');
         $I->fillField('input[name="product[quantity_and_stock_status][qty]"]', '100');
+        $I->selectOption('select[name="product[quantity_and_stock_status][is_in_stock]"]', 1);
         $I->click('Save');
         $this->_waitForLoading($I);
     }
@@ -379,6 +380,7 @@ __THIS;
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
+        $I->waitForElementNotVisible('.loading-mask', 30);
         $I->waitForText($waitString);
     }
 
