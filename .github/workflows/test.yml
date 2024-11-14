@@ -57,7 +57,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y net-tools
           HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
           echo "Host IP: $HOST_IP"
-          docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" --memory="4g" --cpus="2" selenium/standalone-chrome:latest
+          docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" --memory="4g" --cpus="2" selenium/standalone-chrome:4
 
       - name: netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp

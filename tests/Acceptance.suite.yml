@@ -24,7 +24,9 @@ modules:
                         "--no-sandbox",
                         "--disable-dev-shm-usage",
                         "--ignore-certificate-errors",
-                        "--disable-software-rasterizer"
+                        "--disable-software-rasterizer",
+                        "--disable-extensions",
+                        "--disable-features=VizDisplayCompositor"
                     ]
         - \Codeception\Module\Asserts
         - \Tests\Support\Helper\DbHelper
