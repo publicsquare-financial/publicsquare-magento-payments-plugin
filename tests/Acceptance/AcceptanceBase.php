@@ -117,6 +117,7 @@ __THIS;
         $I->waitForElementNotVisible('.loading-mask');
         $I->waitForElementNotVisible('.admin__form-loading-mask');
         $I->waitForElementNotVisible('.admin__data-grid-loading-mask');
+        $I->waitForElementNotVisible('.popup-loading img');
     }
 
     protected function _goToPublicSquarePayments(AcceptanceTester $I): void
