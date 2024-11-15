@@ -14,7 +14,5 @@ class EnableAndConfigurePublicSquarePaymentsCest extends AcceptanceBase
     {
         $this->_initialize($I);
         $this->_adminEnableAndConfigurePublicSquarePayments($I);
-        //$this->_updateItemAvailableStock($I, 'MP09', 50);
-        //$this->_updateItemAvailableStock($I, 'MP09', 30);
     }
 }

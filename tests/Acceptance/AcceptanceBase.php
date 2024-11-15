@@ -30,31 +30,6 @@ class AcceptanceBase
         }
     }
 
-
-    protected function _updateItemAvailableStock(AcceptanceTester $I, string $sku, int $qty): void
-    {
-
-
-//        SELECT * FROM
-//cataloginventory_stock_item item_stock
-//join cataloginventory_stock_status status_stock on (item_stock.product_id = status_stock.product_id)
-//join catalog_product_entity e on (e.entity_id = item_stock.product_id)
-//WHERE e.sku='MP09';
-
-        $sql = <<<__THIS
-UPDATE 
-cataloginventory_stock_item item_stock 
-join cataloginventory_stock_status status_stock on (item_stock.product_id = status_stock.product_id)
-join catalog_product_entity e on (e.entity_id = item_stock.product_id)
-SET item_stock.qty = $qty, item_stock.is_in_stock = 1,
-status_stock.qty = $qty, status_stock.stock_status = 1
-WHERE e.sku='$sku';
-__THIS;
-
-        $I->executeOnDatabase($sql);
-
-    }
-
     protected function _initialize(AcceptanceTester $I): void
     {
         $I->amOnPage('/');
