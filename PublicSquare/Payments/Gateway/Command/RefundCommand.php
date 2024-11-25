@@ -69,7 +69,7 @@ class RefundCommand implements CommandInterface
             $transactionId = $payment->getLastTransId();
         }
 
-        preg_match('/pmt_[a-zA-Z0-9]{22}/', $transactionId, $matches);
+        preg_match('/pmt_[a-zA-Z0-9]+/', $transactionId, $matches);
 
         if (empty($matches))
         {

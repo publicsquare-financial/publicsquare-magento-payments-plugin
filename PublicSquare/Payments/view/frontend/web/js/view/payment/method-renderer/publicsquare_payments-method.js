@@ -101,8 +101,8 @@ define([
             ),
           });
           self.idempotencyKey = self.generateIdempotencyKey();
+          self.submitting = false;
         }
-        self.submitting = false;
       } else {
         messageList.addErrorMessage({
           message: $t("Please check your checkout details."),
