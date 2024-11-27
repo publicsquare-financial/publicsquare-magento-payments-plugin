@@ -6,10 +6,30 @@
 actor: AcceptanceTester
 modules:
     enabled:
+#        - PhpBrowser:
+#            url: https://magento.test/
         - WebDriver:
-            url: https://magento.test/
+            url: https://magento.test
             browser: chrome
+            host: 127.0.0.1
+#            host: 172.18.0.4
+            port: 4444
+            window_size: 1920x1080
+            # comment out the next 3 lines if you don't want headless chrome
+            capabilities:
+                goog:chromeOptions:
+                    args: [
+                        "--headless",
+                        "--disable-gpu",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--ignore-certificate-errors",
+#                        "--disable-software-rasterizer",
+                        "--disable-extensions",
+#                        "--disable-features=VizDisplayCompositor"
+                    ]
         - \Codeception\Module\Asserts
+        - \Tests\Support\Helper\DbHelper
 # Add Codeception\Step\Retry trait to AcceptanceTester to enable retries
 step_decorators:
     - Codeception\Step\ConditionalAssertion

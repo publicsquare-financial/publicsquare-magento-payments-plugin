@@ -10,36 +10,70 @@ class AcceptanceBase
 
     protected $customerEmail = "";  // this will be dynamicaly produced
 
+    protected $rollbackTransactions = true;
+
+    //public function _before(\Codeception\TestInterface $test)
+    public function _before(AcceptanceTester $I)
+    {
+        if ($this->rollbackTransactions) {
+            echo "Beginning SQL Transaction. \n";
+            $I->startDatabaseTransaction();
+        }
+    }
+
+    //public function _after(\Codeception\TestInterface $test)
+    public function _after(AcceptanceTester $I)
+    {
+        if ($this->rollbackTransactions) {
+            echo "Rolling back SQL Transaction. \n";
+            $I->rollbackDatabaseTransaction();
+        }
+    }
 
     protected function _initialize(AcceptanceTester $I): void
     {
         $I->amOnPage('/');
+        $this->_getPastBrowserWarning($I);
+    }
+
+    protected function _clickElementIfExists(AcceptanceTester $I, $selector): void
+    {
         try {
-            $I->see('Your connection is not private');
-            $this->_getPastBrowserWarning($I);
+            $I->seeElement($selector);
+            $I->click($selector);
         } catch (\Exception $e) {
-            // do nothing if we don't see 'Your connection is not private'
+            // do nothing
         }
     }
 
     protected function _getPastBrowserWarning(AcceptanceTester $I): void
     {
-        // TODO: make this conditional to execute only if we see the warning.
-        // get past cert error page
-        $I->click('button[id="details-button"]');
-        $I->waitForElementClickable('#proceed-link');
-        $I->click('#proceed-link');
+        try {
+            $I->see('Your connection is not private');
+            // get past cert error page
+            $I->click('button[id="details-button"]');
+            $I->waitForElementClickable('#proceed-link');
+            $I->click('#proceed-link');
+        } catch (\Exception $e) {
+            // do nothing if we don't see 'Your connection is not private'
+        }
     }
 
     protected function _adminLogin(AcceptanceTester $I): void
     {
         $I->amOnPage('/admin');
-        $I->waitForElement('#username');
-        // login page
-        $I->fillField('#username', 'admin');
-        $I->fillField('#login', 'AdminPassword123');
-        $I->click('.form-actions .action-login');
-        $I->waitForText('Dashboard');
+
+        try {
+            $I->see("Dashboard");   // skip logging in if we are already logged in.
+        }
+        catch (\Exception $e) {
+            // login page
+            $I->waitForElement('#username');
+            $I->fillField('#username', 'admin');
+            $I->fillField('#login', 'AdminPassword123');
+            $I->click('.form-actions .action-login');
+            $I->waitForText('Dashboard');
+        }
     }
 
     protected function _customerLogin(AcceptanceTester $I): void
@@ -52,10 +86,26 @@ class AcceptanceBase
         $I->waitForText('My Account');
     }
 
-    protected function _adminEnableAuthorizeCapture(AcceptanceTester $I): void
+    protected function _waitForLoading(AcceptanceTester $I): void
+    {
+        $I->waitForElementNotVisible('img[alt="Loading..."]', 30);
+        $I->waitForElementNotVisible('.loading-mask', 30);
+        $I->waitForElementNotVisible('.admin__form-loading-mask', 30);
+        $I->waitForElementNotVisible('.admin__data-grid-loading-mask', 30);
+        $I->waitForElementNotVisible('.popup-loading img', 30);
+    }
+
+    protected function _goToPublicSquarePayments(AcceptanceTester $I): void
     {
         $this->_adminLogin($I);
 
+        $this->_clickElementIfExists($I, '.admin__form-loading-mask');
+        $this->_clickElementIfExists($I, '.admin-usage-notification .action-secondary');
+
+        $this->_waitForLoading($I);
+
+        //$I->waitForElementVisible('#menu-magento-backend-stores a');
+        $I->waitForElementClickable('#menu-magento-backend-stores a', 30);
         $I->click('#menu-magento-backend-stores a');
         $I->waitForText('Configuration');
         $I->waitForText('Terms and Conditions');
@@ -68,6 +118,11 @@ class AcceptanceBase
         // click on button.
         $I->click('#payment_us_publicsquare_payments-head');
         $I->waitForText('PublicSquare Secret API key');
+    }
+
+    protected function _adminEnableAuthorizeCapture(AcceptanceTester $I): void
+    {
+        $this->_goToPublicSquarePayments($I);
 
         $I->uncheckOption('#payment_us_publicsquare_payments_payment_action_inherit');
 
@@ -77,6 +132,33 @@ class AcceptanceBase
         $I->waitForText('You saved the configuration');
         $I->see('You saved the configuration');
     }
+
+
+    protected function _adminEnableAndConfigurePublicSquarePayments(AcceptanceTester $I): void
+    {
+        $this->_goToPublicSquarePayments($I);
+
+        $I->uncheckOption('#payment_us_publicsquare_payments_active_inherit');
+
+        // select sale
+        $I->selectOption('select#payment_us_publicsquare_payments_active', '1');
+
+        $public_key = getenv("PUBLICSQUARE_PUBLIC_KEY");
+        $secret_key = getenv("PUBLICSQUARE_SECRET_KEY");
+        echo "public_key=$public_key, secret_key=$secret_key\n";
+        if ($public_key && $secret_key) {
+            echo "Setting the PublicSquare public_key and secret_key\n";
+            $I->fillField("#payment_us_publicsquare_payments_publicsquare_api_public_key", $public_key);
+            $I->fillField("#payment_us_publicsquare_payments_publicsquare_api_secret_key", $secret_key);
+        }
+
+        $I->click('Save Config');
+        $I->waitForText('You saved the configuration');
+        $I->see('You saved the configuration');
+    }
+
+
+
 
     protected function _adminEnableAuthorize(AcceptanceTester $I): void
     {
@@ -158,8 +240,10 @@ class AcceptanceBase
         $I->fillField('input[name="product[sku]"]', 'gift-card');
         $I->waitForElementVisible('input[name="product[price]"]');
         $I->fillField('input[name="product[price]"]', '75');
+        $I->fillField('input[name="product[quantity_and_stock_status][qty]"]', '100');
+        $I->selectOption('select[name="product[quantity_and_stock_status][is_in_stock]"]', 1);
         $I->click('Save');
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $this->_waitForLoading($I);
     }
 
     protected function _customerGoToAnOrder(AcceptanceTester $I, $doLogin=true): void
@@ -198,7 +282,7 @@ class AcceptanceBase
         $I->waitForElementVisible('input[data-role="cart-item-qty"]');
         $I->fillField('input[data-role="cart-item-qty"]', $quantity);
         $I->click('button[name="update_cart_action"]');
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $this->_waitForLoading($I);
     }
 
     protected function _generateUniqueEmail()
@@ -255,7 +339,7 @@ class AcceptanceBase
         $I->waitForElementVisible('//*[@id="expirationDate"]');
         $I->waitForElementVisible('//*[@id="cvc"]');
         $I->switchToIframe();
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $this->_waitForLoading($I);
     }
 
     protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
@@ -271,6 +355,7 @@ class AcceptanceBase
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
+        $I->waitForElementNotVisible('.loading-mask', 30);
         $I->waitForText($waitString);
     }
 
@@ -286,7 +371,7 @@ class AcceptanceBase
         $I->fillField('.payment-method._active input[name="postcode"]', '19711');
         $I->fillField('.payment-method._active input[name="telephone"]', '1234567890');
         $I->click('.payment-method._active button.action-update');
-        $I->waitForElementNotVisible('img[alt="Loading..."]');
+        $this->_waitForLoading($I);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');

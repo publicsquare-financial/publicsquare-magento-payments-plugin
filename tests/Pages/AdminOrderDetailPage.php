@@ -12,6 +12,7 @@ class AdminOrderDetailPage extends AcceptanceBase
     $this->_adminLogin($I);
     $I->amOnPage('/admin/sales/order/index/');
     $I->waitForText('Orders');
+    $this->_waitForLoading($I);
     $I->waitForElementVisible('a.action-menu-item');
     $I->click('View');
     $I->waitForText('Order & Account Information');
