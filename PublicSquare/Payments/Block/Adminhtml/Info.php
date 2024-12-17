@@ -3,7 +3,7 @@
  * Copyright © PublicSquare, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace PublicSquare\Payments\Block;
+namespace PublicSquare\Payments\Block\Adminhtml;
 
 use Magento\Payment\Block\Info\Cc;
 
@@ -84,7 +84,7 @@ class Info extends Cc
     public function getPaymentDetailsLink(string $label)
     {
         if ($this->getRawDetailsInfo()) {
-            return '<a href="https://portal.publicsquare.com/transactions/payments/'.$this->getInfo()->getAdditionalInformation('raw_details_info')['id'].'" target="_blank">'.(string)__($label).' ↗</a>';
+            return '<a class="payment-details-link" href="https://portal.publicsquare.com/payments/'.$this->getInfo()->getAdditionalInformation('raw_details_info')['id'].'" target="_blank">'.(string)__($label).' ↗</a>';
         }
         return null;
     }

@@ -37,20 +37,15 @@ class RefundCommand implements CommandInterface
 
         try
         {
-            $request = $this->refundsRequestFactory->create(['refund' => [
+            $this->refundsRequestFactory->create(['refund' => [
                 'payment_id' => $transactionId,
                 'amount' => $amount
-            ]]);
-            $response = $request->getResponseData();
-            if ($response['status'] != 'succeeded')
-            {
-                throw new LocalizedException(__('Sorry, refund failed.'));
-            }
+            ]])->getResponse();
         }
         catch (\Exception $e)
         {
             // $this->helper->throwError($e->getMessage());
-            throw new LocalizedException(__('Sorry, refund failed. '.$e->getMessage()));
+            throw new LocalizedException(__('Sorry, refund failed. '));
         }
     }
 
@@ -74,7 +69,7 @@ class RefundCommand implements CommandInterface
             $transactionId = $payment->getLastTransId();
         }
 
-        preg_match('/pmt_[a-zA-Z0-9]{22}/', $transactionId, $matches);
+        preg_match('/pmt_[a-zA-Z0-9]+/', $transactionId, $matches);
 
         if (empty($matches))
         {

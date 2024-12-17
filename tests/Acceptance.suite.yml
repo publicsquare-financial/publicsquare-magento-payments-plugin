@@ -9,6 +9,7 @@ modules:
         - WebDriver:
             url: https://magento.test/
             browser: chrome
+        - \Codeception\Module\Asserts
 # Add Codeception\Step\Retry trait to AcceptanceTester to enable retries
 step_decorators:
     - Codeception\Step\ConditionalAssertion

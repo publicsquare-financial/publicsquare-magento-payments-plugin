@@ -20,11 +20,11 @@
         </arguments>
     </type>
 
-    <type name="PublicSquare\Payments\Controller\Payment\Capture">
+    <!-- <type name="PublicSquare\Payments\Controller\Payment\Capture">
         <arguments>
             <argument name="captureCommand" xsi:type="object">PublicSquare\Payments\Gateway\Command\CaptureCommand</argument>
         </arguments>
-    </type>
+    </type> -->
 
     <type name="Magento\Payment\Model\CcGenericConfigProvider">
         <arguments>
@@ -41,4 +41,11 @@
             </argument>
         </arguments>
     </type>
+
+    <virtualType name="PublicSquarePaymentsFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">PublicSquare\Payments\Helper\Config::CODE</argument>
+            <argument name="infoBlockType" xsi:type="string">PublicSquare\Payments\Block\Frontend\Info</argument>
+        </arguments>
+    </virtualType>
 </config>
