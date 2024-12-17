@@ -23,6 +23,7 @@ define(
           const _publicsquare = await publicsquarejs.init(params.apiKey)
           this.publicsquareJs = _publicsquare
           this.cardElement = _publicsquare.createCardElement({})
+          console.log('cardElement', this.cardElement)
           this.cardElement.mount(params.selector)
 
           if (typeof callback === 'function') {

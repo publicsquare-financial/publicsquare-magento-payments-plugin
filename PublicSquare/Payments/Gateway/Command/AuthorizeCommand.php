@@ -23,5 +23,6 @@ class AuthorizeCommand implements CommandInterface
         $payment = $commandSubject['payment']->getPayment();
         $amount = $commandSubject['amount'] * 100;
         // throw new LocalizedException(__('AuthorizeCommand => '.json_encode($commandSubject).' '.$payment->getLastTransId()));
+        dd($commandSubject);
     }
 }
