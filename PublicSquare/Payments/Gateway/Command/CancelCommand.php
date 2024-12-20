@@ -40,16 +40,10 @@ class CancelCommand implements CommandInterface
 
         try
         {
-            $request = $this->paymentCancelRequestFactory->create(['payment' => [
+            $response = $this->paymentCancelRequestFactory->create(['payment' => [
                 'payment_id' => $transactionId
-            ]]);
-            $response = $request->getResponseData();
-            if ($response['status'] != 'cancelled')
-            {
-                throw new LocalizedException(__(json_encode($response)));
-            } else {
-                $payment->setAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $response);
-            }
+            ]])->getResponseData();
+            $payment->setAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $response);
         }
         catch (\Exception $e)
         {

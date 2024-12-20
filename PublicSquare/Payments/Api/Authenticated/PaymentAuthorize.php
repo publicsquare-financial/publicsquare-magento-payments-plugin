@@ -12,7 +12,11 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
-class PaymentAuthorize extends PublicSquareAPIRequestAbstract
+use \PublicSquare\Payments\Exception\ApiRejectedResponseException;
+use \PublicSquare\Payments\Exception\ApiDeclinedResponseException;
+use \PublicSquare\Payments\Exception\ApiFailedResponseException;
+
+class PaymentAuthorize extends \PublicSquare\Payments\Api\ApiRequestAbstract
 {
     const PATH = "payments";
 
@@ -135,36 +139,41 @@ class PaymentAuthorize extends PublicSquareAPIRequestAbstract
     protected function validateResponse(mixed $data): bool
     {
         $status = $data["status"] ?? "";
-        if (in_array($status, ["succeeded", "requires_capture"])) {
-            $this->logger->info("PSQ Payment succeeded", [
-                "response" => $this->getSanitizedResponseData(),
-            ]);
-            return true;
-        } elseif ($status === "rejected") {
+        
+        try {
+            $this->checkResponseStatus($data);
+        } catch (ApiRejectedResponseException $e) {
             $this->logger->error("PSQ Payment rejected", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
-            throw new \Exception(
+            throw new ApiRejectedResponseException(
                 __(
                     "The payment could not be completed. Please verify your details and try again."
                 )
             );
-        } elseif ($status === "declined") {
+        } catch (ApiDeclinedResponseException $e) {
             $this->logger->error("PSQ Payment declined", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
-            throw new \Exception(
+            throw new ApiDeclinedResponseException(
                 __(
                     "The payment could not be processed. Reason: " .
                         $data["declined_reason"] ??
                         "declined"
                 )
             );
+        }
+
+        if (in_array($status, [$this::STATUS_SUCCEEDED, $this::STATUS_REQUIRES_CAPTURE])) {
+            $this->logger->info("PSQ Payment succeeded", [
+                "response" => $this->getSanitizedResponseData(),
+            ]);
+            return true;
         } else {
             $this->logger->error("PSQ Payment failed", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
-            throw new \Exception(
+            throw new ApiFailedResponseException(
                 __(
                     "The payment could not be completed. Please verify your details and try again."
                 )

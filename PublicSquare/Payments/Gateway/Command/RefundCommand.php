@@ -3,24 +3,24 @@
 namespace PublicSquare\Payments\Gateway\Command;
 
 use Magento\Payment\Gateway\CommandInterface;
-use PublicSquare\Payments\Api\Authenticated\RefundsFactory;
+use PublicSquare\Payments\Api\Authenticated\PaymentRefundFactory;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Framework\Exception\LocalizedException;
 
 class RefundCommand implements CommandInterface
 {
     /**
-     * @var RefundsFactory
+     * @var PaymentRefundFactory
      */
-    private $refundsRequestFactory;
+    private $paymentRefundFactory;
 
     /**
      * @var TransactionRepositoryInterface
      */
     private $transactionRepository;
 
-    public function __construct(RefundsFactory $refundsRequestFactory, TransactionRepositoryInterface $transactionRepository) {
-        $this->refundsRequestFactory = $refundsRequestFactory;
+    public function __construct(PaymentRefundFactory $paymentRefundFactory, TransactionRepositoryInterface $transactionRepository) {
+        $this->paymentRefundFactory = $paymentRefundFactory;
         $this->transactionRepository = $transactionRepository;
     }
 
@@ -37,7 +37,7 @@ class RefundCommand implements CommandInterface
 
         try
         {
-            $this->refundsRequestFactory->create(['refund' => [
+            $this->paymentRefundFactory->create(['refund' => [
                 'payment_id' => $transactionId,
                 'amount' => $amount
             ]])->getResponse();

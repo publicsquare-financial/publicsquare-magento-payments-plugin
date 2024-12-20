@@ -73,25 +73,22 @@ class CaptureCommand implements CommandInterface
         }
 
         try {
-            $request = $this->paymentCaptureRequestFactory->create([
+            $response = $this->paymentCaptureRequestFactory->create([
                 "payment" => [
                     "payment_id" => $transactionId,
                     "amount" => $amount,
                     "external_id" =>
                         $order->getIncrementId() ?? ($order->getId() ?? ""),
                 ],
-            ]);
-            $response = $request->getResponseData();
-            if (!empty($response["status"]) && $response["status"] == "succeeded") {
-                $payment->setAdditionalInformation(
-                    \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
-                    $response
-                );
-                $payment->setIsTransactionClosed(0);
-                $payment->save();
-            }
+            ])->getResponseData();
+            $payment->setAdditionalInformation(
+                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
+                $response
+            );
+            $payment->setIsTransactionClosed(0);
+            $payment->save();
         } catch (\Exception $e) {
-            throw new LocalizedException($e);
+            throw new LocalizedException(__($e));
         }
     }
 }

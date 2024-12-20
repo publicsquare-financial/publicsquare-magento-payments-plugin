@@ -43,7 +43,7 @@ class Payments implements PaymentsInterface
     /**
      * @var \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory
      */
-    private $paymentsRequestFactory;
+    private $paymentsAuthorizeFactory;
 
     /**
      * @var \PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory
@@ -147,7 +147,7 @@ class Payments implements PaymentsInterface
     ];
 
     public function __construct(
-        \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory $paymentsRequestFactory,
+        \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory $paymentsAuthorizeFactory,
         \PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory $paymentCancelFactory,
         \Magento\Checkout\Model\Session $checkoutSession,
         CartTotalRepositoryInterface $cartTotalRepository,
@@ -169,7 +169,7 @@ class Payments implements PaymentsInterface
         \PublicSquare\Payments\Logger\Logger $logger,
         ResourceConnection $resourceConnection
     ) {
-        $this->paymentsRequestFactory = $paymentsRequestFactory;
+        $this->paymentsAuthorizeFactory = $paymentsAuthorizeFactory;
         $this->paymentCancelFactory = $paymentCancelFactory;
         $this->checkoutSession = $checkoutSession;
         $this->cartTotalRepository = $cartTotalRepository;
@@ -277,8 +277,7 @@ class Payments implements PaymentsInterface
             $quote
                 ->setPaymentMethod(Config::CODE)
                 ->setInventoryProcessed(false)
-                ->collectTotals()
-                ->save();
+                ->collectTotals();
 
             $shippingAddress = $quote->getShippingAddress();
             if ($quote->getIsVirtual()) {
@@ -289,7 +288,7 @@ class Payments implements PaymentsInterface
             /*
             @var \PublicSquare\Payments\Api\Authenticated\Payments $request
              */
-            $request = $this->paymentsRequestFactory->create([
+            $request = $this->paymentsAuthorizeFactory->create([
                 "idempotencyKey" => $idempotencyKey,
                 "amount" => $quote->getGrandTotal(),
                 "cardId" => $cardId,
