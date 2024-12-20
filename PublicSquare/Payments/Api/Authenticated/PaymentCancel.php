@@ -12,9 +12,11 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
-// use PublicSquare\Payments\Api\Data\ApplicationInfoInterface;
+use \PublicSquare\Payments\Exception\ApiRejectedResponseException;
+use \PublicSquare\Payments\Exception\ApiDeclinedResponseException;
+use \PublicSquare\Payments\Exception\ApiFailedResponseException;
 
-class PaymentCancel extends PublicSquareAPIRequestAbstract
+class PaymentCancel extends \PublicSquare\Payments\Api\ApiRequestAbstract
 {
     const PATH = 'payments/cancel';
 
@@ -60,12 +62,45 @@ class PaymentCancel extends PublicSquareAPIRequestAbstract
 
     protected function validateResponse(mixed $data): bool
     {
-        if ($this->getResponse()->isSuccess()) {
-            $this->logger->info("PSQ Payment cancel succeeded", ["response" => $this->getSanitizedResponseData()]);
+        $status = $data["status"] ?? "";
+        try {
+            $this->checkResponseStatus($data);
+        } catch (ApiRejectedResponseException $e) {
+            $this->logger->error("PSQ Payment cancel rejected", [
+                "response" => $this->getSanitizedResponseData(),
+            ]);
+            throw new ApiRejectedResponseException(
+                __(
+                    "The payment could not be canceled. Please verify your details and try again."
+                )
+            );
+        } catch (ApiDeclinedResponseException $e) {
+            $this->logger->error("PSQ Payment cancel declined", [
+                "response" => $this->getSanitizedResponseData(),
+            ]);
+            throw new ApiDeclinedResponseException(
+                __(
+                    "The payment could not be canceled. Reason: " .
+                        $data["declined_reason"] ??
+                        "declined"
+                )
+            );
+        }
+
+        if (in_array($status, [$this::CANCELLED_STATUS])) {
+            $this->logger->info("PSQ Payment cancel succeeded", [
+                "response" => $this->getSanitizedResponseData(),
+            ]);
             return true;
         } else {
-            $this->logger->error("PSQ Payment cancel failed", ["response" => $this->getSanitizedResponseData()]);
-            throw new \Exception("The payment could not be successfully canceled. Please verify your details and try again.");
+            $this->logger->error("PSQ Payment cancel failed", [
+                "response" => $this->getSanitizedResponseData(),
+            ]);
+            throw new ApiFailedResponseException(
+                __(
+                    "The payment could not be successfully canceled. Please verify your details and try again."
+                )
+            );
         }
     } //end validateResponse()
 }//end class

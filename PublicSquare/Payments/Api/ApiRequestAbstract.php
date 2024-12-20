@@ -13,10 +13,19 @@
 namespace PublicSquare\Payments\Api;
 
 use PublicSquare\Payments\Exception\ApiException;
+use PublicSquare\Payments\Exception\ApiRejectedResponseException;
+use PublicSquare\Payments\Exception\ApiDeclinedResponseException;
+use PublicSquare\Payments\Exception\ApiFailedResponseException;
 
-abstract class RequestAbstract
+abstract class ApiRequestAbstract
 {
     const CONTENT_TYPE = 'application/json';
+    const REJECTED_STATUS = 'rejected';
+    const DECLINED_STATUS = 'declined';
+    const FAILED_STATUS = 'failed';
+    const SUCCEEDED_STATUS = 'succeeded';
+    const REQUIRES_CAPTURE_STATUS = 'requires_capture';
+    const CANCELLED_STATUS = 'cancelled';
 
     /**
      * @var \Laminas\Http\ClientFactory
@@ -161,6 +170,12 @@ abstract class RequestAbstract
             ];
         }
 
+        $headers['X-API-KEY'] = $this->configHelper->getSecretAPIKey();
+
+        if (!empty($this->idempotencyKey)) {
+            $headers['IDEMPOTENCY-KEY'] = substr($this->idempotencyKey, 0, 50);
+        }
+
         return $headers;
     } //end getHeaders()
 
@@ -267,4 +282,15 @@ abstract class RequestAbstract
 
         $this->logger->debug($message);
     } //end debugLog()
+
+    public function checkResponseStatus($responseData): bool {
+        if ($responseData['status'] === self::REJECTED_STATUS) {
+            throw new ApiRejectedResponseException("Something went wrong. Please try again.");
+        } else if ($responseData['status'] === self::DECLINED_STATUS) {
+            throw new ApiDeclinedResponseException("Something went wrong. Please try again.");
+        } else if ($responseData['status'] === self::FAILED_STATUS) {
+            throw new ApiFailedResponseException("Something went wrong. Please try again.");
+        }
+        return true;
+    }
 } //end class
