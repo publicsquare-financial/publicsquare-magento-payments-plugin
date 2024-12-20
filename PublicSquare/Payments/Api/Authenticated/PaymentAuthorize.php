@@ -164,7 +164,7 @@ class PaymentAuthorize extends \PublicSquare\Payments\Api\ApiRequestAbstract
             );
         }
 
-        if (in_array($status, [$this::STATUS_SUCCEEDED, $this::STATUS_REQUIRES_CAPTURE])) {
+        if (in_array($status, [$this::SUCCEEDED_STATUS, $this::REQUIRES_CAPTURE_STATUS])) {
             $this->logger->info("PSQ Payment succeeded", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
