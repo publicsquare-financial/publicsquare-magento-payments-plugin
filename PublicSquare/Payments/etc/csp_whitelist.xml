@@ -15,7 +15,7 @@
                 <value id="publicsquare-iframe3" type="host">*.publicsquare.com</value>
             </values>
         </policy>
-            <policy id="script-src">
+        <policy id="script-src">
             <values>
                 <value id="publicsquare-script-src" type="host">*.publicsquare.com</value>
                 <value id="bt-script-src" type="host">*.basistheory.com</value>

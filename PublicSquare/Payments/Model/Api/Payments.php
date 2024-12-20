@@ -277,8 +277,7 @@ class Payments implements PaymentsInterface
             $quote
                 ->setPaymentMethod(Config::CODE)
                 ->setInventoryProcessed(false)
-                ->collectTotals()
-                ->save();
+                ->collectTotals();
 
             $shippingAddress = $quote->getShippingAddress();
             if ($quote->getIsVirtual()) {
