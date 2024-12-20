@@ -91,7 +91,7 @@ class CaptureCommand implements CommandInterface
                 $payment->save();
             }
         } catch (\Exception $e) {
-            throw new LocalizedException($e);
+            throw new LocalizedException(__($e));
         }
     }
 }
