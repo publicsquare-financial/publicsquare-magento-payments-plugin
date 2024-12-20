@@ -1,10 +1,6 @@
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
 /*browser:true*/
 /*global define*/
-define([
+require([
   'jquery',
   'uiComponent',
   'Magento_Ui/js/modal/alert',
@@ -14,8 +10,9 @@ define([
 ], function ($, Class, alert, domObserver, $t, publicsquare) {
   'use strict';
 
-  return Class.extend({
+  console.log('publicsquare', publicsquare);
 
+  return Class.extend({
     defaults: {
       $selector: null,
       selector: 'edit_form',
@@ -35,6 +32,10 @@ define([
       imports: {
         onActiveChange: 'active'
       }
+    },
+
+    initialize: function () {
+      console.log('publicsquare', publicsquare);
     },
 
     /**

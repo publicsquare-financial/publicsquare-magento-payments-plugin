@@ -6,19 +6,15 @@
  */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <script src="PublicSquare_Payments::js/view/payment/method-renderer.js"/>
+    </head>
     <body>
         <referenceBlock name="order_create_billing_form">
             <action method="setMethodFormTemplate">
                 <argument name="method" xsi:type="string">publicsquare_payments</argument>
                 <argument name="template" xsi:type="string">PublicSquare_Payments::form/cc.phtml</argument>
             </action>
-        </referenceBlock>
-        <referenceBlock name="content">
-            <block name="publicsquare_payments_payment_script"
-                   as="publicsquare_payments_payment_script"
-                   template="PublicSquare_Payments::payment/script.phtml"
-                   class="PublicSquare\Payments\Block\Payment"
-                   before="billing_method"/>
         </referenceBlock>
     </body>
 </page>

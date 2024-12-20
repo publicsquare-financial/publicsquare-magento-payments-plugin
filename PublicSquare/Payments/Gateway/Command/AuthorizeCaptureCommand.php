@@ -8,6 +8,5 @@ class AuthorizeCaptureCommand implements CommandInterface
 {
     public function execute(array $commandSubject)
     {
-        dd($commandSubject);
     }
 }
