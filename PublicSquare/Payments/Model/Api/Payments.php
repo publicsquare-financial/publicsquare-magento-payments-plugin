@@ -280,17 +280,20 @@ class Payments implements PaymentsInterface
                 ->collectTotals();
 
             $shippingAddress = $quote->getShippingAddress();
+            $amount = $quote->getGrandTotal();
             if ($quote->getIsVirtual()) {
                 $shippingAddress = null;
+                $amount = $quote->getGrandTotal() / $quote->getItemsCount();
             } else if (empty($shippingAddress->getFirstname()) || empty($shippingAddress->getLastname())) {
                 $this->logger->warning('Shipping address first/last name is empty', ['quoteId' => $quote->getId(), 'quoteAddressId' => $shippingAddress->getId()]);
             }
+
             /*
             @var \PublicSquare\Payments\Api\Authenticated\Payments $request
              */
             $request = $this->paymentsAuthorizeFactory->create([
                 "idempotencyKey" => $idempotencyKey,
-                "amount" => $quote->getGrandTotal(),
+                "amount" => $amount,
                 "cardId" => $cardId,
                 "capture" => false,
                 "phone" => $billingAddress->getTelephone(),
