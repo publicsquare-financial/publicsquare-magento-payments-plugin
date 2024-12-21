@@ -89,13 +89,28 @@
     <virtualType name="PublicSquarePaymentsCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="authorize" xsi:type="string">PublicSquare\Payments\Gateway\Command\AuthorizeCommand</item>
-                <item name="sale" xsi:type="string">PublicSquare\Payments\Gateway\Command\AuthorizeCaptureCommand</item>
+                <item name="authorize" xsi:type="string">PublicSquareAuthorizeCommand</item>
+                <item name="sale" xsi:type="string">PublicSquareAuthorizeCommand</item>
                 <item name="capture" xsi:type="string">PublicSquare\Payments\Gateway\Command\CaptureCommand</item>
                 <item name="refund" xsi:type="string">PublicSquare\Payments\Gateway\Command\RefundCommand</item>
                 <item name="void" xsi:type="string">PublicSquare\Payments\Gateway\Command\CancelCommand</item>
                 <item name="cancel" xsi:type="string">PublicSquare\Payments\Gateway\Command\CancelCommand</item>
                 <item name="vault_capture" xsi:type="string">PublicSquarePaymentsVaultCaptureCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PublicSquareAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">PublicSquareAuthorizeRequest</argument>
+            <argument name="handler" xsi:type="object">PublicSquare\Payments\Gateway\Command\AuthorizeCommand</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PublicSquareAuthorizeRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="cardId" xsi:type="string">PublicSquare\Payments\Gateway\Request\CardIdDataBuilder</item>
             </argument>
         </arguments>
     </virtualType>

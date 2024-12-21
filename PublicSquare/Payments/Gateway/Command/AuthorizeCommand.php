@@ -22,6 +22,12 @@ class AuthorizeCommand implements CommandInterface
         // Implement authorization logic here
         $payment = $commandSubject['payment']->getPayment();
         $amount = $commandSubject['amount'] * 100;
-        // throw new LocalizedException(__('AuthorizeCommand => '.json_encode($commandSubject).' '.$payment->getLastTransId()));
+        // $this->paymentsRequestFactory->create([
+        //     'amount' => $amount,
+        //     'cardId' => $commandSubject['cardId'],
+        //     'capture' => false,
+        //     'billingAddress' => $commandSubject['billingAddress'],
+        // ])->getResponse();
+        throw new LocalizedException(__('AuthorizeCommand => '.json_encode($commandSubject).' '.$payment->getLastTransId()));
     }
 }

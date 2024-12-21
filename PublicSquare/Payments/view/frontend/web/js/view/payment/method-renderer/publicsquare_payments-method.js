@@ -113,8 +113,12 @@ define([
     placeOrderWithCardId: function (cardId) {
       var self = this;
       var serviceUrl = urlBuilder.createUrl(
-        "/publicsquare_payments/payments",
-        {},
+        customer.isLoggedIn() ?
+          '/carts/mine/payment-information' :
+          '/guest-carts/:quoteId/payment-information',
+        {
+          quoteId: quote.getQuoteId()
+        }
       );
 
       return placeOrderService(
@@ -124,6 +128,9 @@ define([
           saveCard: this.vaultEnabler.isActivePaymentTokenEnabler(),
           ...(!customer.isLoggedIn() && { email: quote.guestEmail }),
           idempotencyKey: self.idempotencyKey,
+          cartId: quote.getQuoteId(),
+          billingAddress: quote.billingAddress(),
+          paymentMethod: this.getData()
         },
         messageList,
       ).then(() => {
@@ -140,6 +147,7 @@ define([
         method: this.getCode(),
         additional_data: {
           payment_method_nonce: this.paymentPayload.nonce,
+          cardId: 'card_1234567890',
         },
       };
 
