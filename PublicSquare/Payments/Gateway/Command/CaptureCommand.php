@@ -50,6 +50,7 @@ class CaptureCommand implements CommandInterface
         $currentStatus = $payment->getAdditionalInformation("raw_details_info")[
             "status"
         ];
+        $this->logger->info("CaptureCommand => ".json_encode($commandSubject).' '.$payment->getLastTransId().' '.$transactionId.' '.$currentStatus);
 
         if (!$transactionId || !str_starts_with($transactionId, "pmt_")) {
             throw new LocalizedException(
@@ -70,25 +71,25 @@ class CaptureCommand implements CommandInterface
                     ),
                 ]
             );
-        }
-
-        try {
-            $response = $this->paymentCaptureRequestFactory->create([
-                "payment" => [
-                    "payment_id" => $transactionId,
-                    "amount" => $amount,
-                    "external_id" =>
-                        $order->getIncrementId() ?? ($order->getId() ?? ""),
-                ],
-            ])->getResponseData();
-            $payment->setAdditionalInformation(
-                \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
-                $response
-            );
-            $payment->setIsTransactionClosed(0);
-            $payment->save();
-        } catch (\Exception $e) {
-            throw new LocalizedException(__($e));
+        } else {
+            try {
+                $response = $this->paymentCaptureRequestFactory->create([
+                    "payment" => [
+                        "payment_id" => $transactionId,
+                        "amount" => $amount,
+                        "external_id" =>
+                            $order->getIncrementId() ?? ($order->getId() ?? ""),
+                    ],
+                ])->getResponseData();
+                $payment->setAdditionalInformation(
+                    \Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
+                    $response
+                );
+                $payment->setIsTransactionClosed(0);
+                $payment->save();
+            } catch (\Exception $e) {
+                throw new LocalizedException(__($e));
+            }
         }
     }
 }
