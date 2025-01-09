@@ -19,7 +19,6 @@ class CustomerPaymentMethodInfoCest extends AcceptanceBase
 
         $this->_checkoutWithCard($I);
 
-
         // check order payment method info
         $this->_customerGoToAnOrder($I, false);
 
@@ -28,5 +27,11 @@ class CustomerPaymentMethodInfoCest extends AcceptanceBase
         $I->see('visa');
         $I->see('Credit Card Number');
         $I->see('xxxx-4242');
+
+        // verify that customers don't see these payment method details.
+        $I->dontSee('Payment ID:');
+        $I->dontSee('AVS Response:');
+        $I->dontSee('CVV Response');
+        $I->dontSee('Fraud Decision');
     }
 }
