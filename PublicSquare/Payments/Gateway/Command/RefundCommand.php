@@ -6,6 +6,7 @@ use Magento\Payment\Gateway\CommandInterface;
 use PublicSquare\Payments\Api\Authenticated\PaymentRefundFactory;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Payment\Gateway\Command\CommandException;
 
 class RefundCommand implements CommandInterface
 {
@@ -35,7 +36,7 @@ class RefundCommand implements CommandInterface
 
         if (!$transactionId)
         {
-            throw new LocalizedException(__('Sorry, it is not possible to invoice this order because the payment is still pending.'));
+            throw new CommandException(__('Sorry, it is not possible to invoice this order because the payment is still pending.'));
         }
 
         try
@@ -47,7 +48,8 @@ class RefundCommand implements CommandInterface
         }
         catch (\Exception $e)
         {
-            throw new LocalizedException(__('Sorry, refund failed. '));
+            $this->logger->error('Refund failed', ['exception' => $e]);
+            throw new CommandException(__('Sorry, refund failed. '));
         }
     }
 
@@ -75,7 +77,7 @@ class RefundCommand implements CommandInterface
 
         if (empty($matches))
         {
-            throw new LocalizedException(__("The payment can only be refunded via the PublicSquare Dashboard. You can retry in offline mode instead."));
+            throw new CommandException(__("The payment can only be refunded via the PublicSquare Dashboard. You can retry in offline mode instead."));
         }
 
         return $matches[0];

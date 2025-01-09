@@ -3,31 +3,32 @@
 namespace PublicSquare\Payments\Gateway\Command;
 
 use Magento\Payment\Gateway\CommandInterface;
-use Magento\Framework\Exception\LocalizedException;
-use PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory;
+use PublicSquare\Payments\Logger\Logger;
+use PublicSquare\Payments\Gateway\PaymentExecutor;
 
 class AuthorizeCommand implements CommandInterface
 {
     /**
-     * @var \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory
+     * @var Logger
      */
-    private $paymentsRequestFactory;
+    private $logger;
 
-    public function __construct(PaymentAuthorizeFactory $paymentsRequestFactory) {
-        $this->paymentsRequestFactory = $paymentsRequestFactory;
+    /**
+     * @var PaymentExecutor
+     */
+    private $paymentExecutor;
+
+    public function __construct(
+        Logger $logger,
+        PaymentExecutor $paymentExecutor
+    ) {
+        $this->logger = $logger;
+        $this->paymentExecutor = $paymentExecutor;
     }
 
     public function execute(array $commandSubject)
     {
-        // Implement authorization logic here
-        $payment = $commandSubject['payment']->getPayment();
-        $amount = $commandSubject['amount'] * 100;
-        // $this->paymentsRequestFactory->create([
-        //     'amount' => $amount,
-        //     'cardId' => $commandSubject['cardId'],
-        //     'capture' => false,
-        //     'billingAddress' => $commandSubject['billingAddress'],
-        // ])->getResponse();
-        throw new LocalizedException(__('AuthorizeCommand => '.json_encode($commandSubject).' '.$payment->getLastTransId()));
+        $this->logger->info("AuthorizeCommand => ".json_encode($commandSubject));
+        $this->paymentExecutor->executeAuthorize($commandSubject);
     }
 }

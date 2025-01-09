@@ -30,10 +30,16 @@ class PaymentCapture extends \PublicSquare\Payments\Api\ApiRequestAbstract
         \PublicSquare\Payments\Helper\Config $configHelper,
         \PublicSquare\Payments\Logger\Logger $logger,
         \PublicSquare\Payments\Helper\Api $apiHelper,
-        array $payment = []
+        float $amount,
+        string $paymentId,
+        string $externalId
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
-        $this->requestData = $payment;
+        $this->requestData = [
+            "amount" => (int)ceil($amount * 100),
+            "payment_id" => $paymentId,
+            "external_id" => $externalId,
+        ];
         $this->apiHelper = $apiHelper;
     }//end __construct()
 

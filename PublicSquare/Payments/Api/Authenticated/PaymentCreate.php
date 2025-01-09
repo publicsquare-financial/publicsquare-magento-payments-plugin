@@ -16,7 +16,7 @@ use \PublicSquare\Payments\Exception\ApiRejectedResponseException;
 use \PublicSquare\Payments\Exception\ApiDeclinedResponseException;
 use \PublicSquare\Payments\Exception\ApiFailedResponseException;
 
-class PaymentAuthorize extends \PublicSquare\Payments\Api\ApiRequestAbstract
+class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
 {
     const PATH = "payments";
 
