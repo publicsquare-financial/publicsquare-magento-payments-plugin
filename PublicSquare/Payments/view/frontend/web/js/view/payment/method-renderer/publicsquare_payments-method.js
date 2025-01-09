@@ -156,7 +156,6 @@ define([
         messageList.addErrorMessage({
           message: $t(errorMessage)
         });
-        self.idempotencyKey = self.generateIdempotencyKey();
       });
     },
     /**
