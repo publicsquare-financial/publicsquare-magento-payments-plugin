@@ -34,10 +34,12 @@ class PaymentCancel extends \PublicSquare\Payments\Api\ApiRequestAbstract
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
         \PublicSquare\Payments\Logger\Logger $logger,
-        array $payment = []
+        string $paymentId
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
-        $this->requestData = $payment;
+        $this->requestData = [
+            "payment_id" => $paymentId
+        ];
     }//end __construct()
 
     /**

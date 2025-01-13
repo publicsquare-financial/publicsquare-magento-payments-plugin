@@ -41,10 +41,10 @@ class RefundCommand implements CommandInterface
 
         try
         {
-            $this->paymentRefundFactory->create(['refund' => [
-                'payment_id' => $transactionId,
+            $this->paymentRefundFactory->create([
+                'paymentId' => $transactionId,
                 'amount' => $amount
-            ]])->getResponse();
+            ])->getResponse();
         }
         catch (\Exception $e)
         {

@@ -28,10 +28,14 @@ class PaymentRefund extends \PublicSquare\Payments\Api\ApiRequestAbstract
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
         \PublicSquare\Payments\Logger\Logger $logger,
-        array $refund = []
+        float $amount,
+        string $paymentId
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
-        $this->requestData = $refund;
+        $this->requestData = [
+            "amount" => (int)ceil($amount * 100),
+            "payment_id" => $paymentId
+        ];
     }//end __construct()
 
     /**

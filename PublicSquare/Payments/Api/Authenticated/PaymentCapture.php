@@ -35,6 +35,11 @@ class PaymentCapture extends \PublicSquare\Payments\Api\ApiRequestAbstract
         string $externalId
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
+        $this->logger->info("PSQ Payment capture request", [
+            "amount" => (int)ceil($amount * 100),
+            "payment_id" => $paymentId,
+            "external_id" => $externalId,
+        ]);
         $this->requestData = [
             "amount" => (int)ceil($amount * 100),
             "payment_id" => $paymentId,

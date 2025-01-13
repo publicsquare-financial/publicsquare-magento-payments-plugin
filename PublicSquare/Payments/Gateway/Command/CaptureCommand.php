@@ -28,15 +28,25 @@ class CaptureCommand implements CommandInterface
 
     public function execute(array $commandSubject)
     {
-        $this->paymentExecutor->setCommandSubject($commandSubject);
-        $transaction = $this->paymentExecutor->getTransaction();
-
-        if ($transaction) {
-            // Capture the payment
-            $this->paymentExecutor->executeCapture($commandSubject);
-        } else {
-            // Authorize and capture the payment
-            $this->paymentExecutor->executeAuthorizeCapture($commandSubject);
+        if ($commandSubject["amount"] > 0) {
+            $payment = $commandSubject["payment"]->getPayment();
+            $tid = $payment->getLastTransId();
+            $this->logger->info('getLastTransId', [
+                'tid' => $tid,
+            ]);
+            $this->paymentExecutor->setCommandSubject($commandSubject);
+            $transaction = $this->paymentExecutor->getTransaction();
+            $this->logger->info('getTransaction', [
+                'payment_id' => $transaction,
+            ]);
+    
+            if ($transaction) {
+                // Capture the payment
+                $this->paymentExecutor->executeCapture($commandSubject);
+            } else {
+                // Authorize and capture the payment
+                $this->paymentExecutor->executeAuthorizeCapture($commandSubject);
+            }
         }
     }
 }

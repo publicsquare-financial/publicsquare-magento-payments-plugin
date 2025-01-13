@@ -75,6 +75,7 @@ class PaymentExecutor
 
 	public function executeAuthorize(array $commandSubject)
 	{
+		$this->logger->info("executeAuthorize");
 		try {
 			$this->createNewPayment($commandSubject, false);
 		} catch (\Exception $e) {
@@ -84,6 +85,7 @@ class PaymentExecutor
 
 	public function executeCapture(array $commandSubject)
 	{
+		$this->logger->info("executeCapture");
 		try {
 			$this->setCommandSubject($commandSubject);
 	
@@ -118,9 +120,9 @@ class PaymentExecutor
 				);
 			} else {
 				$response = $this->paymentCaptureFactory->create([
-					"payment_id" => $transactionId,
+					"paymentId" => $transactionId,
 					"amount" => $this->getAmount(),
-					"external_id" => $order->getIncrementId() ?? ($order->getId() ?? ""),
+					"externalId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
 				])->getResponseData();
 				$this->setPaymentFromPSQResponse($payment, $response);
 			}
@@ -131,6 +133,7 @@ class PaymentExecutor
 
 	public function executeAuthorizeCapture(array $commandSubject)
 	{
+		$this->logger->info("executeAuthorizeCapture");
 		try {
 			$this->createNewPayment($commandSubject, true);
 		} catch (\Exception $e) {
@@ -140,6 +143,7 @@ class PaymentExecutor
 
 	public function executeCancel(array $commandSubject)
 	{
+		$this->logger->info("executeCancel");
 		try {
 			$this->setCommandSubject($commandSubject);
 	
@@ -153,9 +157,9 @@ class PaymentExecutor
 				throw new CouldNotSaveException(__('Sorry, it is not possible to cancel this order.'));
 			}
 	
-			$response = $this->paymentCancelFactory->create(['payment' => [
-				'payment_id' => $transactionId
-			]])->getResponseData();
+			$response = $this->paymentCancelFactory->create([
+				'paymentId' => $transactionId
+			])->getResponseData();
 			$payment->setAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $response);
 			$payment->setIsTransactionClosed(0);
 		} catch (\Exception $e) {
@@ -165,6 +169,7 @@ class PaymentExecutor
 
 	public function executeRefund(array $commandSubject)
 	{
+		$this->logger->info("executeRefund");
 		try {
 			$this->setCommandSubject($commandSubject);
 		} catch (\Exception $e) {
@@ -247,12 +252,14 @@ class PaymentExecutor
 
 	public function createNewPayment(array $commandSubject, bool $capture)
 	{
+		$this->logger->info('createNewPayment');
 		try {
 			$this->setCommandSubject($commandSubject);
 
 			// Load quote using repository
 			$payment = $this->getPayment();
 			$quote = $this->getQuote();
+			$order = $payment->getOrder();
 
 			$billingAddress = $quote->getBillingAddress();
 			$shippingAddress = $quote->getShippingAddress();
@@ -263,7 +270,6 @@ class PaymentExecutor
 			} else if (empty($shippingAddress->getFirstname()) || empty($shippingAddress->getLastname())) {
 				$this->logger->warning('Shipping address first/last name is empty', ['quoteId' => $quote->getId(), 'quoteAddressId' => $shippingAddress->getId()]);
 			}
-
             if ($cardId = $payment->getAdditionalInformation('cardId')) {
                 $idempotencyKey = $payment->getAdditionalInformation('idempotencyKey');
                 $response = $this->paymentCreateFactory->create([
@@ -275,7 +281,9 @@ class PaymentExecutor
                     "email" => $emailToUse,
                     "shippingAddress" => $shippingAddress,
                     "billingAddress" => $billingAddress,
+					"externalId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
                 ])->getResponseData();
+				$this->logger->info('response', $response);
                 $this->setPaymentFromPSQResponse($payment, $response);
             }
         } catch (\Exception $e) {
