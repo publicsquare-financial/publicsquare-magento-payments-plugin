@@ -260,6 +260,10 @@ class PaymentExecutor
 			$payment = $this->getPayment();
 			$quote = $this->getQuote();
 			$order = $payment->getOrder();
+			$this->logger->info('order', [
+				'order' => $order->getId(),
+				'incrementId' => $order->getIncrementId(),
+			]);
 
 			$billingAddress = $quote->getBillingAddress();
 			$shippingAddress = $quote->getShippingAddress();
@@ -283,7 +287,6 @@ class PaymentExecutor
                     "billingAddress" => $billingAddress,
 					"externalId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
                 ])->getResponseData();
-				$this->logger->info('response', $response);
                 $this->setPaymentFromPSQResponse($payment, $response);
             }
         } catch (\Exception $e) {

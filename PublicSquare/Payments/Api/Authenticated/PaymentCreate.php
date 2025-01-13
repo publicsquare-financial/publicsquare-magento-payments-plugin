@@ -41,14 +41,16 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
         string $email,
         \Magento\Quote\Model\Quote\Address $billingAddress,
         $shippingAddress = null,
-        $idempotencyKey = null
+        $idempotencyKey = null,
+        $externalId = ""
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
         if ($idempotencyKey) {
             $this->idempotencyKey = hash('sha256', $idempotencyKey.'-'.$email.'-authorize');
         }
         $this->requestData = [
-            "amount" => (int)ceil($amount * 100),
+            "external_id" => $externalId,
+            "amount" => $amount * 100,
             "currency" => "USD",
             // Authorize only, because the CaptureCommand will handle capturing the payment
             "capture" => $capture,

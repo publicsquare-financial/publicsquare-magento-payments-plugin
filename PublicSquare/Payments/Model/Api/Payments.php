@@ -302,6 +302,7 @@ class Payments implements PaymentsInterface
             //     "billingAddress" => $billingAddress,
             // ]);
             // $response = $request->getResponseData();
+            $payment->setAdditionalInformation('cardId', $cardId);
 
             try {
                 // Create Order From Quote
