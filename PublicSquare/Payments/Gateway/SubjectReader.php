@@ -145,7 +145,6 @@ class SubjectReader
      */
     public function readCardId(array $subject)
     {
-        $this->logger->info("SubjectReader => ".json_encode($subject));
         return $subject['card_id'] ?? null;
     }
 }

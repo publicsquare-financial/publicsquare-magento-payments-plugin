@@ -291,6 +291,7 @@ class Payments implements PaymentsInterface
                 $this->logger->warning('Shipping address first/last name is empty', ['quoteId' => $quote->getId(), 'quoteAddressId' => $shippingAddress->getId()]);
             }
 
+            // DEPRECATED: Handled within CaptureCommand
             // $request = $this->paymentCreateFactory->create([
             //     "idempotencyKey" => $idempotencyKey,
             //     "amount" => $amount,
@@ -316,6 +317,7 @@ class Payments implements PaymentsInterface
                 $this->logger->error("placeOrder failed", [
                     "error" => $e->getMessage(),
                 ]);
+                // DEPRECATED: Handled within CaptureCommand
                 // Cancel the payment in PublicSquare because something went wrong while
                 // placing the order
                 // $this->paymentCancelFactory
@@ -328,11 +330,12 @@ class Payments implements PaymentsInterface
                 );
             }
 
+            // DEPRECATED: Handled within CaptureCommand
             // Create transaction
             // $transactionId = $this->createTransaction($order, $response);
-
+            // 
             // $this->invoiceOrder($order, $transactionId);
-
+            // 
             // if ($customer && $saveCard) {
             //     $this->savePaymentMethod(
             //         $customer->getId(),

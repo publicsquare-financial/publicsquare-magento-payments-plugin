@@ -52,7 +52,6 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
             "external_id" => $externalId,
             "amount" => $amount * 100,
             "currency" => "USD",
-            // Authorize only, because the CaptureCommand will handle capturing the payment
             "capture" => $capture,
             "payment_method" => [
                 "card" => $cardId,

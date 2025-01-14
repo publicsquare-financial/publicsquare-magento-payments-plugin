@@ -28,7 +28,6 @@ class AuthorizeCommand implements CommandInterface
 
     public function execute(array $commandSubject)
     {
-        $this->logger->info("AuthorizeCommand => ".json_encode($commandSubject));
         $this->paymentExecutor->executeAuthorize($commandSubject);
     }
 }

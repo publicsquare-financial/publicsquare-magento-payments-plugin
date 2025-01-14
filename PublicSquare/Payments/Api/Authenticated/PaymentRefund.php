@@ -33,7 +33,7 @@ class PaymentRefund extends \PublicSquare\Payments\Api\ApiRequestAbstract
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
         $this->requestData = [
-            "amount" => $amount * 100,
+            "amount" => $amount,
             "payment_id" => $paymentId
         ];
     }//end __construct()

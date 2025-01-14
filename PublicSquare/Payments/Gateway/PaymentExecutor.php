@@ -75,7 +75,6 @@ class PaymentExecutor
 
 	public function executeAuthorize(array $commandSubject)
 	{
-		$this->logger->info("executeAuthorize");
 		try {
 			$this->createNewPayment($commandSubject, false);
 		} catch (\Exception $e) {
@@ -85,7 +84,6 @@ class PaymentExecutor
 
 	public function executeCapture(array $commandSubject)
 	{
-		$this->logger->info("executeCapture");
 		try {
 			$this->setCommandSubject($commandSubject);
 	
@@ -133,7 +131,6 @@ class PaymentExecutor
 
 	public function executeAuthorizeCapture(array $commandSubject)
 	{
-		$this->logger->info("executeAuthorizeCapture");
 		try {
 			$this->createNewPayment($commandSubject, true);
 		} catch (\Exception $e) {
@@ -143,7 +140,6 @@ class PaymentExecutor
 
 	public function executeCancel(array $commandSubject)
 	{
-		$this->logger->info("executeCancel");
 		try {
 			$this->setCommandSubject($commandSubject);
 	
@@ -169,7 +165,6 @@ class PaymentExecutor
 
 	public function executeRefund(array $commandSubject)
 	{
-		$this->logger->info("executeRefund");
 		try {
 			$this->setCommandSubject($commandSubject);
 		} catch (\Exception $e) {
@@ -252,18 +247,12 @@ class PaymentExecutor
 
 	public function createNewPayment(array $commandSubject, bool $capture)
 	{
-		$this->logger->info('createNewPayment');
 		try {
 			$this->setCommandSubject($commandSubject);
 
-			// Load quote using repository
 			$payment = $this->getPayment();
 			$quote = $this->getQuote();
 			$order = $payment->getOrder();
-			$this->logger->info('order', [
-				'order' => $order->getId(),
-				'incrementId' => $order->getIncrementId(),
-			]);
 
 			$billingAddress = $quote->getBillingAddress();
 			$shippingAddress = $quote->getShippingAddress();
