@@ -15,10 +15,9 @@ namespace PublicSquare\Payments\Api\Authenticated;
 use \PublicSquare\Payments\Exception\ApiRejectedResponseException;
 use \PublicSquare\Payments\Exception\ApiDeclinedResponseException;
 use \PublicSquare\Payments\Exception\ApiFailedResponseException;
-
-class PaymentCapture extends \PublicSquare\Payments\Api\ApiRequestAbstract
+class PaymentRefund extends \PublicSquare\Payments\Api\ApiRequestAbstract
 {
-    const PATH = 'payments/capture';
+    const PATH = 'refunds';
 
     protected $clientFactory;
     protected $configHelper;
@@ -29,23 +28,14 @@ class PaymentCapture extends \PublicSquare\Payments\Api\ApiRequestAbstract
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
         \PublicSquare\Payments\Logger\Logger $logger,
-        \PublicSquare\Payments\Helper\Api $apiHelper,
         float $amount,
-        string $paymentId,
-        string $externalId
+        string $paymentId
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
-        $this->logger->info("PSQ Payment capture request", [
-            "amount" => $amount * 100,
-            "payment_id" => $paymentId,
-            "external_id" => $externalId,
-        ]);
         $this->requestData = [
-            "amount" => (int)ceil($amount * 100),
-            "payment_id" => $paymentId,
-            "external_id" => $externalId,
+            "amount" => $amount,
+            "payment_id" => $paymentId
         ];
-        $this->apiHelper = $apiHelper;
     }//end __construct()
 
     /**
@@ -71,42 +61,42 @@ class PaymentCapture extends \PublicSquare\Payments\Api\ApiRequestAbstract
     protected function validateResponse(mixed $data): bool
     {
         $status = $data["status"] ?? "";
+        
         try {
             $this->checkResponseStatus($data);
         } catch (ApiRejectedResponseException $e) {
-            $this->logger->error("PSQ Payment capture rejected", [
+            $this->logger->error("PSQ Refund rejected", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
             throw new ApiRejectedResponseException(
                 __(
-                    "The payment could not be completed. Please verify your details and try again."
+                    "The Refund could not be completed. Please verify your details and try again."
                 )
             );
         } catch (ApiDeclinedResponseException $e) {
-            $this->logger->error("PSQ Payment capture declined", [
+            $this->logger->error("PSQ Refund declined", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
             throw new ApiDeclinedResponseException(
                 __(
-                    "The payment could not be processed. Reason: " .
+                    "The Refund could not be processed. Reason: " .
                         $data["declined_reason"] ??
                         "declined"
                 )
             );
         }
-
-        if (in_array($status, [$this::SUCCEEDED_STATUS, $this::REQUIRES_CAPTURE_STATUS])) {
-            $this->logger->info("PSQ Payment capture succeeded", [
+        if (in_array($status, [$this::SUCCEEDED_STATUS, $this::CANCELLED_STATUS])) {
+            $this->logger->info("PSQ Refund succeeded", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
             return true;
         } else {
-            $this->logger->error("PSQ Payment capture failed", [
+            $this->logger->error("PSQ Refund failed", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
             throw new ApiFailedResponseException(
                 __(
-                    "The payment capture could not be completed. Please verify your details and try again."
+                    "The Refund could not be completed. Please verify your details and try again."
                 )
             );
         }

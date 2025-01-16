@@ -9,6 +9,7 @@
  * @copyright 2024 PublicSquare
  * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
  * @link      https://publicsquare.com/
+ * @deprecated This class is deprecated and will be removed in the next major release.
  */
 
 namespace PublicSquare\Payments\Model\Api;
@@ -36,17 +37,19 @@ use Magento\Vault\Api\PaymentTokenManagementInterface;
 use PublicSquare\Payments\Exception\CreateTransactionException;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Quote\Model\QuoteManagement;
+use PublicSquare\Payments\Api\Authenticated\PaymentCreateFactory;
+use PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory;
 
 class Payments implements PaymentsInterface
 {
     const ERROR_MESSAGE = "Unfortunately, we were unable to process your payment. Please try again or contact support for assistance.";
     /**
-     * @var \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory
+     * @var PaymentCreateFactory
      */
-    private $paymentsRequestFactory;
+    private $paymentCreateFactory;
 
     /**
-     * @var \PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory
+     * @var PaymentCancelFactory
      */
     private $paymentCancelFactory;
 
@@ -147,8 +150,8 @@ class Payments implements PaymentsInterface
     ];
 
     public function __construct(
-        \PublicSquare\Payments\Api\Authenticated\PaymentAuthorizeFactory $paymentsRequestFactory,
-        \PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory $paymentCancelFactory,
+        PaymentCreateFactory $paymentCreateFactory,
+        PaymentCancelFactory $paymentCancelFactory,
         \Magento\Checkout\Model\Session $checkoutSession,
         CartTotalRepositoryInterface $cartTotalRepository,
         CartManagementInterface $cartManagement,
@@ -169,7 +172,7 @@ class Payments implements PaymentsInterface
         \PublicSquare\Payments\Logger\Logger $logger,
         ResourceConnection $resourceConnection
     ) {
-        $this->paymentsRequestFactory = $paymentsRequestFactory;
+        $this->paymentCreateFactory = $paymentCreateFactory;
         $this->paymentCancelFactory = $paymentCancelFactory;
         $this->checkoutSession = $checkoutSession;
         $this->cartTotalRepository = $cartTotalRepository;
@@ -277,29 +280,30 @@ class Payments implements PaymentsInterface
             $quote
                 ->setPaymentMethod(Config::CODE)
                 ->setInventoryProcessed(false)
-                ->collectTotals()
-                ->save();
+                ->collectTotals();
 
             $shippingAddress = $quote->getShippingAddress();
+            $amount = $quote->getGrandTotal();
             if ($quote->getIsVirtual()) {
                 $shippingAddress = null;
+                $amount = $quote->getGrandTotal() / $quote->getItemsCount();
             } else if (empty($shippingAddress->getFirstname()) || empty($shippingAddress->getLastname())) {
                 $this->logger->warning('Shipping address first/last name is empty', ['quoteId' => $quote->getId(), 'quoteAddressId' => $shippingAddress->getId()]);
             }
-            /*
-            @var \PublicSquare\Payments\Api\Authenticated\Payments $request
-             */
-            $request = $this->paymentsRequestFactory->create([
-                "idempotencyKey" => $idempotencyKey,
-                "amount" => $quote->getGrandTotal(),
-                "cardId" => $cardId,
-                "capture" => false,
-                "phone" => $billingAddress->getTelephone(),
-                "email" => $emailToUse,
-                "shippingAddress" => $shippingAddress,
-                "billingAddress" => $billingAddress,
-            ]);
-            $response = $request->getResponseData();
+
+            // DEPRECATED: Handled within CaptureCommand
+            // $request = $this->paymentCreateFactory->create([
+            //     "idempotencyKey" => $idempotencyKey,
+            //     "amount" => $amount,
+            //     "cardId" => $cardId,
+            //     "capture" => false,
+            //     "phone" => $billingAddress->getTelephone(),
+            //     "email" => $emailToUse,
+            //     "shippingAddress" => $shippingAddress,
+            //     "billingAddress" => $billingAddress,
+            // ]);
+            // $response = $request->getResponseData();
+            $payment->setAdditionalInformation('cardId', $cardId);
 
             try {
                 // Create Order From Quote
@@ -313,31 +317,31 @@ class Payments implements PaymentsInterface
                 $this->logger->error("placeOrder failed", [
                     "error" => $e->getMessage(),
                 ]);
+                // DEPRECATED: Handled within CaptureCommand
                 // Cancel the payment in PublicSquare because something went wrong while
                 // placing the order
-                $this->paymentCancelFactory
-                    ->create([
-                        "payment" => [
-                            "payment_id" => $response["id"],
-                        ],
-                    ])
-                    ->getResponse();
+                // $this->paymentCancelFactory
+                //     ->create([
+                //         "paymentId" => $response["id"],
+                //     ])
+                //     ->getResponse();
                 throw new \Magento\Framework\Exception\CouldNotSaveException(
                     __(self::ERROR_MESSAGE)
                 );
             }
 
+            // DEPRECATED: Handled within CaptureCommand
             // Create transaction
-            $transactionId = $this->createTransaction($order, $response);
-
-            $this->invoiceOrder($order, $transactionId);
-
-            if ($customer && $saveCard) {
-                $this->savePaymentMethod(
-                    $customer->getId(),
-                    $response["payment_method"]
-                );
-            }
+            // $transactionId = $this->createTransaction($order, $response);
+            // 
+            // $this->invoiceOrder($order, $transactionId);
+            // 
+            // if ($customer && $saveCard) {
+            //     $this->savePaymentMethod(
+            //         $customer->getId(),
+            //         $response["payment_method"]
+            //     );
+            // }
 
             if ($orderId) {
                 $result["order_id"] = $orderId;

@@ -10,6 +10,14 @@ use Magento\Payment\Block\Info\Cc;
 class Info extends Cc
 {
     protected $_template = 'PublicSquare_Payments::info/default.phtml';
+
+
+    protected function isThisBlockIsCalledFromTheCustomerEmail()
+    {
+        $parentBlock = $this->getParentBlock();
+        return !$parentBlock;   // email templates do not have a parent block
+    }
+
     /**
      * Prepare credit card related payment info
      *
@@ -21,8 +29,14 @@ class Info extends Cc
         if (null !== $this->_paymentSpecificInformation) {
             return $this->_paymentSpecificInformation;
         }
+
+        if ($this->isThisBlockIsCalledFromTheCustomerEmail()) {
+            return parent::_prepareSpecificInformation($transport);
+        }
+
         $transport = parent::_prepareSpecificInformation($transport);
         $data = [];
+
         if ($rawDetails = $this->getRawDetailsInfo()) {
             $data = [
                 (string)__('Payment Status') => str_replace('_', ' ', (string)__($rawDetails['status'])),

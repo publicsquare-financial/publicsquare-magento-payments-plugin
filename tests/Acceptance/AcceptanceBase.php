@@ -127,7 +127,7 @@ class AcceptanceBase
         $I->uncheckOption('#payment_us_publicsquare_payments_payment_action_inherit');
 
         // select sale
-        $I->selectOption('select#payment_us_publicsquare_payments_payment_action', 'sale');
+        $I->selectOption('select#payment_us_publicsquare_payments_payment_action', 'authorize_capture');
         $I->click('Save Config');
         $I->waitForText('You saved the configuration');
         $I->see('You saved the configuration');
