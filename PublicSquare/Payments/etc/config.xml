@@ -23,7 +23,7 @@
                 <cvv_verification>1</cvv_verification>
                 <three_d_secure_authentiation>0</three_d_secure_authentiation>
                 <card_types>amex,visa,mastercard,discover</card_types>
-                <payment_action>sale</payment_action>
+                <payment_action>authorize_capture</payment_action>
                 <avs_check>1</avs_check>
                 <customer_lookup>1</customer_lookup>
                 <!-- What can we do? -->
@@ -44,7 +44,8 @@
                 <can_capture_vault>1</can_capture_vault>
                 <can_use_internal>1</can_use_internal>
                 <can_vault>1</can_vault>
-                <paymentInfoKeys>cc_type,cc_last_4,cc_trans_id,payment_id,fraud_decision,avsStreetAddressResponseCode,cvvResponseCode</paymentInfoKeys>
+                <paymentInfoKeys>cc_type,cc_last_4,cc_trans_id,payment_id,fraud_decision,avsStreetAddressResponseCode,cvvResponseCode,cardId,idempotencyKey</paymentInfoKeys>
+                <privateInfoKeys>cardId,idempotencyKey</privateInfoKeys>
             </publicsquare_payments>
             <publicsquare_payments_cc_vault>
                 <model>PublicSquarePaymentsCCVaultFacade</model>

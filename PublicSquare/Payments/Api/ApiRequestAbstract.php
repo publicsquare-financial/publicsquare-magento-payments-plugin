@@ -249,7 +249,7 @@ abstract class ApiRequestAbstract
      */
     public function getSanitizedResponseData(): array
     {
-        return array_intersect_key($this->getResponseData(), array_flip(['id', 'errors', 'fraud_details', 'status', 'environment', 'transaction_id', 'amount', 'account_id', 'refunded', 'declined_reason']));
+        return array_intersect_key($this->getResponseData(), array_flip(['id', 'errors', 'fraud_details', 'status', 'environment', 'transaction_id', 'amount', 'amount_capturable', 'account_id', 'refunded', 'declined_reason', 'capture', 'currency', 'external_id']));
     } //end getSanitizedResponseData()
 
     public function is_ssl()

@@ -28,10 +28,14 @@ class PaymentRefund extends \PublicSquare\Payments\Api\ApiRequestAbstract
         \Laminas\Http\ClientFactory $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
         \PublicSquare\Payments\Logger\Logger $logger,
-        array $refund = []
+        float $amount,
+        string $paymentId
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
-        $this->requestData = $refund;
+        $this->requestData = [
+            "amount" => $amount,
+            "payment_id" => $paymentId
+        ];
     }//end __construct()
 
     /**
@@ -81,7 +85,7 @@ class PaymentRefund extends \PublicSquare\Payments\Api\ApiRequestAbstract
                 )
             );
         }
-        if (in_array($status, [$this::CANCELLED_STATUS])) {
+        if (in_array($status, [$this::SUCCEEDED_STATUS, $this::CANCELLED_STATUS])) {
             $this->logger->info("PSQ Refund succeeded", [
                 "response" => $this->getSanitizedResponseData(),
             ]);

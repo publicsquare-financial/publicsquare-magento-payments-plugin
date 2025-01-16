@@ -55,7 +55,6 @@ class VaultTokenRenderer extends AbstractTokenRenderer
     public function getIconHeight()
     {
         return $this->getIconForType($this->getTokenDetails()['type'])['height'];
-        // return 71;
     }
 
     /**
@@ -64,7 +63,6 @@ class VaultTokenRenderer extends AbstractTokenRenderer
      */
     public function getIconWidth()
     {
-        // return $this->getIconForType($this->getTokenDetails()['type'])['width'];
         return 45;
     }
 
