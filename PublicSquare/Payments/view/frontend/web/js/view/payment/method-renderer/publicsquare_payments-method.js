@@ -168,6 +168,7 @@ define([
           cardId: this.cardId,
           idempotencyKey: this.idempotencyKey
         },
+        extension_attributes: { agreement_ids: [1] }
       };
 
       data["additional_data"] = _.extend(
