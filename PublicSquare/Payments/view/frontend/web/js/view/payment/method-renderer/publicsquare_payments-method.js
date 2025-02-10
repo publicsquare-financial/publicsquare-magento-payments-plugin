@@ -168,7 +168,9 @@ define([
           cardId: this.cardId,
           idempotencyKey: this.idempotencyKey
         },
-        extension_attributes: { agreement_ids: [1] }
+        ...(window.checkoutConfig.checkoutAgreements && window.checkoutConfig.checkoutAgreements.agreements && {
+          extension_attributes: { agreement_ids: window.checkoutConfig.checkoutAgreements.agreements.map(({ agreementId }) => agreementId) }
+        })
       };
 
       data["additional_data"] = _.extend(
