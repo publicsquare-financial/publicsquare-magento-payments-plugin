@@ -46,6 +46,7 @@ define([
       paymentPayload: {
         nonce: null,
       },
+      additionalData: {},
       apiKey: window.checkoutConfig.payment.publicsquare_payments.pk,
       code: "publicsquare_payments",
       elementsFormSelector: "#publicsquare-elements-form",
@@ -54,6 +55,7 @@ define([
         "Something went wrong. Please try again or contact support for assistance.",
       submitting: false,
       idempotencyKey: null,
+      cardId: null,
     },
     initialize: function () {
       var self = this;
@@ -112,24 +114,48 @@ define([
     },
     placeOrderWithCardId: function (cardId) {
       var self = this;
+      self.cardId = cardId;
       var serviceUrl = urlBuilder.createUrl(
-        "/publicsquare_payments/payments",
-        {},
+        customer.isLoggedIn() ?
+          '/carts/mine/payment-information' :
+          '/guest-carts/:quoteId/payment-information',
+        {
+          quoteId: quote.getQuoteId()
+        }
       );
 
       return placeOrderService(
         serviceUrl,
         {
-          cardId,
-          saveCard: this.vaultEnabler.isActivePaymentTokenEnabler(),
+          saveCard: self.vaultEnabler.isActivePaymentTokenEnabler(),
           ...(!customer.isLoggedIn() && { email: quote.guestEmail }),
-          idempotencyKey: self.idempotencyKey,
+          paymentMethod: self.getData()
         },
-        messageList,
+        messageList
       ).then(() => {
         const maskId = window.checkoutConfig.quoteData.entity_id;
         const successUrl = `${window.checkoutConfig.payment.publicsquare_payments.successUrl}?${window.checkoutConfig.isCustomerLoggedIn ? "refercust" : "refergues"}=${maskId}`;
         $.mage.redirect(successUrl);
+      }).fail(function (response) {
+        fullScreenLoader.stopLoader();
+        self.submitting = false;
+
+        // Extract the error message from the response
+        let errorMessage = self.errorMessage;
+        if (response.responseJSON && response.responseJSON.message) {
+          try {
+            // Sometimes the message might be JSON encoded
+            const decodedMessage = JSON.parse(response.responseJSON.message);
+            errorMessage = decodedMessage.message || decodedMessage;
+          } catch (e) {
+            // If not JSON, use the message directly
+            errorMessage = response.responseJSON.message;
+          }
+        }
+
+        messageList.addErrorMessage({
+          message: $t(errorMessage)
+        });
       });
     },
     /**
@@ -139,7 +165,8 @@ define([
       var data = {
         method: this.getCode(),
         additional_data: {
-          payment_method_nonce: this.paymentPayload.nonce,
+          cardId: this.cardId,
+          idempotencyKey: this.idempotencyKey
         },
       };
 

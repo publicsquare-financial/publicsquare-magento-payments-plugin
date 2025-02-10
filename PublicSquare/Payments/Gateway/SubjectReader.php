@@ -8,9 +8,19 @@ namespace PublicSquare\Payments\Gateway;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Helper;
 use Magento\Vault\Api\Data\PaymentTokenInterface;
+use PublicSquare\Payments\Logger\Logger;
 
 class SubjectReader
 {
+    /**
+     * @var Logger
+     */
+    private $logger;
+
+    public function __construct(Logger $logger) {
+        $this->logger = $logger;
+    }
+
     /**
      * Reads response object from subject
      *
@@ -125,5 +135,16 @@ class SubjectReader
     public function readStoreId(array $subject)
     {
         return $subject['store_id'] ?? null;
+    }
+
+    /**
+     * Reads card id, otherwise returns null.
+     *
+     * @param array $subject
+     * @return int|null
+     */
+    public function readCardId(array $subject)
+    {
+        return $subject['card_id'] ?? null;
     }
 }

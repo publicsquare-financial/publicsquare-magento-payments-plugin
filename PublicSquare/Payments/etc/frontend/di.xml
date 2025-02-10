@@ -20,12 +20,6 @@
         </arguments>
     </type>
 
-    <!-- <type name="PublicSquare\Payments\Controller\Payment\Capture">
-        <arguments>
-            <argument name="captureCommand" xsi:type="object">PublicSquare\Payments\Gateway\Command\CaptureCommand</argument>
-        </arguments>
-    </type> -->
-
     <type name="Magento\Payment\Model\CcGenericConfigProvider">
         <arguments>
             <argument name="methodCodes" xsi:type="array">

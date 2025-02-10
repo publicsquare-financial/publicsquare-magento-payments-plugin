@@ -3,25 +3,29 @@
 namespace PublicSquare\Payments\Gateway\Command;
 
 use Magento\Payment\Gateway\CommandInterface;
-use PublicSquare\Payments\Api\Authenticated\RefundsFactory;
+use PublicSquare\Payments\Api\Authenticated\PaymentRefundFactory;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Payment\Gateway\Command\CommandException;
 
 class RefundCommand implements CommandInterface
 {
     /**
-     * @var RefundsFactory
+     * @var PaymentRefundFactory
      */
-    private $refundsRequestFactory;
+    private $paymentRefundFactory;
 
     /**
      * @var TransactionRepositoryInterface
      */
     private $transactionRepository;
 
-    public function __construct(RefundsFactory $refundsRequestFactory, TransactionRepositoryInterface $transactionRepository) {
-        $this->refundsRequestFactory = $refundsRequestFactory;
+    protected $logger;
+
+    public function __construct(PaymentRefundFactory $paymentRefundFactory, TransactionRepositoryInterface $transactionRepository, \PublicSquare\Payments\Logger\Logger $logger,) {
+        $this->paymentRefundFactory = $paymentRefundFactory;
         $this->transactionRepository = $transactionRepository;
+        $this->logger = $logger;
     }
 
     public function execute(array $commandSubject)
@@ -32,20 +36,20 @@ class RefundCommand implements CommandInterface
 
         if (!$transactionId)
         {
-            throw new LocalizedException(__('Sorry, it is not possible to invoice this order because the payment is still pending.'));
+            throw new CommandException(__('Sorry, it is not possible to invoice this order because the payment is still pending.'));
         }
 
         try
         {
-            $this->refundsRequestFactory->create(['refund' => [
-                'payment_id' => $transactionId,
+            $this->paymentRefundFactory->create([
+                'paymentId' => $transactionId,
                 'amount' => $amount
-            ]])->getResponse();
+            ])->getResponse();
         }
         catch (\Exception $e)
         {
-            // $this->helper->throwError($e->getMessage());
-            throw new LocalizedException(__('Sorry, refund failed. '));
+            $this->logger->error('Refund failed', ['exception' => $e]);
+            throw new CommandException(__('Sorry, refund failed. '));
         }
     }
 
@@ -73,7 +77,7 @@ class RefundCommand implements CommandInterface
 
         if (empty($matches))
         {
-            throw new LocalizedException(__("The payment can only be refunded via the PublicSquare Dashboard. You can retry in offline mode instead."));
+            throw new CommandException(__("The payment can only be refunded via the PublicSquare Dashboard. You can retry in offline mode instead."));
         }
 
         return $matches[0];
