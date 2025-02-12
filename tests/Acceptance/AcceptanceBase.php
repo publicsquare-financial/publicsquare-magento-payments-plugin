@@ -342,7 +342,7 @@ class AcceptanceBase
         $this->_waitForLoading($I);
     }
 
-    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
+    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!', $termsAndConditions=false)
     {
         $this->_makeSurePaymentMethodIsVisible($I);
         $I->waitForElementVisible($this::IFRAME_CSS);
@@ -352,6 +352,9 @@ class AcceptanceBase
         $I->fillField('//*[@id="expirationDate"]', '12/29');
         $I->fillField('//*[@id="cvc"]', '123');
         $I->switchToIframe();
+        if ($termsAndConditions) {
+            $this->_checkTermsAndConditions($I);
+        }
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
@@ -383,5 +386,10 @@ class AcceptanceBase
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
         $I->waitForText($waitString);
+    }
+
+    protected function _checkTermsAndConditions(AcceptanceTester $I)
+    {
+        $I->checkOption('#agreement_publicsquare_payments_1');
     }
 }
