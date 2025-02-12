@@ -1,0 +1,59 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var PublicSquare\Payments\Block\Payment $block */
+
+$code = $block->escapeHtml($block->getCode());
+
+?>
+
+<script nonce="<?= $block->getNonce() ?>">
+    //<![CDATA[
+    require(
+        [
+            'jquery',
+            'publicsquare_payments',
+            'publicsquare_admin',
+        ], function($, publicsquare, publicsquareAdmin) {
+            var config = <?= /* @noEscape */ $block->getPaymentConfig() ?>,
+                form = $('#payment_form_<?= /* @noEscape */ $code ?>'),
+                elementsFormSelector = '#publicsquare-elements-form',
+                element = $(elementsFormSelector),
+                payment;
+            
+            console.log('publicsquareAdmin', publicsquareAdmin);
+
+            config.active = form.length > 0 && !form.is(':hidden');
+
+            function onSubmit(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('onSubmit');
+            }
+
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !element.children().length) {
+                        requestAnimationFrame(() => {
+                            publicsquare.initElements({
+                                apiKey: config.pk || '',
+                                selector: elementsFormSelector
+                            }, () => { })
+                            document.querySelector('#publicsquare_payments_cardId').value = 'card_1234567890';
+                            // document.querySelector('#submit_order_top_button').addEventListener('click', onSubmit);
+                            // document.querySelector('.order-summary button').addEventListener('click', onSubmit);
+                        })
+                    }
+                });
+            });
+
+            const targetElement = element.get(0); 
+            if (targetElement && publicsquare) {
+                observer.observe(targetElement);
+            }
+        });
+    //]]>
+</script>

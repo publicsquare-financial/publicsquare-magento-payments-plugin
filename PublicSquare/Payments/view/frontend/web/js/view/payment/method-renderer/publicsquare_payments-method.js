@@ -73,7 +73,7 @@ define([
           apiKey: this.apiKey,
           selector: this.elementsFormSelector,
         },
-        () => {},
+        () => { },
       );
     },
     createCard: function (cardholder_name) {
