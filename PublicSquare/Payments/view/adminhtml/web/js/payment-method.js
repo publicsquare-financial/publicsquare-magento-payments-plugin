@@ -10,7 +10,7 @@ require([
 ], function ($, Class, alert, domObserver, $t, publicsquare) {
   'use strict';
 
-  console.log('publicsquare', publicsquare);
+  console.log('publicsquaree', publicsquare);
 
   return Class.extend({
     defaults: {

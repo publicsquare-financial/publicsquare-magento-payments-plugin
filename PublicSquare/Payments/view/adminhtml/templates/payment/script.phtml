@@ -14,9 +14,9 @@ $code = $block->escapeHtml($block->getCode());
     //<![CDATA[
     require(
         [
-            'PublicSquare_Payments/js/publicsquare',
             'jquery',
-        ], function(PublicSquare, $) {
+            'publicsquare_payments'
+        ], function($, publicsquare) {
             var config = <?= /* @noEscape */ $block->getPaymentConfig() ?>,
                 form = $('#payment_form_<?= /* @noEscape */ $code ?>'),
                 elementsFormSelector = '#publicsquare-elements-form',
@@ -25,27 +25,23 @@ $code = $block->escapeHtml($block->getCode());
 
             config.active = form.length > 0 && !form.is(':hidden');
 
-            payment = new PublicSquare(config);
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !element.children().length) {
+                        requestAnimationFrame(() => {
+                            publicsquare.initElements({
+                                apiKey: config.pk || '',
+                                selector: elementsFormSelector
+                            }, () => { })
+                        })
+                    }
+                });
+            });
 
-            // const targetElement = element.get(0); 
-
-            // const observer = new IntersectionObserver(entries => {
-            //     entries.forEach(entry => {
-            //         if (entry.isIntersecting && !element.children().length) {
-            //             // Element is visible
-            //             console.log('Element is now visible'); 
-            //             // Do something when the element becomes visible
-            //             setTimeout(() => {
-            //                 publicsquare.initElements({
-            //                     apiKey: config.pk || '',
-            //                     selector: elementsFormSelector
-            //                 }, () => { })
-            //             }, 1000)
-            //         }
-            //     });
-            // });
-
-            // observer.observe(targetElement);
+            const targetElement = element.get(0); 
+            if (targetElement && publicsquare) {
+                observer.observe(targetElement);
+            }
         });
     //]]>
 </script>

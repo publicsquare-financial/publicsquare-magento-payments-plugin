@@ -45,6 +45,7 @@
                 <can_vault>1</can_vault>
                 <paymentInfoKeys>cc_type,cc_last_4,cc_trans_id,payment_id,fraud_decision,avsStreetAddressResponseCode,cvvResponseCode,cardId,idempotencyKey</paymentInfoKeys>
                 <privateInfoKeys>cardId,idempotencyKey</privateInfoKeys>
+                <cctypes>AE,VI,MC,DI</cctypes>
             </publicsquare_payments>
             <publicsquare_payments_cc_vault>
                 <model>PublicSquarePaymentsCCVaultFacade</model>

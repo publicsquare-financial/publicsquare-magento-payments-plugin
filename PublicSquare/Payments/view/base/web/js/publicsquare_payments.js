@@ -14,7 +14,7 @@ define(
     return (window.publicsquare = {
 
       // Properties
-      version: "4.0.8",
+      version: "1.0.0",
       publicsquareJs: null,
       cardElement: null,
 
@@ -23,7 +23,6 @@ define(
           const _publicsquare = await publicsquarejs.init(params.apiKey)
           this.publicsquareJs = _publicsquare
           this.cardElement = _publicsquare.createCardElement({})
-          console.log('cardElement', this.cardElement)
           this.cardElement.mount(params.selector)
 
           if (typeof callback === 'function') {
