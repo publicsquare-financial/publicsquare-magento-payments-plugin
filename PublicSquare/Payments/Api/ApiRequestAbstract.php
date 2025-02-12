@@ -195,7 +195,7 @@ abstract class ApiRequestAbstract
             $this->getUri();
             $client->setUri($this->getUri());
             $client->setOptions(
-                ['timeout' => 15]
+                ['timeout' => 30]
             );
             $client->setMethod($this->getMethod());
             $client->setHeaders($this->getHeaders());
