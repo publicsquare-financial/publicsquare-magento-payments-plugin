@@ -15,15 +15,24 @@ $code = $block->escapeHtml($block->getCode());
     require(
         [
             'jquery',
-            'publicsquare_payments'
-        ], function($, publicsquare) {
+            'publicsquare_payments',
+            'publicsquare_admin',
+        ], function($, publicsquare, publicsquareAdmin) {
             var config = <?= /* @noEscape */ $block->getPaymentConfig() ?>,
                 form = $('#payment_form_<?= /* @noEscape */ $code ?>'),
                 elementsFormSelector = '#publicsquare-elements-form',
                 element = $(elementsFormSelector),
                 payment;
+            
+            console.log('publicsquareAdmin', publicsquareAdmin);
 
             config.active = form.length > 0 && !form.is(':hidden');
+
+            function onSubmit(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('onSubmit');
+            }
 
             const observer = new IntersectionObserver(entries => {
                 entries.forEach(entry => {
@@ -33,6 +42,9 @@ $code = $block->escapeHtml($block->getCode());
                                 apiKey: config.pk || '',
                                 selector: elementsFormSelector
                             }, () => { })
+                            document.querySelector('#publicsquare_payments_cardId').value = 'card_1234567890';
+                            // document.querySelector('#submit_order_top_button').addEventListener('click', onSubmit);
+                            // document.querySelector('.order-summary button').addEventListener('click', onSubmit);
                         })
                     }
                 });

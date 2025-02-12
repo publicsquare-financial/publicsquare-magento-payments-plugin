@@ -28,8 +28,11 @@ class CaptureCommand implements CommandInterface
 
     public function execute(array $commandSubject)
     {
-        throw new \Exception('CaptureCommand execute');
         $payment = $commandSubject['payment']->getPayment();
+        // Get payment methon nonce
+        $nonce = $payment->getAdditionalInformation('payment_method_nonce');
+        $this->logger->info('CaptureCommand execute', ['commandSubject' => $commandSubject, 'nonce' => $nonce]);
+        throw new \Exception('CaptureCommand execute');
         // $data = $payment->decrypt();
         $paymentData = $payment->getAdditionalInformation();
         $this->logger->info('CaptureCommand execute', ['commandSubject' => $commandSubject, 'paymentData' => $paymentData]);
