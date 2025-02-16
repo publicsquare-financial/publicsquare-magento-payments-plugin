@@ -77,14 +77,14 @@ jobs:
       - name: curl headers of https://magento.test
         run: curl -k -I https://magento.test
 
+      - name: Setup Debug Session
+        uses: csexton/debugger-action@master
+
       - name: Run Integration Tests
         env:
           PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
           PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
         run: php vendor/bin/codecept run Acceptance EnableAndConfigurePublicSquarePaymentsCest --debug
-
-      - name: Setup Debug Session
-        uses: csexton/debugger-action@master
 
       - name: Run Integration Tests
         run: php vendor/bin/codecept run Acceptance --debug
