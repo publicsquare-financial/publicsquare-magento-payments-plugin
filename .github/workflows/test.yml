@@ -83,6 +83,9 @@ jobs:
           PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
         run: php vendor/bin/codecept run Acceptance EnableAndConfigurePublicSquarePaymentsCest --debug
 
+      - name: Setup Debug Session
+        uses: csexton/debugger-action@master
+
       - name: Run Integration Tests
         run: php vendor/bin/codecept run Acceptance --debug
 
