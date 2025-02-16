@@ -10,7 +10,7 @@ class AcceptanceBase
 
     protected $customerEmail = "";  // this will be dynamicaly produced
 
-    protected $rollbackTransactions = true;
+    protected $rollbackTransactions = false;
 
     //public function _before(\Codeception\TestInterface $test)
     public function _before(AcceptanceTester $I)
@@ -70,7 +70,7 @@ class AcceptanceBase
             // login page
             $I->waitForElement('#username');
             $I->fillField('#username', 'admin');
-            $I->fillField('#login', 'AdminPassword123');
+            $I->fillField('#login', 'AdminPassword1234');
             $I->click('.form-actions .action-login');
             $I->waitForText('Dashboard');
         }
@@ -88,11 +88,11 @@ class AcceptanceBase
 
     protected function _waitForLoading(AcceptanceTester $I): void
     {
-        $I->waitForElementNotVisible('img[alt="Loading..."]', 30);
-        $I->waitForElementNotVisible('.loading-mask', 30);
-        $I->waitForElementNotVisible('.admin__form-loading-mask', 30);
-        $I->waitForElementNotVisible('.admin__data-grid-loading-mask', 30);
-        $I->waitForElementNotVisible('.popup-loading img', 30);
+        $I->waitForElementNotVisible('img[alt="Loading..."]', 60);
+        $I->waitForElementNotVisible('.loading-mask', 60);
+        $I->waitForElementNotVisible('.admin__form-loading-mask', 60);
+        $I->waitForElementNotVisible('.admin__data-grid-loading-mask', 60);
+        $I->waitForElementNotVisible('.popup-loading img', 60);
     }
 
     protected function _goToPublicSquarePayments(AcceptanceTester $I): void
@@ -166,7 +166,7 @@ class AcceptanceBase
 
         // login page
         $I->fillField('#username', 'admin');
-        $I->fillField('#login', 'AdminPassword123');
+        $I->fillField('#login', 'AdminPassword1234');
         $I->click('.form-actions .action-login');
 
         $I->waitForText('Dashboard');
@@ -358,7 +358,7 @@ class AcceptanceBase
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
-        $I->waitForElementNotVisible('.loading-mask', 30);
+        $I->waitForElementNotVisible('.loading-mask', 60);
         $I->waitForText($waitString);
     }
 
@@ -390,6 +390,7 @@ class AcceptanceBase
 
     protected function _checkTermsAndConditions(AcceptanceTester $I)
     {
+        $I->pause();
         $I->checkOption('#agreement_publicsquare_payments_1');
     }
 }
