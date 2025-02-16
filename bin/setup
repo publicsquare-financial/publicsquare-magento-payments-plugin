@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -o errexit
 
+echo "Starting Setup ..."
+
 MEM_BYTES=$(docker info -f '{{.MemTotal}}')
 MEM_MB=$(( MEM_BYTES / 1000000 ))
 # When Docker Desktop is set to 6GB in the GUI, it is reported as 6227 MB
@@ -24,6 +26,8 @@ bin/clinotty composer config --no-plugins allow-plugins.laminas/laminas-dependen
 echo "Uninstalling Magento..."
 bin/clinotty bin/magento setup:uninstall -n
 
+bin/fixowns
+
 echo "Running, Magento setup:install..."
 bin/setup-install "${DOMAIN}"
 
@@ -44,7 +48,7 @@ bin/clinotty bin/magento indexer:reindex
 echo "Setting basic URL and generating SSL certificate..."
 bin/setup-domain "${DOMAIN}"
 
-bin/cli composer require markshust/magento2-module-disabletwofactorauth
+bin/clinotty composer require markshust/magento2-module-disabletwofactorauth
 bin/clinotty bin/magento module:enable MarkShust_DisableTwoFactorAuth
 bin/clinotty bin/magento module:enable PublicSquare_Payments
 bin/clinotty bin/magento setup:upgrade
@@ -56,11 +60,17 @@ bin/fixperms
 echo "Clearing the cache to apply updates..."
 bin/clinotty bin/magento cache:flush
 
-echo "Turning on developer mode..."
+#echo "Turning on developer mode..."
 bin/clinotty bin/magento deploy:mode:set developer
 
-bin/cli bin/magento sampledata:deploy
-bin/clinotty bin/magento admin:user:create --admin-user=admin --admin-password=AdminPassword123 --admin-email=admin@example.com --admin-firstname=admin --admin-lastname=admin
+
+bin/setup-sample-data
+
+#git clone git@github.com:magento/magento2-sample-data.git
+#php -f magento2-sample-data/dev/tools/build-sample-data.php -- --ce-source="src/magento-site"
+#bin/fixowns
+#bin/fixperms
+bin/clinotty bin/magento admin:user:create --admin-user=admin --admin-password=AdminPassword1234 --admin-email=admin@example.com --admin-firstname=admin --admin-lastname=admin
 
 bin/clinotty bin/magento setup:upgrade
 
