@@ -16,9 +16,9 @@ class EnableAndConfigurePublicSquarePaymentsCest extends AcceptanceBase
         $this->_adminEnableAndConfigurePublicSquarePayments($I);
     }
 
-    public function addProductInventory(AcceptanceTester $I)
-    {
-        $this->_initialize($I);
-        $this->_addInventoryToProduct($I, "Gift Card", 1000);
-    }
+//    public function addProductInventory(AcceptanceTester $I)
+//    {
+//        $this->_initialize($I);
+//        $this->_addInventoryToProduct($I, "Gift Card", 1000);
+//    }
 }
