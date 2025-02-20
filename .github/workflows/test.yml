@@ -77,8 +77,8 @@ jobs:
       - name: curl headers of https://magento.test
         run: curl -k -I https://magento.test
 
-      - name: Setup Debug Session
-        uses: csexton/debugger-action@master
+#      - name: Setup Debug Session
+#        uses: csexton/debugger-action@master
 
       - name: Run Integration Tests
         env:

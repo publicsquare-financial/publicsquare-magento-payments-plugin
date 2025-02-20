@@ -240,7 +240,7 @@ class AcceptanceBase
         $I->fillField('input[name="product[sku]"]', 'gift-card');
         $I->waitForElementVisible('input[name="product[price]"]');
         $I->fillField('input[name="product[price]"]', '75');
-        $I->fillField('input[name="product[quantity_and_stock_status][qty]"]', '100');
+        $I->fillField('input[name="product[quantity_and_stock_status][qty]"]', '1000');
         $I->selectOption('select[name="product[quantity_and_stock_status][is_in_stock]"]', 1);
         $I->click('Save');
         $this->_waitForLoading($I);
@@ -328,8 +328,11 @@ class AcceptanceBase
 
     protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I)
     {
+        $I->waitForElementNotVisible(".loading-mask", 60);
         $publicsquarePayments = '#publicsquare_payments';
-        $I->waitForElementClickable($publicsquarePayments);
+        $I->waitForElementVisible($publicsquarePayments, 30);
+        $I->waitForElementClickable($publicsquarePayments, 30);
+        $I->waitForElementNotVisible(".loading-mask", 60);
         $I->click($publicsquarePayments);
         $I->see('Credit/Debit Card Number');
         $I->waitForElementVisible($this::IFRAME_CSS);
@@ -355,11 +358,13 @@ class AcceptanceBase
         if ($termsAndConditions) {
             $this->_checkTermsAndConditions($I);
         }
+        $I->saveSessionSnapshot("beforeSubmitScreenshot");
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
+        $I->saveSessionSnapshot("beforeSubmitScreenshot2");
         $I->click($submitButton);
         $I->waitForElementNotVisible('.loading-mask', 60);
-        $I->waitForText($waitString);
+        $I->waitForText($waitString, 30);
     }
 
     protected function _checkoutWithVirtualCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
@@ -390,7 +395,26 @@ class AcceptanceBase
 
     protected function _checkTermsAndConditions(AcceptanceTester $I)
     {
-        $I->pause();
         $I->checkOption('#agreement_publicsquare_payments_1');
+    }
+
+    protected function _addInventoryToProduct(AcceptanceTester $I, $productName, $quantity=1000)
+    {
+
+        $this->_adminLogin($I);
+
+        $I->click("Catalog");
+        $I->waitForText("Products");
+        $I->waitForText("Categories");
+        $I->click("Products");
+        $I->waitForElementVisible('.data-grid-search-control');
+        $I->fillField('.data-grid-search-control', "$productName\n");
+        $I->waitForText("$productName");
+        $I->waitForElement("a[aria-label='Edit $productName']");
+        $I->click("a[aria-label='Edit $productName']");
+        $I->waitForElement("input[name='product[quantity_and_stock_status][qty]']");
+        $I->fillField("input[name='product[quantity_and_stock_status][qty]']", "$quantity");
+        $I->click("Save");
+        $I->waitForText("You saved the product.");
     }
 }
