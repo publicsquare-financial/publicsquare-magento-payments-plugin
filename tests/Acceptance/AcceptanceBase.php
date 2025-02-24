@@ -358,10 +358,10 @@ class AcceptanceBase
         if ($termsAndConditions) {
             $this->_checkTermsAndConditions($I);
         }
-        $I->saveSessionSnapshot("beforeSubmitScreenshot");
+        $I->saveSessionSnapshot("beforeSubmitScreenshot.png");
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
-        $I->saveSessionSnapshot("beforeSubmitScreenshot2");
+        $I->saveSessionSnapshot("beforeSubmitScreenshot2.png");
         $I->click($submitButton);
         $I->waitForElementNotVisible('.loading-mask', 60);
         $I->waitForText($waitString, 30);
