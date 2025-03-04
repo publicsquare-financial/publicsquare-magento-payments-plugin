@@ -8,6 +8,7 @@ class CustomerSavedPaymentMethodsCest
 {
     public function _before(AcceptanceTester $I)
     {
+        $I->amOnPage('/customer/account/logout');
         $I->amOnPage('/customer/account/login/');
         $I->fillField('login[username]', 'roni_cost@example.com');
         $I->fillField('login[password]', 'roni_cost3@example.com');

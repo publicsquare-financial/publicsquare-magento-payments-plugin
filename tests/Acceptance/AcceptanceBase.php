@@ -293,6 +293,7 @@ class AcceptanceBase
 
     protected function _goToCheckout(AcceptanceTester $I) {
         $I->amOnPage('/checkout');
+        $I->waitForElementNotVisible(".loading-mask", 60);
         $I->waitForElement('#customer-email');
         $this->_generateUniqueEmail();
         $I->fillField('#customer-email', $this->customerEmail);
@@ -309,10 +310,12 @@ class AcceptanceBase
         $I->click($firstRadio);
         $I->click('Next');
         $I->waitForText('Payment Method');
+        $I->waitForText('Order Total');
     }
 
     protected function _goToVirtualProductCheckout(AcceptanceTester $I) {
         $I->amOnPage('/checkout');
+        $I->waitForElementNotVisible(".loading-mask", 60);
         $I->waitForElement('#customer-email');
         $this->_generateUniqueEmail();
         $I->fillField('#customer-email', $this->customerEmail);
@@ -345,9 +348,30 @@ class AcceptanceBase
         $this->_waitForLoading($I);
     }
 
+    protected function _clearField(AcceptanceTester $I, $field)
+    {
+        $I->click($field);
+        $I->pressKey($field, [\Facebook\WebDriver\WebDriverKeys::COMMAND, 'a']);
+        $I->pressKey($field, [\Facebook\WebDriver\WebDriverKeys::BACKSPACE]);
+    }
+
+    protected function _clearCardForm(AcceptanceTester $I)
+    {
+        $this->_makeSurePaymentMethodIsVisible($I);
+        $I->waitForElementVisible($this::IFRAME_CSS);
+        $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
+        $I->switchToIframe('//*[@id="'.$x.'"]');
+        $this->_clearField($I, '//*[@id="cardNumber"]');
+        $this->_clearField($I, '//*[@id="expirationDate"]');
+        $this->_clearField($I, '//*[@id="cvc"]');
+        $I->wait(1);
+        $I->switchToIframe();
+    }
+
     protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!', $termsAndConditions=false)
     {
         $this->_makeSurePaymentMethodIsVisible($I);
+        $this->_clearCardForm($I);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
@@ -363,8 +387,8 @@ class AcceptanceBase
         $I->waitForElementClickable($submitButton);
         $I->saveSessionSnapshot("beforeSubmitScreenshot2");
         $I->click($submitButton);
+        $I->waitForText($waitString, 60);
         $I->waitForElementNotVisible('.loading-mask', 60);
-        $I->waitForText($waitString, 30);
     }
 
     protected function _checkoutWithVirtualCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
@@ -395,7 +419,7 @@ class AcceptanceBase
 
     protected function _checkTermsAndConditions(AcceptanceTester $I)
     {
-        $I->checkOption('#agreement_publicsquare_payments_1');
+        $I->checkOption('._active .checkout-agreement input');
     }
 
     protected function _addInventoryToProduct(AcceptanceTester $I, $productName, $quantity=1000)

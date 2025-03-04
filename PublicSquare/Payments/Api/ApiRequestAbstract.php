@@ -231,7 +231,7 @@ abstract class ApiRequestAbstract
      */
     public function getResponseData(): array
     {
-        $response = $this->getResponse();
+        $this->getResponse();
 
         $data = $this->responseData;
 

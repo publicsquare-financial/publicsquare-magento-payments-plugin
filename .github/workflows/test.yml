@@ -87,7 +87,7 @@ jobs:
         run: php vendor/bin/codecept run Acceptance EnableAndConfigurePublicSquarePaymentsCest --debug
 
       - name: Run Integration Tests
-        run: php vendor/bin/codecept run Acceptance --debug
+        run: php vendor/bin/codecept run Acceptance --debug -f
 
       - name: artifacts
         uses: actions/upload-artifact@v4
