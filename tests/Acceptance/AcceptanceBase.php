@@ -441,4 +441,11 @@ class AcceptanceBase
         $I->click("Save");
         $I->waitForText("You saved the product.");
     }
+
+    protected function _doSuccessfulCheckout(AcceptanceTester $I) {
+        $this->_initialize($I);
+        $this->_addProductToCart($I);
+        $this->_goToCheckout($I);
+        $this->_checkoutWithCard($I);
+    }
 }
