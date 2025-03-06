@@ -74,6 +74,8 @@ class AcceptanceBase
             $I->click('.form-actions .action-login');
             $I->waitForText('Dashboard');
         }
+        // Maybe click "Don't allow" if Adobe usage data collection modal is shown
+        $I->tryToClick("Don't Allow");
     }
 
     protected function _customerLogin(AcceptanceTester $I): void
@@ -132,33 +134,6 @@ class AcceptanceBase
         $I->waitForText('You saved the configuration');
         $I->see('You saved the configuration');
     }
-
-
-    protected function _adminEnableAndConfigurePublicSquarePayments(AcceptanceTester $I): void
-    {
-        $this->_goToPublicSquarePayments($I);
-
-        $I->uncheckOption('#payment_us_publicsquare_payments_active_inherit');
-
-        // select sale
-        $I->selectOption('select#payment_us_publicsquare_payments_active', '1');
-
-        $public_key = getenv("PUBLICSQUARE_PUBLIC_KEY");
-        $secret_key = getenv("PUBLICSQUARE_SECRET_KEY");
-        echo "public_key=$public_key, secret_key=$secret_key\n";
-        if ($public_key && $secret_key) {
-            echo "Setting the PublicSquare public_key and secret_key\n";
-            $I->fillField("#payment_us_publicsquare_payments_publicsquare_api_public_key", $public_key);
-            $I->fillField("#payment_us_publicsquare_payments_publicsquare_api_secret_key", $secret_key);
-        }
-
-        $I->click('Save Config');
-        $I->waitForText('You saved the configuration');
-        $I->see('You saved the configuration');
-    }
-
-
-
 
     protected function _adminEnableAuthorize(AcceptanceTester $I): void
     {
@@ -244,6 +219,7 @@ class AcceptanceBase
         $I->selectOption('select[name="product[quantity_and_stock_status][is_in_stock]"]', 1);
         $I->click('Save');
         $this->_waitForLoading($I);
+        $I->runShellCommand('bin/magento indexer:reindex cataloginventory_stock');
     }
 
     protected function _customerGoToAnOrder(AcceptanceTester $I, $doLogin=true): void
@@ -294,7 +270,17 @@ class AcceptanceBase
     protected function _goToCheckout(AcceptanceTester $I) {
         $I->amOnPage('/checkout');
         $I->waitForElementNotVisible(".loading-mask", 60);
-        $I->waitForElement('#customer-email');
+        /**
+         * This is a workaround to fix the issue where the customer-email field is not visible.
+         * https://github.com/magento/magento2/issues/38274
+         */
+        try {
+            $I->waitForElement('#customer-email', 5);
+        } catch (\Exception $e) {
+            // do nothing
+            $I->reloadPage();
+            $I->waitForElement('#customer-email');
+        }
         $this->_generateUniqueEmail();
         $I->fillField('#customer-email', $this->customerEmail);
         $I->fillField('firstname', 'Billy');

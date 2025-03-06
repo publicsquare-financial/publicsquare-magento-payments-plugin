@@ -96,6 +96,9 @@ rootnotty:
 setup:
 	@./bin/setup $(call args)
 
+setup-cli:
+	@./bin/setup-cli $(call args)
+
 setup-composer-auth:
 	@./bin/setup-composer-auth
 

@@ -9,7 +9,7 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - name: create hosts entry for magento.test
+      - name: Create hosts entry for magento.test
         run: sudo echo "127.0.0.1 magento.test" | sudo tee -a /etc/hosts
 
       - name: Checkout code
@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
 
-      - name: fix the file permissions
+      - name: Fix the file permissions
         run: bin/fixowns && bin/fixperms
 
       - name: Cache Magento installation
@@ -98,14 +98,14 @@ jobs:
           PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
         run: make verify      
 
-      - name: start selenium via docker cli
+      - name: Start selenium
         run: |
           sudo apt-get update && sudo apt-get install -y net-tools
           HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
           echo "Host IP: $HOST_IP"
           docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" --memory="4g" --cpus="2" selenium/standalone-chrome:latest
 
-      - name: netstat to see services listening on ports
+      - name: Netstat to see services listening on ports
         run : sudo apt install net-tools && sudo netstat -lp
 
       - name: Wait for Selenium 127.0.0.1:4444
@@ -120,14 +120,11 @@ jobs:
             sleep 3
           done
 
-      - name: curl headers of https://magento.test
+      - name: Curl headers of https://magento.test
         run: curl -k -I https://magento.test
 
-      - name: Run Integration Tests
-        env:
-          PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
-          PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
-        run: php vendor/bin/codecept run Acceptance EnableAndConfigurePublicSquarePaymentsCest --debug
+      - name: Enable PublicSquare Payments
+        run: make setup-cli ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }} ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
 
       - name: Run Integration Tests
         run: php vendor/bin/codecept run Acceptance --debug -f
