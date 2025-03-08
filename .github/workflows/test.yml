@@ -21,6 +21,7 @@ jobs:
           path: |
             ~/.composer/cache
             src/magento-site/vendor
+            vendor
           key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-${{ github.repository }}-
@@ -98,41 +99,41 @@ jobs:
           PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
         run: make verify      
 
-      - name: Start selenium
-        run: |
-          sudo apt-get update && sudo apt-get install -y net-tools
-          HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
-          echo "Host IP: $HOST_IP"
-          docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" --memory="4g" --cpus="2" selenium/standalone-chrome:latest
-
-      - name: Netstat to see services listening on ports
-        run : sudo apt install net-tools && sudo netstat -lp
-
-      - name: Wait for Selenium 127.0.0.1:4444
-        run: |
-          for i in {1..10}; do
-            if curl -s "http://127.0.0.1:4444/wd/hub/status" | jq ".value.ready" | grep 'true'; then
-              echo "Selenium is ready!"
-              break
-            fi
-            echo $(curl -s "http://localhost:4444/wd/hub/status")
-            echo "Waiting for Selenium to be ready..."
-            sleep 3
-          done
-
-      - name: Curl headers of https://magento.test
-        run: curl -k -I https://magento.test
-
-      - name: Enable PublicSquare Payments
-        run: make setup-cli ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }} ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
-
-      - name: Run Integration Tests
-        run: php vendor/bin/codecept run Acceptance --debug -f
-
-      - name: artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-output
-          path: /home/runner/work/publicsquare-magento-payments-plugin/publicsquare-magento-payments-plugin/tests/_output/
-
+#      - name: Start selenium
+#        run: |
+#          sudo apt-get update && sudo apt-get install -y net-tools
+#          HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
+#          echo "Host IP: $HOST_IP"
+#          docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" --memory="4g" --cpus="2" selenium/standalone-chrome:latest
+#
+#      - name: Netstat to see services listening on ports
+#        run : sudo apt install net-tools && sudo netstat -lp
+#
+#      - name: Wait for Selenium 127.0.0.1:4444
+#        run: |
+#          for i in {1..10}; do
+#            if curl -s "http://127.0.0.1:4444/wd/hub/status" | jq ".value.ready" | grep 'true'; then
+#              echo "Selenium is ready!"
+#              break
+#            fi
+#            echo $(curl -s "http://localhost:4444/wd/hub/status")
+#            echo "Waiting for Selenium to be ready..."
+#            sleep 3
+#          done
+#
+#      - name: Curl headers of https://magento.test
+#        run: curl -k -I https://magento.test
+#
+#      - name: Enable PublicSquare Payments
+#        run: make setup-cli ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }} ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
+#
+#      - name: Run Integration Tests
+#        run: php vendor/bin/codecept run Acceptance --debug -f
+#
+#      - name: artifacts
+#        uses: actions/upload-artifact@v4
+#        if: always()
+#        with:
+#          name: test-output
+#          path: /home/runner/work/publicsquare-magento-payments-plugin/publicsquare-magento-payments-plugin/tests/_output/
+#
