@@ -20,7 +20,7 @@ jobs:
         with:
           path: |
             ~/.composer/cache
-            vendor/
+            src/magento-site/vendor
           key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-${{ github.repository }}-
