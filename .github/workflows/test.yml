@@ -31,11 +31,9 @@ jobs:
           extensions: curl, mbstring, openssl, pdo, pdo_sqlite
           ini-values: memory_limit=-1, date.timezone='UTC'
           coverage: xdebug
-          tools: composer:v2
+          tools: 'composer:v2'
       - name: Docker compose
         run: |
-#          mkdir -p docker-volumes
-#          ./bin/restore-volumes.sh $PWD/docker-volumes || true
           docker compose -f docker-compose-ci.yaml up -d
           docker compose -f docker-compose-ci.yaml exec web install-magento
           docker compose -f docker-compose-ci.yaml exec web setup-cli ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }} ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
