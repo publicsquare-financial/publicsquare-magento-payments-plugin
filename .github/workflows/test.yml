@@ -10,22 +10,22 @@ jobs:
       contents: write
     steps:
       - name: Create hosts entry for magento.test
-        run: sudo echo "127.0.0.1 magento.test" | sudo tee -a /etc/hosts
+        run: sudo echo "127.0.0.1 local.magento" | sudo tee -a /etc/hosts
 
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.composer/cache
-            src/magento-site/vendor
-            vendor
-          key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ github.repository }}-
-            ${{ runner.os }}-composer-
+#      - name: Cache Composer dependencies
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            ~/.composer/cache
+#            src/magento-site/vendor
+#            vendor
+#          key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('**/composer.lock') }}
+#          restore-keys: |
+#            ${{ runner.os }}-composer-${{ github.repository }}-
+#            ${{ runner.os }}-composer-
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -35,69 +35,70 @@ jobs:
           ini-values: memory_limit=-1, date.timezone='UTC'
           coverage: xdebug
           tools: composer:v2
+      - name: Docker compose
+        run: docker compose -f docker-compose-ci.yaml up -d
+#      - name: Validate composer.json and composer.lock
+#        run: composer validate
+#
+#      - name: Install dependencies
+#        run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
+#
+#      - name: Fix the file permissions
+#        run: bin/fixowns && bin/fixperms
+#
+#      - name: Cache Magento installation
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            vendor/magento/
+#            generated/
+#            var/
+#            pub/
+#            app/etc/
+#            bin/
+#            dev/
+#            lib/
+#            setup/
+#            phpsqlite3/
+#            .htaccess
+#            .htaccess.sample
+#            .php-cs-fixer.cache
+#            .php-cs-fixer.dist.php
+#            .phpunit.result.cache
+#            .user.ini
+#            auth.json
+#            auth.json.sample
+#            composer.json
+#            composer.lock
+#            index.php
+#            php.ini
+#            php.ini.sample
+#            pub/index.php
+#            pub/static/
+#            setup.php
+#            vendor/
+#          key: ${{ runner.os }}-magento-core-${{ github.repository }}-${{ hashFiles('**/composer.lock', '**/app/etc/config.php', '**/pub/static/**/*') }}
+#          restore-keys: |
+#            ${{ runner.os }}-magento-core-${{ github.repository }}-
+#            ${{ runner.os }}-magento-core-
 
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
-
-      - name: Fix the file permissions
-        run: bin/fixowns && bin/fixperms
-
-      - name: Cache Magento installation
-        uses: actions/cache@v4
-        with:
-          path: |
-            vendor/magento/
-            generated/
-            var/
-            pub/
-            app/etc/
-            bin/
-            dev/
-            lib/
-            setup/
-            phpsqlite3/
-            .htaccess
-            .htaccess.sample
-            .php-cs-fixer.cache
-            .php-cs-fixer.dist.php
-            .phpunit.result.cache
-            .user.ini
-            auth.json
-            auth.json.sample
-            composer.json
-            composer.lock
-            index.php
-            php.ini
-            php.ini.sample
-            pub/index.php
-            pub/static/
-            setup.php
-            vendor/
-          key: ${{ runner.os }}-magento-core-${{ github.repository }}-${{ hashFiles('**/composer.lock', '**/app/etc/config.php', '**/pub/static/**/*') }}
-          restore-keys: |
-            ${{ runner.os }}-magento-core-${{ github.repository }}-
-            ${{ runner.os }}-magento-core-
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.repository }}-${{ github.ref }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ github.repository }}-
-            ${{ runner.os }}-buildx-
-
-      - id: make-verify
-        name: Install Magento using make verify
-        env:
-          ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
-          ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
-          PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
-          PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
-        run: make verify      
+#      - name: Cache Docker layers
+#        uses: actions/cache@v4
+#        with:
+#          path: /tmp/.buildx-cache
+#          key: ${{ runner.os }}-buildx-${{ github.repository }}-${{ github.ref }}
+#          restore-keys: |
+#            ${{ runner.os }}-buildx-${{ github.repository }}-
+#            ${{ runner.os }}-buildx-
+#
+#      - id: make-verify
+#        name: Install Magento using make verify
+#        env:
+#          ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
+#          ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
+#          PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
+#          PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
+#        run: make verify
 
 #      - name: Start selenium
 #        run: |

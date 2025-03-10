@@ -1,0 +1,49 @@
+version: '3.0'
+services:
+  web:
+    platform: linux/amd64
+    image: ghcr.io/alexcheng1982/docker-magento2:2.4.6-p5
+    ports:
+      - "80:80"
+    links:
+      - db
+      - opensearch
+    depends_on:
+      - db
+      - opensearch
+    volumes: 
+      - magento-data:/var/www/html  
+      - ./PublicSquare:/var/www/html/app/code/PublicSquare
+    env_file:
+      - env/ci-stack.env
+  db:
+    platform: linux/amd64
+    image: mysql:8.0.0
+    volumes:
+      - db-data:/var/lib/mysql
+    env_file:
+      - env/ci-stack.env
+  phpmyadmin:
+    platform: linux/amd64
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8580:80"
+    links:
+      - db
+    depends_on:
+      - db
+  opensearch:
+    image: markoshust/magento-opensearch:2.12-0
+    ports:
+      - 9200:9200
+      - 9300:9300
+      - 9600:9600
+    env_file: env/opensearch.env
+    environment:
+      - "discovery.type=single-node"
+      - "cluster.routing.allocation.disk.threshold_enabled=false"
+      - "index.blocks.read_only_allow_delete"
+volumes:
+  magento-data:
+  db-data:
+  opensearch-data:
