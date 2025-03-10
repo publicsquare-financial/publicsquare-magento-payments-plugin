@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            /var/lib/docker/volumes
+            /tmp/docker-volumes
             # src/magento-site/vendor
             # vendor
           key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('docker-compose-ci.yaml') }}
@@ -38,6 +38,8 @@ jobs:
           docker volume ls --format json
           docker compose -f docker-compose-ci.yaml exec web install-magento
           docker compose -f docker-compose-ci.yaml exec web bin/magento module:enable PublicSquare_Payments
+        env:
+          DOCKER_VOLUME_PATH: /tmp/docker-volumes
 #      - name: Validate composer.json and composer.lock
 #        run: composer validate
 #
