@@ -19,10 +19,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            .docker-data
+            /var/lib/docker/volumes
             # src/magento-site/vendor
             # vendor
-          key: ${{ runner.os }}-composer-${{ github.repository }} # -${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('docker-compose-ci.yaml') }}
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -35,6 +35,7 @@ jobs:
       - name: Docker compose
         run: |
           docker compose -f docker-compose-ci.yaml up -d
+          docker volume ls --format json
           docker compose -f docker-compose-ci.yaml exec web install-magento
           docker compose -f docker-compose-ci.yaml exec web bin/magento module:enable PublicSquare_Payments
 #      - name: Validate composer.json and composer.lock
