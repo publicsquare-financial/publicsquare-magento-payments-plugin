@@ -35,7 +35,7 @@ jobs:
       - name: Docker compose
         run: |
           mkdir -p docker-volumes
-          ./bun/restore-volumes.sh $PWD/docker-volumes
+          ./bin/restore-volumes.sh $PWD/docker-volumes
           docker compose -f docker-compose-ci.yaml up -d
           docker volume ls --format json
           docker compose -f docker-compose-ci.yaml exec web install-magento
