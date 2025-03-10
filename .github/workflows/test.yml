@@ -19,7 +19,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            /tmp/docker-volumes
+            docker-volumes
             # src/magento-site/vendor
             # vendor
           key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('docker-compose-ci.yaml') }}
@@ -34,12 +34,18 @@ jobs:
           tools: composer:v2
       - name: Docker compose
         run: |
+          mkdir -p docker-volumes
+          ./bun/restore-volumes.sh $PWD/docker-volumes
           docker compose -f docker-compose-ci.yaml up -d
           docker volume ls --format json
           docker compose -f docker-compose-ci.yaml exec web install-magento
           docker compose -f docker-compose-ci.yaml exec web bin/magento module:enable PublicSquare_Payments
+          docker compose -f docker-compose-ci.yaml down
         env:
           DOCKER_VOLUME_PATH: /tmp/docker-volumes
+      - name: Backup volumes
+        run: |
+          ./bin/backup-volumes.sh $PWD/docker-volumes
 #      - name: Validate composer.json and composer.lock
 #        run: composer validate
 #
