@@ -16,6 +16,7 @@ services:
     volumes:
       - magento-data:/var/www/html  
       - ./PublicSquare:/var/www/html/app/code/PublicSquare
+      - ./bin/setup-cli:/user/local/bin/setup-cli
     env_file:
       - env/ci-stack.env
   db:
