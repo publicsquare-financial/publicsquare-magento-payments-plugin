@@ -15,17 +15,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-#      - name: Cache Composer dependencies
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            ~/.composer/cache
-#            src/magento-site/vendor
-#            vendor
-#          key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('**/composer.lock') }}
-#          restore-keys: |
-#            ${{ runner.os }}-composer-${{ github.repository }}-
-#            ${{ runner.os }}-composer-
+      - name: Cache docker data
+        uses: actions/cache@v4
+        with:
+          path: |
+            .docker-data
+            # src/magento-site/vendor
+            # vendor
+          key: ${{ runner.os }}-composer-${{ github.repository }} # -${{ hashFiles('**/composer.lock') }}
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -36,7 +33,10 @@ jobs:
           coverage: xdebug
           tools: composer:v2
       - name: Docker compose
-        run: docker compose -f docker-compose-ci.yaml up -d
+        run: |
+          docker compose -f docker-compose-ci.yaml up -d
+          docker compose -f docker-compose-ci.yaml exec web install-magento
+          docker compose -f docker-compose-ci.yaml exec web bin/magento module:enable PublicSquare_Payments
 #      - name: Validate composer.json and composer.lock
 #        run: composer validate
 #
