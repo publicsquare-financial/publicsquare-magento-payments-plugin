@@ -9,9 +9,11 @@ services:
       - db
       - opensearch
     depends_on:
-      - db
-      - opensearch
-    volumes: 
+      db:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    volumes:
       - magento-data:/var/www/html  
       - ./PublicSquare:/var/www/html/app/code/PublicSquare
     env_file:
@@ -23,6 +25,12 @@ services:
       - db-data:/var/lib/mysql
     env_file:
       - env/ci-stack.env
+    healthcheck:
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "magento", "-pmagento" ]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+        start_period: 20s
   phpmyadmin:
     platform: linux/amd64
     image: phpmyadmin/phpmyadmin
@@ -43,6 +51,12 @@ services:
       - "discovery.type=single-node"
       - "cluster.routing.allocation.disk.threshold_enabled=false"
       - "index.blocks.read_only_allow_delete"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 volumes:
   magento-data:
   db-data:
