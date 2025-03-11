@@ -24,6 +24,8 @@ services:
     image: mysql:8.0.0
     volumes:
       - db-data:/var/lib/mysql
+    ports:
+      - 3306:3306
     env_file:
       - env/ci-stack.env
     healthcheck:
