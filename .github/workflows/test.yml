@@ -126,8 +126,8 @@ jobs:
             sleep 3
           done
 
-      - name: Curl headers of https://magento.test
-        run: curl -k -I https://magento.test
+      - name: Curl headers of http://magento.test
+        run: curl -k -I http://magento.test
 #
 #      - name: Enable PublicSquare Payments
 #        run: make setup-cli ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }} ${{ secrets.PUBLICSQUARE_SECRET_KEY }}

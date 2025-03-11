@@ -7,9 +7,9 @@ actor: AcceptanceTester
 modules:
     enabled:
 #        - PhpBrowser:
-#            url: https://magento.test/
+#            url: http://magento.test/
         - WebDriver:
-            url: https://magento.test
+            url: http://magento.test
             browser: chrome
             host: 127.0.0.1
 #            host: 172.18.0.4
