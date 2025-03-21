@@ -15,17 +15,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Composer dependencies
+      - name: Cache docker data
         uses: actions/cache@v4
         with:
           path: |
-            ~/.composer/cache
-            src/magento-site/vendor
-            vendor
-          key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ github.repository }}-
-            ${{ runner.os }}-composer-
+            docker-volumes
+            # src/magento-site/vendor
+            # vendor
+          key: ${{ runner.os }}-composer-${{ github.repository }}-${{ hashFiles('docker-compose-ci.yaml') }}
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
@@ -34,101 +31,109 @@ jobs:
           extensions: curl, mbstring, openssl, pdo, pdo_sqlite
           ini-values: memory_limit=-1, date.timezone='UTC'
           coverage: xdebug
-          tools: composer:v2
-
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-
+          tools: 'composer:v2'
+      - name: Docker compose
+        run: |
+          docker compose -f docker-compose-ci.yaml up -d
+          docker compose -f docker-compose-ci.yaml exec web install-magento
+          docker compose -f docker-compose-ci.yaml exec web setup-cli ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }} ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
+#          docker compose -f docker-compose-ci.yaml exec web bin/magento module:enable PublicSquare_Payments
+#      - name: Backup volumes
+#        run: |
+#          ./bin/backup-volumes.sh $PWD/docker-volumes
+#      - name: Validate composer.json and composer.lock
+#        run: composer validate
+#
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
-
-      - name: Fix the file permissions
-        run: bin/fixowns && bin/fixperms
-
-      - name: Cache Magento installation
-        uses: actions/cache@v4
-        with:
-          path: |
-            vendor/magento/
-            generated/
-            var/
-            pub/
-            app/etc/
-            bin/
-            dev/
-            lib/
-            setup/
-            phpsqlite3/
-            .htaccess
-            .htaccess.sample
-            .php-cs-fixer.cache
-            .php-cs-fixer.dist.php
-            .phpunit.result.cache
-            .user.ini
-            auth.json
-            auth.json.sample
-            composer.json
-            composer.lock
-            index.php
-            php.ini
-            php.ini.sample
-            pub/index.php
-            pub/static/
-            setup.php
-            vendor/
-          key: ${{ runner.os }}-magento-core-${{ github.repository }}-${{ hashFiles('**/composer.lock', '**/app/etc/config.php', '**/pub/static/**/*') }}
-          restore-keys: |
-            ${{ runner.os }}-magento-core-${{ github.repository }}-
-            ${{ runner.os }}-magento-core-
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.repository }}-${{ github.ref }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ github.repository }}-
-            ${{ runner.os }}-buildx-
-
-      - id: make-verify
-        name: Install Magento using make verify
-        env:
-          ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
-          ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
-          PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
-          PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
-        run: make verify      
-
-#      - name: Start selenium
-#        run: |
-#          sudo apt-get update && sudo apt-get install -y net-tools
-#          HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
-#          echo "Host IP: $HOST_IP"
-#          docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" --memory="4g" --cpus="2" selenium/standalone-chrome:latest
 #
-#      - name: Netstat to see services listening on ports
-#        run : sudo apt install net-tools && sudo netstat -lp
+#      - name: Fix the file permissions
+#        run: bin/fixowns && bin/fixperms
 #
-#      - name: Wait for Selenium 127.0.0.1:4444
-#        run: |
-#          for i in {1..10}; do
-#            if curl -s "http://127.0.0.1:4444/wd/hub/status" | jq ".value.ready" | grep 'true'; then
-#              echo "Selenium is ready!"
-#              break
-#            fi
-#            echo $(curl -s "http://localhost:4444/wd/hub/status")
-#            echo "Waiting for Selenium to be ready..."
-#            sleep 3
-#          done
+#      - name: Cache Magento installation
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            vendor/magento/
+#            generated/
+#            var/
+#            pub/
+#            app/etc/
+#            bin/
+#            dev/
+#            lib/
+#            setup/
+#            phpsqlite3/
+#            .htaccess
+#            .htaccess.sample
+#            .php-cs-fixer.cache
+#            .php-cs-fixer.dist.php
+#            .phpunit.result.cache
+#            .user.ini
+#            auth.json
+#            auth.json.sample
+#            composer.json
+#            composer.lock
+#            index.php
+#            php.ini
+#            php.ini.sample
+#            pub/index.php
+#            pub/static/
+#            setup.php
+#            vendor/
+#          key: ${{ runner.os }}-magento-core-${{ github.repository }}-${{ hashFiles('**/composer.lock', '**/app/etc/config.php', '**/pub/static/**/*') }}
+#          restore-keys: |
+#            ${{ runner.os }}-magento-core-${{ github.repository }}-
+#            ${{ runner.os }}-magento-core-
+
+#      - name: Cache Docker layers
+#        uses: actions/cache@v4
+#        with:
+#          path: /tmp/.buildx-cache
+#          key: ${{ runner.os }}-buildx-${{ github.repository }}-${{ github.ref }}
+#          restore-keys: |
+#            ${{ runner.os }}-buildx-${{ github.repository }}-
+#            ${{ runner.os }}-buildx-
 #
-#      - name: Curl headers of https://magento.test
-#        run: curl -k -I https://magento.test
+#      - id: make-verify
+#        name: Install Magento using make verify
+#        env:
+#          ADOBE_ACCESS_PUBLIC_KEY: ${{ secrets.ADOBE_ACCESS_PUBLIC_KEY }}
+#          ADOBE_ACCESS_PRIVATE_KEY: ${{ secrets.ADOBE_ACCESS_PRIVATE_KEY }}
+#          PUBLICSQUARE_PUBLIC_KEY: ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }}
+#          PUBLICSQUARE_SECRET_KEY: ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
+#        run: make verify
+
+      - name: Start selenium
+        run: |
+          sudo apt-get update && sudo apt-get install -y net-tools
+          HOST_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
+          echo "Host IP: $HOST_IP"
+          docker run -d -p 4444:4444 -p 7900:7900 --add-host "magento.test:$HOST_IP" --shm-size="2g" --memory="4g" --cpus="2" selenium/standalone-chrome:latest
+#
+      - name: Netstat to see services listening on ports
+        run : sudo apt install net-tools && sudo netstat -lp
+#
+      - name: Wait for Selenium 127.0.0.1:4444
+        run: |
+          for i in {1..10}; do
+            if curl -s "http://127.0.0.1:4444/wd/hub/status" | jq ".value.ready" | grep 'true'; then
+              echo "Selenium is ready!"
+              break
+            fi
+            echo $(curl -s "http://localhost:4444/wd/hub/status")
+            echo "Waiting for Selenium to be ready..."
+            sleep 3
+          done
+
+      - name: Curl headers of http://magento.test
+        run: curl -k -I http://magento.test
 #
 #      - name: Enable PublicSquare Payments
 #        run: make setup-cli ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }} ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
 #
-#      - name: Run Integration Tests
-#        run: php vendor/bin/codecept run Acceptance --debug -f
+      - name: Run Integration Tests
+        run: php vendor/bin/codecept run Acceptance --debug -f
 #
 #      - name: artifacts
 #        uses: actions/upload-artifact@v4
