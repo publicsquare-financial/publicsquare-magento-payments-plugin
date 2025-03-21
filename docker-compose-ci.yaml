@@ -1,3 +1,4 @@
+version: '3.0'
 services:
   web:
     platform: linux/amd64
@@ -16,8 +17,6 @@ services:
       - magento-data:/var/www/html  
       - ./PublicSquare:/var/www/html/app/code/PublicSquare
       - ./bin/setup-cli:/usr/local/bin/setup-cli
-      - ./docker/php.ini:/usr/local/etc/php/php.ini
-      - ./docker/msmtprc:/etc/msmtprc
     env_file:
       - env/ci-stack.env
   db:
@@ -61,10 +60,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
-  mailcatcher:
-    image: sj26/mailcatcher
-    ports:
-      - "1080:1080"
 volumes:
   magento-data:
   db-data:

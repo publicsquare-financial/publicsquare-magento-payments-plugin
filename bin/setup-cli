@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -o errexit
+
+echo "Starting Setup cli..."
+
+# Take in 2 arguments, a public key and a secret key
+PUBLIC_KEY=$1
+SECRET_KEY=$2
+
+# Check if the public key and secret key are provided
+if [ -z "$PUBLIC_KEY" ] || [ -z "$SECRET_KEY" ]; then
+  echo "Usage: $0 <public_key> <secret_key>"
+  exit 1
+fi
+
+# Set the public key and secret key
+echo "Setting PSQ public key"
+bin/magento config:set --scope="default" payment/publicsquare_payments/publicsquare_api_public_key $PUBLIC_KEY
+echo "Setting PSQ secret key"
+bin/magento config:set --scope="default" payment/publicsquare_payments/publicsquare_api_secret_key $SECRET_KEY
+echo "Setting PSQ plugin active"
+bin/magento config:set --scope="default" payment/publicsquare_payments/active 1
+echo "Disabling Two Factor Auth"
+bin/magento module:disable Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth
+bin/magento config:set twofactorauth/general/enable 0 || true
+echo "Setting deploy mode to production"
+bin/magento deploy:mode:set production
+bin/magento setup:upgrade
+bin/magento setup:static-content:deploy
+bin/magento indexer:reindex
+echo "Cleaning cache"
+bin/magento cache:clean
+
+echo "Setup cli completed"
