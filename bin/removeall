@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 bin/stopall
-bin/docker-compose rm -f
+docker compose rm -f
 bin/removevolumes
 bin/removenetwork

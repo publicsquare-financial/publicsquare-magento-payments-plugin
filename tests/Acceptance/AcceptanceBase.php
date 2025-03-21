@@ -75,6 +75,7 @@ class AcceptanceBase
             $I->waitForText('Dashboard');
         }
         // Maybe click "Don't allow" if Adobe usage data collection modal is shown
+        $this->_waitForLoading($I);
         $I->tryToClick("Don't Allow");
     }
 
@@ -82,8 +83,8 @@ class AcceptanceBase
     {
         $I->amOnPage('/customer/account/login');
         // login page
-        $I->fillField('#email', 'roni_cost@example.com');
-        $I->fillField('#password', 'roni_cost3@example.com');
+        $I->fillField('[type="email"]', 'roni_cost@example.com');
+        $I->fillField('[type="password"]', 'roni_cost3@example.com');
         $I->click('.form-login .action.login.primary');
         $I->waitForText('My Account');
     }
@@ -356,6 +357,8 @@ class AcceptanceBase
 
     protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!', $termsAndConditions=false)
     {
+        $I->reloadPage();
+        $I->amOnPage('/checkout/#payment');
         $this->_makeSurePaymentMethodIsVisible($I);
         $this->_clearCardForm($I);
         $I->waitForElementVisible($this::IFRAME_CSS);
@@ -373,7 +376,7 @@ class AcceptanceBase
         $I->waitForElementClickable($submitButton);
         $I->saveSessionSnapshot("beforeSubmitScreenshot2.png");
         $I->click($submitButton);
-        $I->waitForText($waitString, 60);
+        $I->waitForText($waitString, 10);
         $I->waitForElementNotVisible('.loading-mask', 60);
     }
 
