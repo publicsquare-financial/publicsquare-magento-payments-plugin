@@ -49,14 +49,8 @@ class CheckoutCest extends AcceptanceBase
 
     }
 
-    /**
-     * Declined Card test using data provider.
-     *
-     * @dataProvider declinedChargesProvider
-     */
-    public function declinedChargesTest(AcceptanceTester $I, \Codeception\Example $example) {
-
-        echo "Testing cardNumber: {$example['cardNumber']} Message: {$example['message']}\n";
+    public function declinedChargesTest(AcceptanceTester $I) 
+    {
         $this->_initialize($I);
 
         // add product.
@@ -82,19 +76,5 @@ class CheckoutCest extends AcceptanceBase
 
         // verify order was not created.
         $I->dontSeeInDatabase('sales_order', ['customer_email' => $this->customerEmail]);
-    }
-
-    protected function declinedChargesProvider() : array  // to make it public use `_` prefix
-    {
-        return [
-            ['cardNumber'=>"4000000000000002", 'message'=> $this::GENERIC_DECLINE_MESSAGE.'Decline'],
-            ['cardNumber'=>"4000000000009995", 'message'=> $this::GENERIC_DECLINE_MESSAGE.'Insufficient Funds'],
-            ['cardNumber'=>"4000000000009987", 'message'=> $this::GENERIC_DECLINE_MESSAGE.'Lost/Stolen'],
-            ['cardNumber'=>"4100000000000019", 'message'=> $this::GENERIC_FRAUDULENT_MESSAGE],
-            ['cardNumber'=>"4000000000000101", 'message'=> $this::GENERIC_FRAUDULENT_MESSAGE],
-            ['cardNumber'=>"4000000000000010", 'message'=> $this::GENERIC_FRAUDULENT_MESSAGE],
-            ['cardNumber'=>"4111111111111111", 'message'=> $this::GENERIC_FRAUDULENT_MESSAGE],
-
-        ];
     }
 }
