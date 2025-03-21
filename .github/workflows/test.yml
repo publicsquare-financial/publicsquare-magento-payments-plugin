@@ -3,7 +3,6 @@ on: push
 jobs:
   test:
     runs-on: selenium
-
     name: Build and test codeception tests
     permissions:
       id-token: write

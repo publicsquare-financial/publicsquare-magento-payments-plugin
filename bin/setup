@@ -27,7 +27,7 @@ echo "Fixing owner and permissions..."
 bin/fixowns
 bin/fixperms
 
-bin/setup-email
+# bin/setup-email
 
 bin/cli install-magento
 
@@ -35,7 +35,7 @@ bin/setup-sample-data
 
 bin/magento admin:user:create --admin-user=admin --admin-password=AdminPassword1234 --admin-email=admin@example.com --admin-firstname=admin --admin-lastname=admin
 
-make setup-cli $PUBLICSQUARE_PUBLIC_KEY $PUBLICSQUARE_SECRET_KEY
+bin/setup-cli $PUBLICSQUARE_PUBLIC_KEY $PUBLICSQUARE_SECRET_KEY
 
 echo "Docker development environment setup complete."
 echo "You may now access your Magento instance at ${DOMAIN}"
