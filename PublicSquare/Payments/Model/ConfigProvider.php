@@ -63,8 +63,8 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
             'payment' => [
                 $this->publicsquareConfig::CODE => [
                     'pk'         => $this->publicsquareConfig->getPublicAPIKey(),
-                    'cancelUrl'     => $this->urlBuilder->getUrl('publicsquare_payments/checkout/cancel', ['_secure' => true]),
-                    'successUrl'    => $this->urlBuilder->getUrl('publicsquare_payments/checkout/complete', ['_secure' => true]),
+                    // 'cancelUrl'     => $this->urlBuilder->getUrl('checkout/onepage/cancel', ['_secure' => true]),
+                    'successUrl'    => $this->urlBuilder->getUrl('checkout/onepage/success', ['_secure' => true]),
                     'ccVaultCode'   => Config::VAULT_CODE,
                     'cardImagesBasePath' => Config::PUBLICSQUARE_CARD_IMAGES_BASE_PATH
                 ],

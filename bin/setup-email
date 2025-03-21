@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -o errexit
+
+bin/cli apt update
+bin/cli apt install -y msmtp mailutils

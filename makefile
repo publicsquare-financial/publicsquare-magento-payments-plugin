@@ -50,18 +50,12 @@ cache-clean:
 
 cli:
 	@./bin/cli $(call args)
-
-clinotty:
-	@./bin/clinotty $(call args)
-
-cliq:
-	@./bin/cliq $(call args)
 	
 deploy:
 	@./bin/deploy $(call args)
 
 docker-compose:
-	@./bin/docker-compose
+	@./bin/docker-compose $(call args)
 
 download:
 	@./bin/download $(call args)
@@ -90,11 +84,11 @@ removenetwork:
 removevolumes:
 	@./bin/removevolumes
 
-rootnotty:
-	@./bin/rootnotty $(call args)
-
 setup:
 	@./bin/setup $(call args)
+
+setup-cli:
+	@./bin/setup-cli $(call args)
 
 setup-composer-auth:
 	@./bin/setup-composer-auth
@@ -107,6 +101,9 @@ setup-install:
 	
 setup-ssl:
 	@./bin/setup-ssl $(call args)
+	
+setup-sample-data:
+	@./bin/setup-sample-data $(call args)
 
 start:
 	@./bin/start $(call args)
