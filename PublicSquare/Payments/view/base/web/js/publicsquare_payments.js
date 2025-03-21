@@ -14,7 +14,7 @@ define(
     return (window.publicsquare = {
 
       // Properties
-      version: "4.0.8",
+      version: "1.0.0",
       publicsquareJs: null,
       cardElement: null,
 
