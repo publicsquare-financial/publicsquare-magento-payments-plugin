@@ -9,6 +9,7 @@ use PublicSquare\Payments\Api\Authenticated\PaymentCaptureFactory;
 use PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory;
 use PublicSquare\Payments\Logger\Logger;
 use Magento\Sales\Api\TransactionRepositoryInterface;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 
 class PaymentExecutor
 {
@@ -47,13 +48,19 @@ class PaymentExecutor
 	 */
 	private $transactionRepository;
 
+	/**
+	 * @var RemoteAddress
+	 */
+	private $remoteAddress;
+
 	public function __construct(
 		QuoteRepository $quoteRepository,
 		PaymentCreateFactory $paymentCreateFactory,
 		Logger $logger,
 		TransactionRepositoryInterface $transactionRepository,
 		PaymentCaptureFactory $paymentCaptureFactory,
-		PaymentCancelFactory $paymentCancelFactory
+		PaymentCancelFactory $paymentCancelFactory,
+		RemoteAddress $remoteAddress
 	) {
 		$this->quoteRepository = $quoteRepository;
 		$this->paymentCreateFactory = $paymentCreateFactory;
@@ -61,6 +68,7 @@ class PaymentExecutor
 		$this->transactionRepository = $transactionRepository;
 		$this->paymentCaptureFactory = $paymentCaptureFactory;
 		$this->paymentCancelFactory = $paymentCancelFactory;
+		$this->remoteAddress = $remoteAddress;
 	}
 
 	public function setCommandSubject(array $commandSubject)
@@ -257,6 +265,18 @@ class PaymentExecutor
 		}
 	}
 
+	public function getDeviceInformation()
+	{
+		$deviceInformation = [];
+		if ($ip_address = $this->remoteAddress->getRemoteAddress()) {
+			$deviceInformation['ip_address'] = explode(',', $ip_address)[0];
+		}
+		if (isset($_SERVER['HTTP_USER_AGENT'])) {
+			$deviceInformation['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+		}
+		return isset($deviceInformation['ip_address']) ? $deviceInformation : null;
+	}
+
 	public function createNewPayment(array $commandSubject, bool $capture)
 	{
 		try {
@@ -287,6 +307,7 @@ class PaymentExecutor
 					"shippingAddress" => $shippingAddress,
 					"billingAddress" => $billingAddress,
 					"externalId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
+					"deviceInformation" => $this->getDeviceInformation(),
 				])->getResponseData();
 				$this->setPaymentFromPSQResponse($payment, $response);
 			} else {

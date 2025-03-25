@@ -42,7 +42,8 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
         \Magento\Quote\Model\Quote\Address $billingAddress,
         $shippingAddress = null,
         $idempotencyKey = null,
-        $externalId = ""
+        $externalId = "",
+        $deviceInformation = null
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
         if ($idempotencyKey) {
@@ -92,6 +93,9 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
                 "postal_code" => $shippingAddress->getPostcode(),
                 "country" => $shippingAddress->getCountryId(),
             ];
+        }
+        if ($deviceInformation) {
+            $this->requestData['device_information'] = $deviceInformation;
         }
     } //end __construct()
 
