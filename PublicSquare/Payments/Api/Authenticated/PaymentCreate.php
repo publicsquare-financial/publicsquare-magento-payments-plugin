@@ -50,7 +50,7 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
         }
         $this->requestData = [
             "external_id" => $externalId,
-            "amount" => $amount * 100,
+            "amount" => round($amount * 100),
             "currency" => "USD",
             "capture" => $capture,
             "payment_method" => [
