@@ -200,8 +200,8 @@ class PaymentExecutor
 	{
 		$commandSubject = $this->getCommandSubject();
 		if (!$commandSubject || !$commandSubject['payment'] instanceof \Magento\Payment\Gateway\Data\PaymentDataObjectInterface) {
-            throw new \InvalidArgumentException('$commandSubject not set');
-        }
+			throw new \InvalidArgumentException('$commandSubject not set');
+		}
 
 		return $commandSubject['payment'];
 	}
@@ -219,18 +219,18 @@ class PaymentExecutor
 	public function getQuote()
 	{
 		if ($order = $this->getOrder()) {
-            return $this->quoteRepository->get($order->getQuoteId());
-        } else {
-            throw new \InvalidArgumentException('Payment or order not found');
-        }
+			return $this->quoteRepository->get($order->getQuoteId());
+		} else {
+			throw new \InvalidArgumentException('Payment or order not found');
+		}
 	}
 
 	private function getAmount()
 	{
 		$commandSubject = $this->getCommandSubject();
 		if (!$commandSubject || !isset($commandSubject['amount'])) {
-            throw new \InvalidArgumentException('$commandSubject not set or amount is null');
-        }
+			throw new \InvalidArgumentException('$commandSubject not set or amount is null');
+		}
 
 		return $this->_commandSubject['amount'];
 	}
@@ -238,11 +238,11 @@ class PaymentExecutor
 	public function getTransaction()
 	{
 		$tid = $this->getPayment()->getLastTransId();
-        try {
-            return $this->transactionRepository->get($tid);
-        } catch (\Magento\Framework\Exception\InputException $e) {
+		try {
+			return $this->transactionRepository->get($tid);
+		} catch (\Magento\Framework\Exception\InputException $e) {
 			return null;
-        }
+		}
 	}
 
 	public function createNewPayment(array $commandSubject, bool $capture)
@@ -263,24 +263,26 @@ class PaymentExecutor
 			} else if (empty($shippingAddress->getFirstname()) || empty($shippingAddress->getLastname())) {
 				$this->logger->warning('Shipping address first/last name is empty', ['quoteId' => $quote->getId(), 'quoteAddressId' => $shippingAddress->getId()]);
 			}
-            if ($cardId = $payment->getAdditionalInformation('cardId')) {
-                $idempotencyKey = $payment->getAdditionalInformation('idempotencyKey');
-                $response = $this->paymentCreateFactory->create([
-                    "idempotencyKey" => $idempotencyKey,
-                    "amount" => $this->getAmount(),
-                    "cardId" => $cardId,
-                    "capture" => $capture,
-                    "phone" => $billingAddress->getTelephone(),
-                    "email" => $emailToUse,
-                    "shippingAddress" => $shippingAddress,
-                    "billingAddress" => $billingAddress,
+			if ($cardId = $payment->getAdditionalInformation('cardId')) {
+				$idempotencyKey = $payment->getAdditionalInformation('idempotencyKey');
+				$response = $this->paymentCreateFactory->create([
+					"idempotencyKey" => $idempotencyKey,
+					"amount" => $this->getAmount(),
+					"cardId" => $cardId,
+					"capture" => $capture,
+					"phone" => $billingAddress->getTelephone(),
+					"email" => $emailToUse,
+					"shippingAddress" => $shippingAddress,
+					"billingAddress" => $billingAddress,
 					"externalId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
-                ])->getResponseData();
-                $this->setPaymentFromPSQResponse($payment, $response);
-            }
-        } catch (\Exception $e) {
-            $this->throwUserFriendlyException($e);
-        }
+				])->getResponseData();
+				$this->setPaymentFromPSQResponse($payment, $response);
+			} else {
+				throw new \Exception('Card ID not found');
+			}
+		} catch (\Exception $e) {
+			$this->throwUserFriendlyException($e);
+		}
 	}
 
 	public function throwUserFriendlyException(\Exception $e)

@@ -5,19 +5,9 @@ namespace PublicSquare\Payments\Block;
 use PublicSquare\Payments\Helper\Config;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;
-use Magento\Csp\Helper\CspNonceProvider;
 
 class Payment extends Template
 {
-    // /**
-    //  * @var ConfigProviderInterface
-    //  */
-    // private $config;
-    /**
-     * @var CspNonceProvider
-     */
-    private $cspNonceProvider;
-
     /**
      * @var Config
      */
@@ -27,17 +17,15 @@ class Payment extends Template
      * Constructor
      *
      * @param Context $context
-     * @param ConfigProviderInterface $config
+     * @param Config $configProvider
      * @param array $data
      */
     public function __construct(
         Context $context,
-        CspNonceProvider $cspNonceProvider,
         Config $configProvider,
         array $data = []
     ) {
         parent::__construct($context, $data);
-        $this->cspNonceProvider = $cspNonceProvider;
         $this->configProvider = $configProvider;
     }
 
@@ -65,6 +53,6 @@ class Payment extends Template
      */
     public function getNonce(): string
     {
-        return $this->cspNonceProvider->generateNonce();
+        return bin2hex(random_bytes(16));
     }
 }

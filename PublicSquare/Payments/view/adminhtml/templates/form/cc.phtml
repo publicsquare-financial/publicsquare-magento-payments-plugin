@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
@@ -10,12 +11,11 @@ $code = $block->escapeHtml($block->getMethodCode());
 $ccType = $block->getInfoData('cc_type');
 ?>
 <fieldset class="admin__fieldset payment-method"
-          id="payment_form_<?= /* @noEscape */ $code ?>"
-          style="display:none"
-    >
+    id="payment_form_<?= /* @noEscape */ $code ?>"
+    style="display:none">
     <div class="admin__field _required">
-        <label class="label admin__field-label" for="<?= /* @noEscape */ $code ?>_cc_type" >
-            <span><?= $block->escapeHtml(__('Credit Card')) ?></span>
+        <label class="label admin__field-label" for="<?= /* @noEscape */ $code ?>_cc_type">
+            <span><?= $block->escapeHtml(__('Credit/Debit Card Number')) ?></span>
         </label>
         <div class="admin__field-control control">
             <div id="publicsquare-elements-form"></div>
@@ -25,9 +25,9 @@ $ccType = $block->getInfoData('cc_type');
     <?php if ($block->isVaultEnabled()) : ?>
         <div class="field-tooltip-content">
             <input type="checkbox"
-                   id="<?= /* @noEscape */ $code ?>_vault"
-                   name="payment[is_active_payment_token_enabler]"
-                   class="admin__control-checkbox"/>
+                id="<?= /* @noEscape */ $code ?>_vault"
+                name="payment[is_active_payment_token_enabler]"
+                class="admin__control-checkbox" />
             <label class="label admin__field-label" for="<?= /* @noEscape */ $code ?>_vault">
                 <span><?= $block->escapeHtml(__('Save for later use.')) ?></span>
             </label>
@@ -35,6 +35,6 @@ $ccType = $block->getInfoData('cc_type');
     <?php endif; ?>
 
     <input type="hidden" id="<?= /* @noEscape */ $code ?>_payment_method_nonce"
-           name="payment[payment_method_nonce]"/>
-    <input type="submit" name="Submit" style="display: none;">
+        name="payment[payment_method_nonce]" required />
+    <!-- <input type="submit" name="Submit" style="display: none;"> -->
 </fieldset>

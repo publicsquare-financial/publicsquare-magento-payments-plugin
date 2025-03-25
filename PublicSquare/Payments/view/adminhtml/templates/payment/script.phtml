@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
@@ -16,44 +17,87 @@ $code = $block->escapeHtml($block->getCode());
         [
             'jquery',
             'publicsquare_payments',
-            'publicsquare_admin',
-        ], function($, publicsquare, publicsquareAdmin) {
+            // 'publicsquare_admin',
+        ],
+        function($, publicsquare) {
             var config = <?= /* @noEscape */ $block->getPaymentConfig() ?>,
-                form = $('#payment_form_<?= /* @noEscape */ $code ?>'),
+                upperSubmitButton = $('#submit_order_top_button'),
+                lowerSubmitButton = $('.action-default.scalable.save.primary'),
+                form = lowerSubmitButton.closest('form'),
+                firstNameSelector = '#order-billing_address_firstname',
+                lastNameSelector = '#order-billing_address_lastname',
                 elementsFormSelector = '#publicsquare-elements-form',
+                paymentMethodNonceSelector = '#publicsquare_payments_payment_method_nonce',
                 element = $(elementsFormSelector),
-                payment;
-            
-            console.log('publicsquareAdmin', publicsquareAdmin);
+                payment,
+                lowerOriginalOnClick;
 
-            config.active = form.length > 0 && !form.is(':hidden');
-
-            function onSubmit(e) {
+            async function onSubmit(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('onSubmit');
+                try {
+                    const cardholder_name = [$(firstNameSelector).val(), $(lastNameSelector).val()].filter(Boolean).join(' ');
+                    if (!cardholder_name) {
+                        return alert('Cardholder name is required');
+                    } else if (!publicsquare.cardElement || !publicsquare.cardElement.metadata.valid) {
+                        return alert('The card is invalid. Please check the card details and try again.');
+                    }
+                    const card = await publicsquare.createCard(cardholder_name, publicsquare.cardElement);
+                    $(paymentMethodNonceSelector).val(card.id);
+                    lowerOriginalOnClick(e);
+                } catch (e) {
+                    console.error(e);
+                    return false;
+                }
             }
 
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !element.children().length) {
-                        requestAnimationFrame(() => {
-                            publicsquare.initElements({
-                                apiKey: config.pk || '',
-                                selector: elementsFormSelector
-                            }, () => { })
-                            document.querySelector('#publicsquare_payments_cardId').value = 'card_1234567890';
-                            // document.querySelector('#submit_order_top_button').addEventListener('click', onSubmit);
-                            // document.querySelector('.order-summary button').addEventListener('click', onSubmit);
+            function enableSubmitHandler() {
+                const lowerSubmitButton = $('.action-default.scalable.save.primary');
+                if (lowerSubmitButton[0].onclick !== onSubmit) {
+                    console.log('> enableSubmitHandler', lowerSubmitButton);
+                    lowerOriginalOnClick = lowerSubmitButton[0].onclick;
+                    upperSubmitButton[0].onclick = onSubmit;
+                    lowerSubmitButton[0].onclick = onSubmit;
+                } else {
+                    lowerSubmitButton[0].onclick = lowerOriginalOnClick;
+                }
+            }
+
+            function observe() {
+                const paymentMethods = document.querySelector('#edit_form');
+                if (paymentMethods) {
+                    renderElements();
+                    observer.observe(paymentMethods, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                    })
+                }
+            }
+
+            function renderElements() {
+                element = $(elementsFormSelector);
+                if (element.length && !element.children().length && !publicsquare.loading) {
+                    observer.disconnect();
+                    requestAnimationFrame(() => {
+                        publicsquare.initElements({
+                            apiKey: config.pk || '',
+                            selector: elementsFormSelector
+                        }, () => {
+                            observe();
                         })
-                    }
-                });
+                    })
+                }
+                enableSubmitHandler();
+            }
+
+            const observer = new MutationObserver((mutations) => {
+                if (mutations.find((cur) => $(cur.target).find('#payment_form_publicsquare_payments').length)) {
+                    renderElements();
+                }
             });
 
-            const targetElement = element.get(0); 
-            if (targetElement && publicsquare) {
-                observer.observe(targetElement);
-            }
+            observe();
         });
     //]]>
 </script>
