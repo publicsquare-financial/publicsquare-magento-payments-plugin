@@ -54,7 +54,6 @@ $code = $block->escapeHtml($block->getCode());
             function enableSubmitHandler() {
                 const lowerSubmitButton = $('.action-default.scalable.save.primary');
                 if (lowerSubmitButton[0].onclick !== onSubmit) {
-                    console.log('> enableSubmitHandler', lowerSubmitButton);
                     lowerOriginalOnClick = lowerSubmitButton[0].onclick;
                     upperSubmitButton[0].onclick = onSubmit;
                     lowerSubmitButton[0].onclick = onSubmit;

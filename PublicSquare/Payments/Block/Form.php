@@ -16,7 +16,6 @@ use Magento\Vault\Model\VaultPaymentInterface;
 
 class Form extends Cc
 {
-    // protected $_template = 'PublicSquare_Payments::form/cc.phtml';
     /**
      * @var Quote
      */
@@ -71,14 +70,6 @@ class Form extends Cc
         $configuredCardTypes = $this->getConfiguredCardTypes();
         $countryId = $this->sessionQuote->getQuote()->getBillingAddress()->getCountryId();
         return $this->filterCardTypesForCountry($configuredCardTypes, $countryId);
-        // return [
-        //     'amex' => 'AMEX',
-        //     'visa' => 'VISA',
-        //     'master' => 'MASTER',
-        //     'discover' => 'DISCOVER',
-        //     'jcb' => 'JCB',
-            
-        // ];
     }
 
     /**
