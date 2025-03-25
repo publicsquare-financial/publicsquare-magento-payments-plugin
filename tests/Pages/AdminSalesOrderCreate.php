@@ -13,8 +13,10 @@ class AdminSalesOrderCreate extends AcceptanceBase
     $this->_initialize($I);
     $this->_adminLogin($I);
     $I->amOnPage('/admin/sales/order/index/');
-    $I->click('Create New Order');
-    $I->click('Create New Customer');
+    $I->waitForElementClickable('.page-actions-buttons button[title="Create New Order"]');
+    $I->click('.page-actions-buttons button[title="Create New Order"]');
+    $I->waitForElementClickable('#edit_form .actions button[title="Create New Customer"]');
+    $I->click('#edit_form .actions button[title="Create New Customer"]');
     $this->_waitForLoading($I);
     sleep(1);
   }

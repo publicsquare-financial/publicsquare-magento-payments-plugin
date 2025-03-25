@@ -8,6 +8,8 @@ class AcceptanceBase
 {
     const IFRAME_CSS = '#publicsquare-elements-form iframe';
 
+    const DEFAULT_CONTAINER_SELECTOR = '#publicsquare_payments';
+
     protected $customerEmail = "";  // this will be dynamicaly produced
 
     protected $rollbackTransactions = false;
@@ -316,7 +318,7 @@ class AcceptanceBase
         $I->click('Next');
     }
 
-    protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I, $containerSelector = '#publicsquare_payments')
+    protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
     {
         $I->waitForElementNotVisible(".loading-mask", 60);
         $I->waitForElementVisible($containerSelector, 30);
@@ -340,7 +342,7 @@ class AcceptanceBase
         $I->pressKey($field, [\Facebook\WebDriver\WebDriverKeys::BACKSPACE]);
     }
 
-    protected function _clearCardForm(AcceptanceTester $I, $containerSelector = null)
+    protected function _clearCardForm(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
     {
         $this->_makeSurePaymentMethodIsVisible($I, $containerSelector);
         $I->waitForElementVisible($this::IFRAME_CSS);
@@ -353,7 +355,7 @@ class AcceptanceBase
         $I->switchToIframe();
     }
 
-    protected function _fillCardForm(AcceptanceTester $I, $cardNumber = '4242424242424242', $expirationDate = '12/29', $cvc = '123', $containerSelector = null)
+    protected function _fillCardForm(AcceptanceTester $I, $cardNumber = '4242424242424242', $expirationDate = '12/29', $cvc = '123', $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
     {
         $this->_makeSurePaymentMethodIsVisible($I, $containerSelector);
         $this->_clearCardForm($I, $containerSelector);
@@ -396,7 +398,7 @@ class AcceptanceBase
         $I->fillField('.payment-method._active input[name="telephone"]', '1234567890');
         $I->click('.payment-method._active button.action-update');
         $this->_waitForLoading($I);
-        $this->_fillCardForm($I, $cardNumber, '12/29', '123');
+        $this->_fillCardForm($I, $cardNumber);
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
