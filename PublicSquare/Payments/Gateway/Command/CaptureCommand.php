@@ -28,6 +28,12 @@ class CaptureCommand implements CommandInterface
 
     public function execute(array $commandSubject)
     {
+        $payment = $commandSubject['payment']->getPayment();
+        // Get payment methon nonce, which is the card id
+        if ($card_id = $payment->getAdditionalInformation('payment_method_nonce')) {
+            $payment->setAdditionalInformation('cardId', $card_id);
+        }
+
         if ($commandSubject["amount"] > 0) {
             $this->paymentExecutor->setCommandSubject($commandSubject);
             $transaction = $this->paymentExecutor->getTransaction();

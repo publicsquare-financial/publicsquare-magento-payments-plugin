@@ -8,6 +8,8 @@ class AcceptanceBase
 {
     const IFRAME_CSS = '#publicsquare-elements-form iframe';
 
+    const DEFAULT_CONTAINER_SELECTOR = '#publicsquare_payments';
+
     protected $customerEmail = "";  // this will be dynamicaly produced
 
     protected $rollbackTransactions = false;
@@ -316,15 +318,13 @@ class AcceptanceBase
         $I->click('Next');
     }
 
-    protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I)
+    protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
     {
         $I->waitForElementNotVisible(".loading-mask", 60);
-        $publicsquarePayments = '#publicsquare_payments';
-        $I->waitForElementVisible($publicsquarePayments, 30);
-        $I->waitForElementClickable($publicsquarePayments, 30);
+        $I->waitForElementVisible($containerSelector, 30);
+        $I->waitForElementClickable($containerSelector, 30);
         $I->waitForElementNotVisible(".loading-mask", 60);
-        $I->click($publicsquarePayments);
-        $I->see('Credit/Debit Card Number');
+        $I->click($containerSelector);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
@@ -342,9 +342,9 @@ class AcceptanceBase
         $I->pressKey($field, [\Facebook\WebDriver\WebDriverKeys::BACKSPACE]);
     }
 
-    protected function _clearCardForm(AcceptanceTester $I)
+    protected function _clearCardForm(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
     {
-        $this->_makeSurePaymentMethodIsVisible($I);
+        $this->_makeSurePaymentMethodIsVisible($I, $containerSelector);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
@@ -355,19 +355,24 @@ class AcceptanceBase
         $I->switchToIframe();
     }
 
-    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!', $termsAndConditions=false)
+    protected function _fillCardForm(AcceptanceTester $I, $cardNumber = '4242424242424242', $expirationDate = '12/29', $cvc = '123', $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
     {
-        $I->reloadPage();
-        $I->amOnPage('/checkout/#payment');
-        $this->_makeSurePaymentMethodIsVisible($I);
-        $this->_clearCardForm($I);
+        $this->_makeSurePaymentMethodIsVisible($I, $containerSelector);
+        $this->_clearCardForm($I, $containerSelector);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
         $I->fillField('//*[@id="cardNumber"]', $cardNumber);
-        $I->fillField('//*[@id="expirationDate"]', '12/29');
-        $I->fillField('//*[@id="cvc"]', '123');
+        $I->fillField('//*[@id="expirationDate"]', $expirationDate);
+        $I->fillField('//*[@id="cvc"]', $cvc);
         $I->switchToIframe();
+    }
+
+    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false)
+    {
+        $I->reloadPage();
+        $I->amOnPage('/checkout/#payment');
+        $this->_fillCardForm($I, $cardNumber, '12/29', '123');
         if ($termsAndConditions) {
             $this->_checkTermsAndConditions($I);
         }
@@ -393,13 +398,7 @@ class AcceptanceBase
         $I->fillField('.payment-method._active input[name="telephone"]', '1234567890');
         $I->click('.payment-method._active button.action-update');
         $this->_waitForLoading($I);
-        $I->waitForElementVisible($this::IFRAME_CSS);
-        $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
-        $I->switchToIframe('//*[@id="'.$x.'"]');
-        $I->fillField('//*[@id="cardNumber"]', $cardNumber);
-        $I->fillField('//*[@id="expirationDate"]', '12/29');
-        $I->fillField('//*[@id="cvc"]', '123');
-        $I->switchToIframe();
+        $this->_fillCardForm($I, $cardNumber);
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);

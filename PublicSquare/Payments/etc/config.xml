@@ -42,10 +42,10 @@
                 <can_use_for_multishipping>0</can_use_for_multishipping>
                 <can_authorize_vault>1</can_authorize_vault>
                 <can_capture_vault>1</can_capture_vault>
-                <can_use_internal>1</can_use_internal>
                 <can_vault>1</can_vault>
                 <paymentInfoKeys>cc_type,cc_last_4,cc_trans_id,payment_id,fraud_decision,avsStreetAddressResponseCode,cvvResponseCode,cardId,idempotencyKey</paymentInfoKeys>
                 <privateInfoKeys>cardId,idempotencyKey</privateInfoKeys>
+                <cctypes>AE,VI,MC,DI</cctypes>
             </publicsquare_payments>
             <publicsquare_payments_cc_vault>
                 <model>PublicSquarePaymentsCCVaultFacade</model>
@@ -54,5 +54,19 @@
                 </instant_purchase>
             </publicsquare_payments_cc_vault>
         </payment>
+        <csp>
+            <policies>
+                <storefront_checkout_index_index>
+                    <scripts>
+                        <inline>1</inline>
+                    </scripts>
+                </storefront_checkout_index_index>
+                <sales_order_create_index>
+                    <scripts>
+                        <inline>1</inline>
+                    </scripts>
+                </sales_order_create_index>
+            </policies>
+        </csp>
     </default>
 </config>
