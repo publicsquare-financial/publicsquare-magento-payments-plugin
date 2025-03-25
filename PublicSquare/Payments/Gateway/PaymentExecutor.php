@@ -125,6 +125,7 @@ class PaymentExecutor
 				$this->setPaymentFromPSQResponse($payment, $response);
 			}
 		} catch (\Exception $e) {
+			$this->maybeCancelPayment($commandSubject);
 			$this->throwUserFriendlyException($e);
 		}
 	}
@@ -169,6 +170,17 @@ class PaymentExecutor
 			$this->setCommandSubject($commandSubject);
 		} catch (\Exception $e) {
 			$this->throwUserFriendlyException($e);
+		}
+	}
+
+	protected function maybeCancelPayment(array $commandSubject)
+	{
+		try {
+			$this->executeCancel($commandSubject);
+		} catch (\Exception $e) {
+			$this->logger->error("PSQ Payments attempted to cancel payment, but failed", [
+				"error" => $e->getMessage(),
+			]);
 		}
 	}
 
