@@ -8,9 +8,6 @@ define(
   ],
   function (publicsquarejs) {
     'use strict';
-
-    // Warning: This file should be kept lightweight as it is loaded on nearly all pages.
-
     return (window.publicsquare = {
 
       // Properties
