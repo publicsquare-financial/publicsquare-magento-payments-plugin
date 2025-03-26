@@ -7,9 +7,11 @@ use Magento\Quote\Model\QuoteRepository;
 use PublicSquare\Payments\Api\Authenticated\PaymentCreateFactory;
 use PublicSquare\Payments\Api\Authenticated\PaymentCaptureFactory;
 use PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory;
+use PublicSquare\Payments\Api\Authenticated\PaymentUpdateFactory;
 use PublicSquare\Payments\Logger\Logger;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
+use Magento\Framework\Event\Observer;
 
 class PaymentExecutor
 {
@@ -32,6 +34,11 @@ class PaymentExecutor
 	 * @var PaymentCancelFactory
 	 */
 	private $paymentCancelFactory;
+
+	/**
+	 * @var PaymentUpdateFactory
+	 */
+	private $paymentUpdateFactory;
 
 	/**
 	 * @var Logger
@@ -60,6 +67,7 @@ class PaymentExecutor
 		TransactionRepositoryInterface $transactionRepository,
 		PaymentCaptureFactory $paymentCaptureFactory,
 		PaymentCancelFactory $paymentCancelFactory,
+		PaymentUpdateFactory $paymentUpdateFactory,
 		RemoteAddress $remoteAddress
 	) {
 		$this->quoteRepository = $quoteRepository;
@@ -68,6 +76,7 @@ class PaymentExecutor
 		$this->transactionRepository = $transactionRepository;
 		$this->paymentCaptureFactory = $paymentCaptureFactory;
 		$this->paymentCancelFactory = $paymentCancelFactory;
+		$this->paymentUpdateFactory = $paymentUpdateFactory;
 		$this->remoteAddress = $remoteAddress;
 	}
 
@@ -172,12 +181,59 @@ class PaymentExecutor
 		}
 	}
 
+	public function executeUpdateFromObserver(Observer $observer)
+	{
+		try {
+			$quote = $observer->getEvent()->getQuote();
+			$order = $quote->getOrder();
+			$payment = $quote->getPayment();
+			$transactionId = $payment->getLastTransId();
+
+			$this->logger->info("PSQ Payments update from observer", [
+				"transactionId" => $transactionId,
+				"quoteId" => $quote->getId(),
+				"orderId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
+				"paymentId" => $payment->getId(),
+				"payment" => json_encode($payment->getAdditionalInformation()),
+			]);
+
+			if ($transactionId && str_starts_with($transactionId, "pmt_")) {
+				$response = $this->paymentCancelFactory->create([
+					'paymentId' => $transactionId
+				])->getResponseData();
+				$payment->setAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $response);
+				$payment->setIsTransactionClosed(0);
+			}
+		} catch (\Exception $e) {
+			$this->throwUserFriendlyException($e);
+		}
+	}
+
 	public function executeRefund(array $commandSubject)
 	{
 		try {
 			$this->setCommandSubject($commandSubject);
 		} catch (\Exception $e) {
 			$this->throwUserFriendlyException($e);
+		}
+	}
+
+	public function executeUpdate(Observer $observer)
+	{
+		$order = $observer->getEvent()->getOrder();
+		$payment = $order->getPayment();
+		$transactionId = $payment->getLastTransId();
+
+		$this->logger->info("PSQ Payments update", [
+			"transactionId" => $transactionId,
+			"orderId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
+		]);
+
+		if ($transactionId && str_starts_with($transactionId, "pmt_")) {
+			$this->paymentUpdateFactory->create([
+				"paymentId" => $transactionId,
+				"externalId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
+			])->getResponse();
 		}
 	}
 
@@ -310,6 +366,7 @@ class PaymentExecutor
 					"deviceInformation" => $this->getDeviceInformation(),
 				])->getResponseData();
 				$this->setPaymentFromPSQResponse($payment, $response);
+				throw new \Exception("Bombing this on purpose for a test");
 			} else {
 				throw new \Exception('Card ID not found');
 			}
