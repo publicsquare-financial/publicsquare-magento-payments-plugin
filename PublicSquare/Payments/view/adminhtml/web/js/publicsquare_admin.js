@@ -12,6 +12,7 @@ define(
       lastNameSelector = '#order-billing_address_lastname',
       elementsFormSelector = '#publicsquare-elements-form',
       paymentMethodNonceSelector = '#publicsquare_payments_payment_method_nonce',
+      paymentsFormSelector = '#payment_form_publicsquare_payments',
       element = $(elementsFormSelector),
       lowerOriginalOnClick;
 
@@ -40,8 +41,6 @@ define(
         lowerOriginalOnClick = lowerSubmitButton[0].onclick;
         upperSubmitButton[0].onclick = onSubmit;
         lowerSubmitButton[0].onclick = onSubmit;
-      } else {
-        lowerSubmitButton[0].onclick = lowerOriginalOnClick;
       }
     }
 
@@ -74,12 +73,13 @@ define(
     }
 
     const observer = new MutationObserver((mutations) => {
-      if (mutations.find((cur) => $(cur.target).find('#payment_form_publicsquare_payments').length)) {
+      if (mutations.find((cur) => $(cur.target).find(paymentsFormSelector).length)) {
         renderElements();
       }
     });
 
     function init(_config) {
+      config = _config;
       observe();
     }
 

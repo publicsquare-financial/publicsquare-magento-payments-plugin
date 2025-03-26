@@ -23,8 +23,12 @@ class AdminSalesOrderCreateCest extends AdminSalesOrderCreate
         $this->_addProductToOrder($I);
         $this->_addCustomerToOrder($I);
         $this->_addShippingMethodToOrder($I);
+        // First, fail the payment
         $this->_addPaymentMethodToOrder($I, '4000000000009995');
         $this->_submitOrder($I, 'The payment could not be processed. Reason: Insufficient Funds');
+        // Then, succeed the payment
+        $this->_fillCardForm($I, '4242424242424242', '12/29', '123', '#publicsquare-elements-form');
+        $this->_submitOrder($I);
     }
 
     public function rejectedPayment(AcceptanceTester $I)
