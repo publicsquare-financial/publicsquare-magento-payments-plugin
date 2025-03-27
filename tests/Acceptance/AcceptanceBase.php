@@ -273,7 +273,12 @@ class AcceptanceBase
     protected function _goToCheckout(AcceptanceTester $I) {
         $I->amOnPage('/checkout');
         $I->waitForElementNotVisible(".loading-mask", 60);
-        if (!$I->grabTextFrom('.new-address-popup>button.action-show-popup')) {
+        try {
+            // Check if there is a saved address
+            $I->grabTextFrom('.new-address-popup>button.action-show-popup');
+            // Then do nothing
+        } catch (\Exception $e) {
+            // If there is no saved address, then we need to create a new one
             /**
              * This is a workaround to fix the issue where the customer-email field is not visible.
              * https://github.com/magento/magento2/issues/38274
