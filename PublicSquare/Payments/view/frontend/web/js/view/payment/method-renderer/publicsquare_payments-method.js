@@ -127,7 +127,6 @@ define([
       return placeOrderService(
         serviceUrl,
         {
-          saveCard: self.vaultEnabler.isActivePaymentTokenEnabler(),
           ...(!customer.isLoggedIn() && { email: quote.guestEmail }),
           paymentMethod: self.getData()
         },
@@ -166,7 +165,8 @@ define([
         method: this.getCode(),
         additional_data: {
           cardId: this.cardId,
-          idempotencyKey: this.idempotencyKey
+          idempotencyKey: this.idempotencyKey,
+          saveCard: this.vaultEnabler.isActivePaymentTokenEnabler()
         },
         ...(window.checkoutConfig.checkoutAgreements && window.checkoutConfig.checkoutAgreements.agreements && {
           extension_attributes: { agreement_ids: window.checkoutConfig.checkoutAgreements.agreements.map(({ agreementId }) => agreementId) }
@@ -178,6 +178,9 @@ define([
         this.additionalData,
       );
       this.vaultEnabler.visitAdditionalData(data);
+      if (data.saveCard) {
+        data["additional_data"]["saveCard"] = true;
+      }
 
       return data;
     },

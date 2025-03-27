@@ -26,11 +26,6 @@
         </arguments>
     </type>
 
-    <preference for="PublicSquare\Payments\Api\Data\CustomerInterface" type="PublicSquare\Payments\Model\Data\Customer" />
-    <preference for="PublicSquare\Payments\Api\PaymentsInterface" type="PublicSquare\Payments\Model\Api\Payments" />
-    <preference for="PublicSquare\Payments\Api\OrdersInterface" type="PublicSquare\Payments\Model\Api\Orders" />
-    <preference for="PublicSquare\Payments\Api\ReturnsInterface" type="PublicSquare\Payments\Model\Api\ReturnRequest" />
-
     <virtualType name="PublicSquarePaymentsValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
@@ -70,6 +65,7 @@
             <argument name="commands" xsi:type="array">
                 <item name="authorize" xsi:type="string">PublicSquare\Payments\Gateway\Command\AuthorizeCommand</item>
                 <item name="capture" xsi:type="string">PublicSquare\Payments\Gateway\Command\CaptureCommand</item>
+                <item name="vault_sale" xsi:type="string">PublicSquare\Payments\Gateway\Command\CaptureCommand</item>
                 <item name="refund" xsi:type="string">PublicSquare\Payments\Gateway\Command\RefundCommand</item>
                 <item name="void" xsi:type="string">PublicSquare\Payments\Gateway\Command\CancelCommand</item>
                 <item name="cancel" xsi:type="string">PublicSquare\Payments\Gateway\Command\CancelCommand</item>
