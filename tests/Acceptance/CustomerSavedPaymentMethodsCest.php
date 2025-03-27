@@ -8,6 +8,15 @@ class CustomerSavedPaymentMethodsCest extends AcceptanceBase
 {
     public function _before(AcceptanceTester $I)
     {
+        $enabled = $I->grabFromDatabase('core_config_data', 'value', ['path' => 'payment/publicsquare_payments_cc_vault/active']);
+        if (!$enabled) {
+            $I->haveInDatabase('core_config_data', [
+                'scope' => 'default',
+                'scope_id' => 0,
+                'path' => 'payment/publicsquare_payments_cc_vault/active',
+                'value' => 1
+            ]);
+        }
         $I->amOnPage('/customer/account/logout');
         $I->amOnPage('/customer/account/login/');
         $I->fillField('login[username]', 'roni_cost@example.com');
