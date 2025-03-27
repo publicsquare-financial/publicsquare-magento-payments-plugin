@@ -16,6 +16,7 @@ class CustomerSavedPaymentMethodsCest extends AcceptanceBase
                 'path' => 'payment/publicsquare_payments_cc_vault/active',
                 'value' => 1
             ]);
+            $I->runShellCommand('bin/magento cache:clean config');
         }
         $I->amOnPage('/customer/account/logout');
         $I->amOnPage('/customer/account/login/');
