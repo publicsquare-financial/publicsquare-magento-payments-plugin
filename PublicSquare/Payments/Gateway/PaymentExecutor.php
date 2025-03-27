@@ -10,6 +10,13 @@ use PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory;
 use PublicSquare\Payments\Logger\Logger;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
+use Magento\Vault\Model\CreditCardTokenFactory;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Vault\Api\PaymentTokenRepositoryInterface;
+use Magento\Vault\Api\Data\PaymentTokenInterface;
+use Magento\Vault\Api\PaymentTokenManagementInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
+use PublicSquare\Payments\Helper\Config;
 
 class PaymentExecutor
 {
@@ -34,6 +41,31 @@ class PaymentExecutor
 	private $paymentCancelFactory;
 
 	/**
+	 * @var CreditCardTokenFactory
+	 */
+	protected $creditCardTokenFactory;
+
+	/**
+	 * @var StoreManagerInterface
+	 */
+	protected $storeManager;
+
+	/**
+	 * @var PaymentTokenRepositoryInterface
+	 */
+	protected $paymentTokenRepository;
+
+	/**
+	 * @var PaymentTokenManagementInterface
+	 */
+	protected $tokenManagement;
+
+	/**
+	 * @var EncryptorInterface
+	 */
+	protected $encryptor;
+
+	/**
 	 * @var Logger
 	 */
 	private $logger;
@@ -56,14 +88,24 @@ class PaymentExecutor
 	public function __construct(
 		QuoteRepository $quoteRepository,
 		PaymentCreateFactory $paymentCreateFactory,
+		CreditCardTokenFactory $creditCardTokenFactory,
+		StoreManagerInterface $storeManager,
+		PaymentTokenRepositoryInterface $paymentTokenRepository,
+		PaymentTokenManagementInterface $tokenManagement,
+		EncryptorInterface $encryptor,
 		Logger $logger,
 		TransactionRepositoryInterface $transactionRepository,
 		PaymentCaptureFactory $paymentCaptureFactory,
 		PaymentCancelFactory $paymentCancelFactory,
-		RemoteAddress $remoteAddress
+		RemoteAddress $remoteAddress,
 	) {
 		$this->quoteRepository = $quoteRepository;
 		$this->paymentCreateFactory = $paymentCreateFactory;
+		$this->creditCardTokenFactory = $creditCardTokenFactory;
+		$this->storeManager = $storeManager;
+		$this->paymentTokenRepository = $paymentTokenRepository;
+		$this->tokenManagement = $tokenManagement;
+		$this->encryptor = $encryptor;
 		$this->logger = $logger;
 		$this->transactionRepository = $transactionRepository;
 		$this->paymentCaptureFactory = $paymentCaptureFactory;
@@ -192,30 +234,6 @@ class PaymentExecutor
 		}
 	}
 
-	private function setPaymentFromPSQResponse(Interceptor $payment, $response)
-	{
-		$payment->setAdditionalInformation(
-			\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
-			$response
-		);
-		$payment->setLastTransId($response["id"]);
-		$payment->setTransactionId($response["id"]);
-		$payment->setIsTransactionClosed(0);
-		$payment->setCcLast4(
-				$response["payment_method"]["card"]["last4"]
-		);
-		$payment->setCcType(
-				$response["payment_method"]["card"]["brand"]
-		);
-		$payment->setCcExpMonth(
-				$response["payment_method"]["card"]["exp_month"]
-		);
-		$payment->setCcExpYear(
-				$response["payment_method"]["card"]["exp_year"]
-		);
-		$payment->setCcTransId($response["id"]);
-	}
-
 	private function getPaymentDO()
 	{
 		$commandSubject = $this->getCommandSubject();
@@ -277,6 +295,12 @@ class PaymentExecutor
 		return isset($deviceInformation['ip_address']) ? $deviceInformation : null;
 	}
 
+	public function getIsSaveCard(): bool
+	{
+		$payment = $this->getPayment();
+		return $payment->getOrder()->getCustomerId() && $payment->getAdditionalInformation('saveCard');
+	}
+
 	public function createNewPayment(array $commandSubject, bool $capture)
 	{
 		try {
@@ -316,6 +340,107 @@ class PaymentExecutor
 		} catch (\Exception $e) {
 			$this->throwUserFriendlyException($e);
 		}
+	}
+
+	private function setPaymentFromPSQResponse(Interceptor $payment, $response)
+	{
+		$payment->setAdditionalInformation(
+			\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
+			$response
+		);
+		$payment->setLastTransId($response["id"]);
+		$payment->setTransactionId($response["id"]);
+		$payment->setIsTransactionClosed(0);
+		$payment->setCcLast4(
+			$response["payment_method"]["card"]["last4"]
+		);
+		$payment->setCcType(
+			$response["payment_method"]["card"]["brand"]
+		);
+		$payment->setCcExpMonth(
+			$response["payment_method"]["card"]["exp_month"]
+		);
+		$payment->setCcExpYear(
+			$response["payment_method"]["card"]["exp_year"]
+		);
+		$payment->setCcTransId($response["id"]);
+		if ($this->getIsSaveCard()) {
+			$this->savePaymentMethod($payment->getOrder()->getCustomerId(), $response['payment_method']);
+		}
+	}
+
+	private function savePaymentMethod($customerId, $paymentMethodData)
+	{
+		try {
+			$paymentToken = $this->creditCardTokenFactory->create();
+
+			// Use the exp_month and exp_year to generate the expiration date
+			$expirationDate = date(
+				"Y-m-t 23:59:59",
+				strtotime(
+					$paymentMethodData["card"]["exp_year"] .
+						"-" .
+						$paymentMethodData["card"]["exp_month"]
+				)
+			);
+			$paymentToken->setExpiresAt($expirationDate);
+			$paymentToken->setGatewayToken($paymentMethodData["card"]["id"]);
+			$paymentToken->setTokenDetails(
+				json_encode([
+					"type" => $paymentMethodData["card"]["brand"],
+					"maskedCC" => $paymentMethodData["card"]["last4"],
+					"expirationDate" =>
+					$paymentMethodData["card"]["exp_month"] .
+						"/" .
+						$paymentMethodData["card"]["exp_year"],
+				])
+			);
+			$paymentToken->setIsActive(true);
+			$paymentToken->setIsVisible(true);
+			$paymentToken->setPaymentMethodCode(Config::CODE);
+			$paymentToken->setWebsiteId(
+				$this->storeManager->getStore()->getWebsiteId()
+			);
+			$paymentToken->setCustomerId($customerId);
+			$paymentToken->setPublicHash(
+				$this->generatePublicHash($paymentToken)
+			);
+			$this->paymentTokenRepository->save($paymentToken);
+		} catch (\Exception $e) {
+			// $this->logger->error($e->getMessage(), [
+			// 	"trace" => $e->getTraceAsString(),
+			// ]);
+		}
+	}
+
+	/**
+	 * Generate vault payment public hash
+	 *
+	 * @param PaymentTokenInterface $paymentToken
+	 * @return string
+	 */
+	private function generatePublicHash(PaymentTokenInterface $paymentToken)
+	{
+		$hashKey = $paymentToken->getGatewayToken();
+		if ($paymentToken->getCustomerId()) {
+			$hashKey = $paymentToken->getCustomerId();
+		}
+
+		$hashKey .=
+			$paymentToken->getPaymentMethodCode() .
+			$paymentToken->getType() .
+			json_encode($paymentToken->getTokenDetails());
+
+		return $this->encryptor->getHash($hashKey);
+	}
+
+	public function getCardIdFromPublicHash($publicHash, $customerId): string
+	{
+		$paymentToken = $this->tokenManagement->getByPublicHash(
+			$publicHash,
+			$customerId
+		);
+		return $paymentToken->getGatewayToken();
 	}
 
 	public function throwUserFriendlyException(\Exception $e)

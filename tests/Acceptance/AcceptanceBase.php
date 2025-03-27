@@ -273,27 +273,34 @@ class AcceptanceBase
     protected function _goToCheckout(AcceptanceTester $I) {
         $I->amOnPage('/checkout');
         $I->waitForElementNotVisible(".loading-mask", 60);
-        /**
-         * This is a workaround to fix the issue where the customer-email field is not visible.
-         * https://github.com/magento/magento2/issues/38274
-         */
         try {
-            $I->waitForElement('#customer-email', 5);
+            // Check if there is a saved address
+            $I->grabTextFrom('.new-address-popup>button.action-show-popup');
+            // Then do nothing
         } catch (\Exception $e) {
-            // do nothing
-            $I->reloadPage();
-            $I->waitForElement('#customer-email');
+            // If there is no saved address, then we need to create a new one
+            /**
+             * This is a workaround to fix the issue where the customer-email field is not visible.
+             * https://github.com/magento/magento2/issues/38274
+             */
+            try {
+                $I->waitForElement('#customer-email', 5);
+            } catch (\Exception $e) {
+                // do nothing
+                $I->reloadPage();
+                $I->waitForElement('#customer-email');
+            }
+            $this->_generateUniqueEmail();
+            $I->fillField('#customer-email', $this->customerEmail);
+            $I->fillField('firstname', 'Billy');
+            $I->fillField('lastname', 'Bob');
+            $I->fillField('street[0]', '123 Main St');
+            $I->selectOption('select[name="country_id"]', 'US');
+            $I->selectOption('select[name="region_id"]', '15');
+            $I->fillField('city', 'Newark');
+            $I->fillField('postcode', '19711');
+            $I->fillField('telephone', '1234567890');
         }
-        $this->_generateUniqueEmail();
-        $I->fillField('#customer-email', $this->customerEmail);
-        $I->fillField('firstname', 'Billy');
-        $I->fillField('lastname', 'Bob');
-        $I->fillField('street[0]', '123 Main St');
-        $I->selectOption('select[name="country_id"]', 'US');
-        $I->selectOption('select[name="region_id"]', '15');
-        $I->fillField('city', 'Newark');
-        $I->fillField('postcode', '19711');
-        $I->fillField('telephone', '1234567890');
         $firstRadio = '.table-checkout-shipping-method tbody tr:nth-child(1) input[type="radio"]';
         $I->waitForElementClickable($firstRadio);
         $I->click($firstRadio);
@@ -368,18 +375,25 @@ class AcceptanceBase
         $I->switchToIframe();
     }
 
-    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false)
+    protected function _enableSaveCard(AcceptanceTester $I)
+    {
+        $I->waitForElementVisible('input[name="vault[is_enabled]"]');
+        $I->click('input[name="vault[is_enabled]"]');
+    }
+
+    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false, $saveCard = false)
     {
         $I->reloadPage();
         $I->amOnPage('/checkout/#payment');
         $this->_fillCardForm($I, $cardNumber, '12/29', '123');
+        if ($saveCard) {
+            $this->_enableSaveCard($I);
+        }
         if ($termsAndConditions) {
             $this->_checkTermsAndConditions($I);
         }
-        $I->saveSessionSnapshot("beforeSubmitScreenshot.png");
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
-        $I->saveSessionSnapshot("beforeSubmitScreenshot2.png");
         $I->click($submitButton);
         $I->waitForText($waitString, 10);
         $I->waitForElementNotVisible('.loading-mask', 60);
@@ -403,6 +417,19 @@ class AcceptanceBase
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
         $I->waitForText($waitString);
+    }
+
+    protected function _checkoutWithSavedCard(AcceptanceTester $I, $waitString = 'Thank you for your purchase!')
+    {
+        $this->_waitForLoading($I);
+        $I->see('Payment Method');
+        $I->checkOption('.payment-methods input#publicsquare_payments_cc_vault_1');
+        $submitButton = '.payment-method._active button[type="submit"]';
+        $this->_waitForLoading($I);
+        $I->waitForElementClickable($submitButton);
+        $I->click($submitButton);
+        $I->waitForText($waitString, 10);
+        $I->waitForElementNotVisible('.loading-mask', 60);
     }
 
     protected function _checkTermsAndConditions(AcceptanceTester $I)

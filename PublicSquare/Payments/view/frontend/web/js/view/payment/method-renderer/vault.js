@@ -11,8 +11,11 @@ define([
   'Magento_Checkout/js/model/full-screen-loader',
   'Magento_Checkout/js/model/url-builder',
   'mage/storage',
-  'mage/translate'
-], function ($, VaultComponent, messageList, fullScreenLoader, urlBuilder, storage, $t) {
+  'mage/translate',
+  "Magento_Customer/js/model/customer",
+  "Magento_Checkout/js/model/place-order",
+  "Magento_Checkout/js/model/quote",
+], function ($, VaultComponent, messageList, fullScreenLoader, urlBuilder, storage, $t, customer, placeOrderService, quote) {
   'use strict';
 
   return VaultComponent.extend({
@@ -21,8 +24,17 @@ define([
       modules: {
         hostedFields: '${ $.parentName }.publicsquare_payments'
       },
-      additionalData: {}
+      additionalData: {},
+      idempotencyKey: null,
     },
+
+    initialize: function () {
+      var self = this;
+      self._super();
+      self.idempotencyKey = self.generateIdempotencyKey();
+      return self;
+    },
+
 
     getIcons: function (type) {
       return {
@@ -69,15 +81,22 @@ define([
 
     placeOrderWithCardId: function (publicHash) {
       fullScreenLoader.startLoader();
-      var serviceUrl = urlBuilder.createUrl('/publicsquare_payments/payments', {});
+      var serviceUrl = urlBuilder.createUrl(
+        customer.isLoggedIn() ?
+          '/carts/mine/payment-information' :
+          '/guest-carts/:quoteId/payment-information',
+        {
+          quoteId: quote.getQuoteId()
+        }
+      );
 
-      return storage.post(
+      return placeOrderService(
         serviceUrl,
-        JSON.stringify({
-          cardId: null,
-          saveCard: false,
-          publicHash,
-        })
+        {
+          ...(!customer.isLoggedIn() && { email: quote.guestEmail }),
+          paymentMethod: this.getData()
+        },
+        messageList
       ).done(function (response) {
         // Handle successful order placement
         const maskId = window.checkoutConfig.quoteData.entity_id;
@@ -98,15 +117,22 @@ define([
        */
     getData: function () {
       var data = {
-        'method': this.code,
-        'additional_data': {
-          'public_hash': this.publicHash
+        method: this.code,
+        additional_data: {
+          public_hash: this.publicHash,
+          idempotencyKey: this.idempotencyKey,
         }
       };
 
       data['additional_data'] = _.extend(data['additional_data'], this.additionalData);
 
       return data;
-    }
+    },
+
+    generateIdempotencyKey() {
+      const timestamp = Date.now().toString();
+      const random = Math.random().toString(36).substr(2, 9);
+      return timestamp + random;
+    },
   });
 });
