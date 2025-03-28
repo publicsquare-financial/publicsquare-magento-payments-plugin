@@ -260,15 +260,15 @@ class PaymentExecutor
 			$transactionId = $payment->getLastTransId();
 
 			if ($transactionId && str_starts_with($transactionId, "pmt_") && $amount) {
-				if ($status == \PublicSquare\Payments\Api\ApiRequestAbstract::SUCCEEDED_STATUS) {
+				if ($status == \PublicSquare\Payments\Api\ApiRequestAbstract::REQUIRES_CAPTURE_STATUS) {
+					$this->paymentCancelFactory->create([
+						'paymentId' => $transactionId,
+					])->getResponse();
+					$payment->setIsTransactionClosed(1);
+				} else {
 					$this->paymentRefundFactory->create([
 						'paymentId' => $transactionId,
 						'amount' => $amount
-					])->getResponse();
-					$payment->setIsTransactionClosed(1);
-				} else if ($status == \PublicSquare\Payments\Api\ApiRequestAbstract::REQUIRES_CAPTURE_STATUS) {
-					$this->paymentCancelFactory->create([
-						'paymentId' => $transactionId,
 					])->getResponse();
 					$payment->setIsTransactionClosed(1);
 				}
