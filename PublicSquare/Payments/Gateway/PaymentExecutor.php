@@ -255,6 +255,9 @@ class PaymentExecutor
 			$order = $observer->getEvent()->getOrder();
 			$payment = $order->getPayment();
 			$psqPaymentResponse = $payment->getAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS);
+			if (!isset($psqPaymentResponse["amount"]) || !isset($psqPaymentResponse["status"])) {
+				return;
+			}
 			$amount = $psqPaymentResponse["amount"];
 			$status = $psqPaymentResponse["status"];
 			$transactionId = $payment->getLastTransId();
