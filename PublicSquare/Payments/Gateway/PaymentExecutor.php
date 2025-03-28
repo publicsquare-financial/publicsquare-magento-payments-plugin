@@ -1,4 +1,5 @@
 <?php
+
 namespace PublicSquare\Payments\Gateway;
 
 use Magento\Sales\Model\Order\Payment\Interceptor;
@@ -7,15 +8,19 @@ use Magento\Quote\Model\QuoteRepository;
 use PublicSquare\Payments\Api\Authenticated\PaymentCreateFactory;
 use PublicSquare\Payments\Api\Authenticated\PaymentCaptureFactory;
 use PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory;
+use PublicSquare\Payments\Api\Authenticated\PaymentUpdateFactory;
+use PublicSquare\Payments\Api\Authenticated\PaymentRefundFactory;
 use PublicSquare\Payments\Logger\Logger;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
+use Magento\Framework\Event\Observer;
 use Magento\Vault\Model\CreditCardTokenFactory;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Vault\Api\PaymentTokenRepositoryInterface;
 use Magento\Vault\Api\Data\PaymentTokenInterface;
 use Magento\Vault\Api\PaymentTokenManagementInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
+use PublicSquare\Payments\Api\Authenticated\PaymentCapture;
 use PublicSquare\Payments\Helper\Config;
 
 class PaymentExecutor
@@ -39,6 +44,16 @@ class PaymentExecutor
 	 * @var PaymentCancelFactory
 	 */
 	private $paymentCancelFactory;
+
+	/**
+	 * @var PaymentUpdateFactory
+	 */
+	private $paymentUpdateFactory;
+
+	/**
+	 * @var PaymentRefundFactory
+	 */
+	private $paymentRefundFactory;
 
 	/**
 	 * @var CreditCardTokenFactory
@@ -97,7 +112,9 @@ class PaymentExecutor
 		TransactionRepositoryInterface $transactionRepository,
 		PaymentCaptureFactory $paymentCaptureFactory,
 		PaymentCancelFactory $paymentCancelFactory,
-		RemoteAddress $remoteAddress,
+		PaymentUpdateFactory $paymentUpdateFactory,
+		PaymentRefundFactory $paymentRefundFactory,
+		RemoteAddress $remoteAddress
 	) {
 		$this->quoteRepository = $quoteRepository;
 		$this->paymentCreateFactory = $paymentCreateFactory;
@@ -110,6 +127,8 @@ class PaymentExecutor
 		$this->transactionRepository = $transactionRepository;
 		$this->paymentCaptureFactory = $paymentCaptureFactory;
 		$this->paymentCancelFactory = $paymentCancelFactory;
+		$this->paymentUpdateFactory = $paymentUpdateFactory;
+		$this->paymentRefundFactory = $paymentRefundFactory;
 		$this->remoteAddress = $remoteAddress;
 	}
 
@@ -136,17 +155,15 @@ class PaymentExecutor
 	{
 		try {
 			$this->setCommandSubject($commandSubject);
-	
+
 			$payment = $this->getPayment();
 			$transaction = $this->getTransaction();
 			// PSQ payment id
 			$transactionId = $transaction->getTxnId();
 			$order = $payment->getOrder();
-	
-			$currentStatus = $payment->getAdditionalInformation("raw_details_info")[
-				"status"
-			];
-	
+
+			$currentStatus = $payment->getAdditionalInformation("raw_details_info")["status"];
+
 			if (!$transactionId || !str_starts_with($transactionId, "pmt_")) {
 				throw new CouldNotSaveException(
 					__(
@@ -193,32 +210,76 @@ class PaymentExecutor
 	{
 		try {
 			$this->setCommandSubject($commandSubject);
-	
+
 			$payment = $this->getPayment();
 			$transaction = $this->getTransaction();
 			// PSQ payment id
 			$transactionId = $transaction->getTxnId();
-	
-			if (!$transactionId)
-			{
+
+			if (!$transactionId) {
 				throw new CouldNotSaveException(__('Sorry, it is not possible to cancel this order.'));
 			}
-	
+
 			$response = $this->paymentCancelFactory->create([
 				'paymentId' => $transactionId
 			])->getResponseData();
 			$payment->setAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS, $response);
-			$payment->setIsTransactionClosed(0);
+			$payment->setIsTransactionClosed(1);
 		} catch (\Exception $e) {
 			$this->throwUserFriendlyException($e);
 		}
 	}
 
-	public function executeRefund(array $commandSubject)
+	public function executeUpdate(Observer $observer)
+	{
+		$order = $observer->getEvent()->getOrder();
+		$payment = $order->getPayment();
+		$transactionId = $payment->getLastTransId();
+
+		$this->logger->info("PSQ Payments update", [
+			"transactionId" => $transactionId,
+			"orderId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
+		]);
+
+		if ($transactionId && str_starts_with($transactionId, "pmt_")) {
+			$this->paymentUpdateFactory->create([
+				"paymentId" => $transactionId,
+				"externalId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
+			])->getResponse();
+		}
+	}
+
+	public function executeObserverOrderDidFailToSubmit(Observer $observer)
 	{
 		try {
-			$this->setCommandSubject($commandSubject);
+			$order = $observer->getEvent()->getOrder();
+			$payment = $order->getPayment();
+			$psqPaymentResponse = $payment->getAdditionalInformation(\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS);
+			if (!isset($psqPaymentResponse["amount"]) || !isset($psqPaymentResponse["status"])) {
+				return;
+			}
+			$amount = $psqPaymentResponse["amount"];
+			$status = $psqPaymentResponse["status"];
+			$transactionId = $payment->getLastTransId();
+
+			if ($transactionId && str_starts_with($transactionId, "pmt_") && $amount) {
+				if ($status == \PublicSquare\Payments\Api\ApiRequestAbstract::REQUIRES_CAPTURE_STATUS) {
+					$this->paymentCancelFactory->create([
+						'paymentId' => $transactionId,
+					])->getResponse();
+					$payment->setIsTransactionClosed(1);
+				} else {
+					$this->paymentRefundFactory->create([
+						'paymentId' => $transactionId,
+						'amount' => $amount
+					])->getResponse();
+					$payment->setIsTransactionClosed(1);
+				}
+			}
 		} catch (\Exception $e) {
+			$this->logger->error("PSQ Payments update from observer failed", [
+				"error" => $e->getMessage(),
+			]);
 			$this->throwUserFriendlyException($e);
 		}
 	}
@@ -350,7 +411,7 @@ class PaymentExecutor
 		);
 		$payment->setLastTransId($response["id"]);
 		$payment->setTransactionId($response["id"]);
-		$payment->setIsTransactionClosed(0);
+		$payment->setIsTransactionClosed($response["status"] == \PublicSquare\Payments\Api\ApiRequestAbstract::REQUIRES_CAPTURE_STATUS ? 0 : 1);
 		$payment->setCcLast4(
 			$response["payment_method"]["card"]["last4"]
 		);
@@ -450,4 +511,3 @@ class PaymentExecutor
 		);
 	}
 }
-

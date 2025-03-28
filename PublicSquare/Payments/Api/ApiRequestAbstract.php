@@ -48,6 +48,11 @@ abstract class ApiRequestAbstract
     protected $logPrefix;
 
     /**
+     * @var string
+     */
+    protected $objectId;
+
+    /**
      * @var array
      */
     protected $requestData;
@@ -110,7 +115,13 @@ abstract class ApiRequestAbstract
 
         $path = ltrim($this->getPath());
 
-        return $host . '/' . $path;
+        $uri = $host . '/' . $path;
+
+        if ($this->objectId) {
+            $uri .= '/' . $this->objectId;
+        }
+
+        return $uri;
     } //end getUri()
 
     protected function getUrii(): string

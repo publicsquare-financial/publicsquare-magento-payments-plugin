@@ -2,6 +2,7 @@
 
 namespace Tests\Pages;
 
+use Codeception\Util\Locator;
 use Tests\Acceptance\AcceptanceBase;
 use Tests\Support\AcceptanceTester;
 
@@ -15,7 +16,9 @@ class AdminOrderDetailPage extends AcceptanceBase
     $this->_waitForLoading($I);
     $I->waitForElementVisible('a.action-menu-item');
     $this->_waitForLoading($I);
-    $I->click('.data-grid-actions-cell>a');
+    $link = Locator::firstElement('.data-grid-actions-cell>a');
+    $I->waitForElementClickable($link);
+    $I->click($link);
     $I->waitForText('Order & Account Information');
   }
 
