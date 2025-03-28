@@ -25,7 +25,7 @@ class SalesModelServiceQuoteSubmitFailureObserver implements ObserverInterface
    */
   public function execute(Observer $observer)
   {
-    $this->paymentExecutor->executeUpdateFromObserver($observer);
+    $this->paymentExecutor->executeObserverOrderDidFailToSubmit($observer);
     return $this;
   }
 }

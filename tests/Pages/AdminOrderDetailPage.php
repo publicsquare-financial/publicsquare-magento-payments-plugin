@@ -14,7 +14,8 @@ class AdminOrderDetailPage extends AcceptanceBase
     $I->waitForText('Orders');
     $this->_waitForLoading($I);
     $I->waitForElementVisible('a.action-menu-item');
-    $I->click('View');
+    $this->_waitForLoading($I);
+    $I->click('.data-grid-actions-cell>a');
     $I->waitForText('Order & Account Information');
   }
 
