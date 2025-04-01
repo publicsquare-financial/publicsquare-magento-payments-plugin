@@ -312,7 +312,7 @@ class PaymentExecutor
 
 	public function getOrder()
 	{
-		return $this->getPaymentDO()->getOrder();
+		return $this->getPayment()->getOrder();
 	}
 
 	public function getQuote()
