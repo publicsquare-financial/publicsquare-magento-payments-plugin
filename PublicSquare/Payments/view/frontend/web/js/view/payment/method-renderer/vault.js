@@ -121,7 +121,10 @@ define([
         additional_data: {
           public_hash: this.publicHash,
           idempotencyKey: this.idempotencyKey,
-        }
+        },
+        ...(window.checkoutConfig.checkoutAgreements && window.checkoutConfig.checkoutAgreements.agreements && {
+          extension_attributes: { agreement_ids: window.checkoutConfig.checkoutAgreements.agreements.map(({ agreementId }) => agreementId) }
+        })
       };
 
       data['additional_data'] = _.extend(data['additional_data'], this.additionalData);
