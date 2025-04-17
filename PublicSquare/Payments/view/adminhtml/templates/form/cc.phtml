@@ -8,6 +8,7 @@
 /** @var PublicSquare\Payments\Block\Form $block */
 
 $code = $block->escapeHtml($block->getMethodCode());
+$isVaultEnabled = method_exists($block, 'isVaultEnabled') ? $block->isVaultEnabled() : false;
 $ccType = $block->getInfoData('cc_type');
 ?>
 <fieldset class="admin__fieldset payment-method"
@@ -22,7 +23,7 @@ $ccType = $block->getInfoData('cc_type');
         </div>
     </div>
 
-    <?php if ($block->isVaultEnabled()) : ?>
+    <?php if ($isVaultEnabled) : ?>
         <div class="field-tooltip-content">
             <input type="checkbox"
                 id="<?= /* @noEscape */ $code ?>_vault"
