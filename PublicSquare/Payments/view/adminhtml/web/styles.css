@@ -42,3 +42,8 @@
   border-radius: 2px;
   padding: 4px 4px 4px 12px;
 }
+
+#p_method_publicsquare_payments_cc_vault,
+#p_method_publicsquare_payments_cc_vault + label {
+  display: none;
+}

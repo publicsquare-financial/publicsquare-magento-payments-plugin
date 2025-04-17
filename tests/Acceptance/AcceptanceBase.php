@@ -3,6 +3,7 @@
 namespace Tests\Acceptance;
 
 use Tests\Support\AcceptanceTester;
+use Codeception\Step\Argument\PasswordArgument;
 
 class AcceptanceBase
 {
@@ -72,7 +73,8 @@ class AcceptanceBase
             // login page
             $I->waitForElement('#username');
             $I->fillField('#username', 'admin');
-            $I->fillField('#login', 'AdminPassword1234');
+            $password = new PasswordArgument('AdminPassword1234');
+            $I->fillField('#login', $password);
             $I->click('.form-actions .action-login');
             $I->waitForText('Dashboard');
         }
@@ -86,7 +88,8 @@ class AcceptanceBase
         $I->amOnPage('/customer/account/login');
         // login page
         $I->fillField('[type="email"]', 'roni_cost@example.com');
-        $I->fillField('[type="password"]', 'roni_cost3@example.com');
+        $password = new PasswordArgument('roni_cost3@example.com');
+        $I->fillField('[type="password"]', $password);
         $I->click('.form-login .action.login.primary');
         $I->waitForText('My Account');
     }

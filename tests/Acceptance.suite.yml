@@ -25,7 +25,8 @@ modules:
                         "--ignore-certificate-errors",
 #                        "--disable-software-rasterizer",
                         "--disable-extensions",
-                        "--allow-insecure-localhost"
+                        "--allow-insecure-localhost",
+                        "--incognito"
 #                        "--disable-features=VizDisplayCompositor"
                     ]
                 acceptInsecureCerts: true

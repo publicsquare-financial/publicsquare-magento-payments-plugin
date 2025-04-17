@@ -17,6 +17,11 @@ use Magento\Vault\Model\VaultPaymentInterface;
 class Form extends Cc
 {
     /**
+     * @var Context
+     */
+    protected $context;
+
+    /**
      * @var Quote
      */
     protected $sessionQuote;
@@ -55,6 +60,7 @@ class Form extends Cc
         array $data = []
     ) {
         parent::__construct($context, $paymentConfig, $data);
+        $this->context = $context;
         $this->sessionQuote = $sessionQuote;
         $this->gatewayConfig = $gatewayConfig;
         $this->ccType = $ccType;
@@ -87,6 +93,12 @@ class Form extends Cc
      */
     public function isVaultEnabled()
     {
+        // Determine if this is a page in the admin area
+        $isAdmin = $this->context->getAppState()->getAreaCode() === 'adminhtml';
+        if ($isAdmin) {
+            return false;
+        }
+
         $vaultPayment = $this->getVaultPayment();
         return $vaultPayment->isActive($this->sessionQuote->getStoreId());
     }
