@@ -33,6 +33,7 @@ define(
     }
 
     function enableSubmitHandler() {
+      if (!window.order || !window.order.submit) return;
       if (!originalOrderSubmit) {
         originalOrderSubmit = window.order.submit;
       }
