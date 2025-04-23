@@ -13,7 +13,8 @@
     "codeception/module-webdriver": "^4.0",
     "codeception/module-db": "^3.1",
     "codeception/module-phpbrowser": "^3.0",
-    "codeception/module-cli": "^2.0"
+    "codeception/module-cli": "^2.0",
+    "codeception/module-rest": "^3.4"
   },
   "config": {
     "allow-plugins": {

@@ -2,6 +2,7 @@
 
 namespace Tests\Acceptance;
 
+use Tests\Bases\AcceptanceBase;
 use Tests\Support\AcceptanceTester;
 
 class CheckoutRoundingCest extends AcceptanceBase

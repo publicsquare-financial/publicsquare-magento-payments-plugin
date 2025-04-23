@@ -2,7 +2,7 @@
 
 namespace Tests\Acceptance;
 
-
+use Tests\Bases\AcceptanceBase;
 use Tests\Support\AcceptanceTester;
 
 class CheckoutWithAuthorizeCaptureCest extends AcceptanceBase

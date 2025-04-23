@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Acceptance;
+namespace Tests\Bases;
 
 use Tests\Support\AcceptanceTester;
 use Codeception\Step\Argument\PasswordArgument;
@@ -68,8 +68,7 @@ class AcceptanceBase
 
         try {
             $I->see("Dashboard");   // skip logging in if we are already logged in.
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             // login page
             $I->waitForElement('#username');
             $I->fillField('#username', 'admin');
@@ -228,7 +227,7 @@ class AcceptanceBase
         $I->runShellCommand('bin/magento indexer:reindex cataloginventory_stock');
     }
 
-    protected function _customerGoToAnOrder(AcceptanceTester $I, $doLogin=true): void
+    protected function _customerGoToAnOrder(AcceptanceTester $I, $doLogin = true): void
     {
         if ($doLogin) {
             $this->_customerLogin($I);
@@ -273,7 +272,8 @@ class AcceptanceBase
         $this->customerEmail = "BillyBob{$time}@example.com";
     }
 
-    protected function _goToCheckout(AcceptanceTester $I) {
+    protected function _goToCheckout(AcceptanceTester $I)
+    {
         $I->amOnPage('/checkout');
         $I->waitForElementNotVisible(".loading-mask", 60);
         try {
@@ -312,7 +312,8 @@ class AcceptanceBase
         $I->waitForText('Order Total');
     }
 
-    protected function _goToVirtualProductCheckout(AcceptanceTester $I) {
+    protected function _goToVirtualProductCheckout(AcceptanceTester $I)
+    {
         $I->amOnPage('/checkout');
         $I->waitForElementNotVisible(".loading-mask", 60);
         $I->waitForElement('#customer-email');
@@ -320,7 +321,8 @@ class AcceptanceBase
         $I->fillField('#customer-email', $this->customerEmail);
     }
 
-    protected function _goToCheckoutWhileLoggedIn(AcceptanceTester $I) {
+    protected function _goToCheckoutWhileLoggedIn(AcceptanceTester $I)
+    {
         $I->amOnPage('/checkout');
         $firstRadio = '.table-checkout-shipping-method tbody tr:nth-child(1) input[type="radio"]';
         $I->waitForElementClickable($firstRadio);
@@ -337,7 +339,7 @@ class AcceptanceBase
         $I->click($containerSelector);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
-        $I->switchToIframe('//*[@id="'.$x.'"]');
+        $I->switchToIframe('//*[@id="' . $x . '"]');
         $I->waitForElementVisible('//*[@id="cardNumber"]');
         $I->waitForElementVisible('//*[@id="expirationDate"]');
         $I->waitForElementVisible('//*[@id="cvc"]');
@@ -357,7 +359,7 @@ class AcceptanceBase
         $this->_makeSurePaymentMethodIsVisible($I, $containerSelector);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
-        $I->switchToIframe('//*[@id="'.$x.'"]');
+        $I->switchToIframe('//*[@id="' . $x . '"]');
         $this->_clearField($I, '//*[@id="cardNumber"]');
         $this->_clearField($I, '//*[@id="expirationDate"]');
         $this->_clearField($I, '//*[@id="cvc"]');
@@ -371,7 +373,7 @@ class AcceptanceBase
         $this->_clearCardForm($I, $containerSelector);
         $I->waitForElementVisible($this::IFRAME_CSS);
         $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
-        $I->switchToIframe('//*[@id="'.$x.'"]');
+        $I->switchToIframe('//*[@id="' . $x . '"]');
         $I->fillField('//*[@id="cardNumber"]', $cardNumber);
         $I->fillField('//*[@id="expirationDate"]', $expirationDate);
         $I->fillField('//*[@id="cvc"]', $cvc);
@@ -402,7 +404,7 @@ class AcceptanceBase
         $I->waitForElementNotVisible('.loading-mask', 60);
     }
 
-    protected function _checkoutWithVirtualCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
+    protected function _checkoutWithVirtualCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!')
     {
         $this->_makeSurePaymentMethodIsVisible($I);
         $I->fillField('.payment-method._active input[name="firstname"]', 'Billy');
@@ -440,7 +442,7 @@ class AcceptanceBase
         $I->checkOption('._active .checkout-agreement input');
     }
 
-    protected function _addInventoryToProduct(AcceptanceTester $I, $productName, $quantity=1000)
+    protected function _addInventoryToProduct(AcceptanceTester $I, $productName, $quantity = 1000)
     {
 
         $this->_adminLogin($I);
@@ -460,7 +462,8 @@ class AcceptanceBase
         $I->waitForText("You saved the product.");
     }
 
-    protected function _doSuccessfulCheckout(AcceptanceTester $I) {
+    protected function _doSuccessfulCheckout(AcceptanceTester $I)
+    {
         $this->_initialize($I);
         $this->_addProductToCart($I);
         $this->_goToCheckout($I);

@@ -3,7 +3,7 @@
 namespace Tests\Pages;
 
 use Codeception\Util\Locator;
-use Tests\Acceptance\AcceptanceBase;
+use Tests\Bases\AcceptanceBase;
 use Tests\Support\AcceptanceTester;
 
 class AdminOrderDetailPage extends AcceptanceBase

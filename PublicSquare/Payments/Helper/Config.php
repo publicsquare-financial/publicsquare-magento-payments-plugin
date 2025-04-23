@@ -34,6 +34,7 @@ class Config extends AbstractHelper
     const PUBLICSQUARE_LOGGING_CONFIG_PATH                  = 'payment/publicsquare_payments/debug';
     const PUBLICSQUARE_CARD_IMAGES_BASE_PATH                = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
     const PUBLICSQUARE_CUSTOMER_LOOKUP                       = 'payment/publicsquare_payments/customer_lookup';
+    const PUBLICSQUARE_WEBHOOK_SIGNING_SECRET                = 'payment/publicsquare_payments/publicsquare_webhook_signing_secret';
     /**
      * @var \Magento\Framework\Serialize\Serializer\Json
      */
@@ -157,6 +158,21 @@ class Config extends AbstractHelper
         return (bool) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_CUSTOMER_LOOKUP, $scopeType, $scopeCode);
     } //end getGuestCheckoutCustomerLookup()
+
+    /**
+     * Get webhook signing secret
+     *
+     * @param  string $scopeType
+     * @param  null   $scopeCode
+     * @return string
+     */
+    public function getWebhookSigningSecret(
+        $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+        $scopeCode = null
+    ): string {
+        return (string) $this->scopeConfig
+            ->getValue(self::PUBLICSQUARE_WEBHOOK_SIGNING_SECRET, $scopeType, $scopeCode);
+    } //end getWebhookSigningSecret()
 
     /**
      * Get publicsquare payment capture action

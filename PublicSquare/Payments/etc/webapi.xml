@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<routes>
+  <route url="/V1/publicsquare/webhooks" method="POST">
+    <service class="PublicSquare\Payments\Api\Webhooks\WebhookInterface" method="execute"/>
+    <resources>
+      <resource ref="anonymous"/>
+    </resources>
+  </route>
+</routes>
