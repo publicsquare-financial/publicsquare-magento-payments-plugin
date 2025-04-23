@@ -31,6 +31,7 @@ class RefundCommand implements CommandInterface
     public function execute(array $commandSubject)
     {
         $payment = $commandSubject['payment']->getPayment();
+        $order = $payment->getOrder();
         $amount = $commandSubject['amount'] * 100;
         $transactionId = $this->getTransactionId($payment);
 
@@ -43,7 +44,8 @@ class RefundCommand implements CommandInterface
         {
             $this->paymentRefundFactory->create([
                 'paymentId' => $transactionId,
-                'amount' => $amount
+                'amount' => $amount,
+                'externalId' => $order->getIncrementId() ?? ($order->getId() ?? "")
             ])->getResponse();
         }
         catch (\Exception $e)
