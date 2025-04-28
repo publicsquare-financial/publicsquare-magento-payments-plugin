@@ -29,13 +29,17 @@ class PaymentRefund extends \PublicSquare\Payments\Api\ApiRequestAbstract
         \PublicSquare\Payments\Helper\Config $configHelper,
         \PublicSquare\Payments\Logger\Logger $logger,
         float $amount,
-        string $paymentId
+        string $paymentId,
+        string | null $externalId = null
     ) {
         parent::__construct($clientFactory, $configHelper, $logger);
         $this->requestData = [
             "amount" => $amount,
             "payment_id" => $paymentId
         ];
+        if ($externalId) {
+            $this->requestData["external_id"] = $externalId;
+        }
     }//end __construct()
 
     /**

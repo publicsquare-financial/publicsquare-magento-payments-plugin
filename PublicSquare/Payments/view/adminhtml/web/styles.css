@@ -47,3 +47,7 @@
 #p_method_publicsquare_payments_cc_vault + label {
   display: none;
 }
+
+.admin__payment-method-wrapper {
+  min-width: 384px;
+}
