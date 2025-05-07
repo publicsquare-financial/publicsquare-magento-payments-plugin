@@ -14,8 +14,9 @@ define(
       originalOrderSubmit;
 
     async function onSubmit(e) {
+      const $form = $('#edit_form');
       try {
-        $('#edit_form').trigger('processStart');
+        $form.trigger('processStart');
         const cardholder_name = [$(firstNameSelector).val(), $(lastNameSelector).val()].filter(Boolean).join(' ');
         if (!cardholder_name) {
           alert('Cardholder name is required');
@@ -26,9 +27,13 @@ define(
         }
         const card = await publicsquare.createCard(cardholder_name, publicsquare.cardElement);
         $(paymentMethodNonceSelector).val(card.id);
+        if (!$form.valid()) {
+          $form.trigger('processStop');
+          return
+        }
         originalOrderSubmit();
       } catch {
-        $('#edit_form').trigger('processStop');
+        $form.trigger('processStop');
       }
     }
 
