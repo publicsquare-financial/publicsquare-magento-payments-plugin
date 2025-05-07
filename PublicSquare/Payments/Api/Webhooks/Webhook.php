@@ -6,8 +6,12 @@ use PublicSquare\Payments\Api\Webhooks\WebhookInterface;
 use PublicSquare\Payments\Api\Webhooks\WebhookEventType;
 use PublicSquare\Payments\Api\Webhooks\PaymentStatus;
 use PublicSquare\Payments\Api\Webhooks\RefundStatus;
-use Magento\Sales\Api\OrderRepositoryInterface;
 use PublicSquare\Payments\Api\Authenticated\PaymentGetFactory;
+use Magento\Sales\Model\Spi\OrderResourceInterface;
+use Magento\Sales\Api\Data\OrderInterfaceFactory;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Model\Order\CreditmemoFactory;
+use Magento\Sales\Model\Service\CreditmemoService;
 
 class Webhook implements WebhookInterface
 {
@@ -22,9 +26,24 @@ class Webhook implements WebhookInterface
   private $config;
 
   /**
-   * @var OrderRepositoryInterface
+   * @var OrderResourceInterface
    */
-  private $orderRepository;
+  private $orderResource;
+
+  /**
+   * @var OrderInterfaceFactory
+   */
+  private $orderFactory;
+
+  /**
+   * @var CreditmemoFactory
+   */
+  private $creditMemoFactory;
+
+  /**
+   * @var CreditmemoService
+   */
+  private $creditMemoService;
 
   /**
    * @var PaymentGetFactory
@@ -34,12 +53,18 @@ class Webhook implements WebhookInterface
   public function __construct(
     \PublicSquare\Payments\Logger\Logger $logger,
     \PublicSquare\Payments\Helper\Config $config,
-    OrderRepositoryInterface $orderRepository,
+    OrderResourceInterface $orderResource,
+    OrderInterfaceFactory $orderFactory,
+    CreditmemoFactory $creditMemoFactory,
+    CreditmemoService $creditMemoService,
     PaymentGetFactory $paymentGetFactory
   ) {
     $this->logger = $logger;
     $this->config = $config;
-    $this->orderRepository = $orderRepository;
+    $this->orderResource = $orderResource;
+    $this->orderFactory = $orderFactory;
+    $this->creditMemoFactory = $creditMemoFactory;
+    $this->creditMemoService = $creditMemoService;
     $this->paymentGetFactory = $paymentGetFactory;
   }
 
@@ -67,6 +92,8 @@ class Webhook implements WebhookInterface
       } catch (\Exception $e) {
         $this->logger->error("Error handling event " . $event_type . " " . $e->getMessage());
       }
+    } else {
+      $this->logger->error("Signature verification failed");
     }
     return "";
   }
@@ -92,6 +119,8 @@ class Webhook implements WebhookInterface
       $this->logger->info("Refund update received " . $entity['id'] . " " . $status->value);
 
       $payment = $this->getPSQPaymentFromPSQRefundEntity($entity);
+
+      $creditMemoCreated = $this->checkIfPaymentShouldBeRefunded($entity, $payment);
 
       $this->updateOrderPaymentAdditionalInformation($payment);
     } catch (\ValueError $th) {
@@ -125,11 +154,7 @@ class Webhook implements WebhookInterface
       throw new \Exception("Missing external_id for payment " . $entity['id']);
     }
 
-    $order = $this->orderRepository->loadByIncrementId($entity['external_id']);
-    if (!$order) {
-      $this->logger->error("Order not found for payment " . $entity['id']);
-      throw new \Exception("Order not found for payment " . $entity['id']);
-    }
+    $order = $this->getOrderForPayment($entity);
 
     $payment = $order->getPayment();
     if (!$payment) {
@@ -141,6 +166,52 @@ class Webhook implements WebhookInterface
     $payment->save();
 
     return $payment;
+  }
+
+  private function checkIfPaymentShouldBeRefunded(mixed $refund, mixed $payment): bool
+  {
+    if ($payment['status'] === 'cancelled') {
+      // Check if there is a credit memo for this payment
+      $order = $this->getOrderForPayment($payment);
+      $creditMemo = $order->getCreditmemosCollection()->getFirstItem();
+      if ($creditMemo) {
+        $this->logger->info("Credit memo found for payment, no need to create a new credit memo. " . $refund['id']);
+        return false;
+      } else {
+        $this->logger->info("No credit memo found for payment, creating a new credit memo. " . $refund['id']);
+        $invoices = $order->getInvoiceCollection();
+        foreach ($invoices as $invoice) {
+          $invoiceincrementid = $invoice->getIncrementId();
+        }
+
+        $invoiceobj = $invoice->loadByIncrementId($invoiceincrementid);
+        $creditmemo = $this->creditMemoFactory->createByOrder($order);
+
+        // Don't set invoice if you want to do offline refund
+        $creditmemo->setInvoice($invoiceobj);
+
+        $creditmemo->setGrandTotal($refund['amount']);
+
+        $this->creditMemoService->refund($creditmemo);
+        return true;
+      }
+    }
+
+    $this->logger->info("Payment is not cancelled, no need to create a credit memo. " . $refund['id']);
+
+    return false;
+  }
+
+  private function getOrderForPayment(mixed $entity)
+  {
+    $order = $this->orderFactory->create();
+    $this->orderResource->load($order, $entity['external_id'], OrderInterface::INCREMENT_ID);
+    if (!$order) {
+      $this->logger->error("Order not found for payment " . $entity['id']);
+      throw new \Exception("Order not found for payment " . $entity['id']);
+    }
+
+    return $order;
   }
 
   private function verifySignature(): bool

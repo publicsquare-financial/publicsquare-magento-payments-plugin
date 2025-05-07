@@ -2,7 +2,7 @@
 
 namespace Tests\Pages;
 
-use Tests\Acceptance\AcceptanceBase;
+use Tests\Bases\AcceptanceBase;
 use Tests\Support\AcceptanceTester;
 use Codeception\Util\Locator;
 

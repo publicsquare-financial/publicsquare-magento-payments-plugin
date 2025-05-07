@@ -4,9 +4,18 @@ namespace Tests\Bases;
 
 use Tests\Support\AcceptanceTester;
 
+/**
+ * How to: generate a new RSA key pair with openssl v3
+ * Private key: openssl genrsa -traditional -out id_rsa 2048
+ * Public key: openssl rsa -in id_rsa -pubout > id_rsa.pub
+ * Then remove "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A" from the public key
+ */
+
 class WebhookBase extends AcceptanceBase
 {
-  public function setWebhookSigningSecret(AcceptanceTester $I)
+  protected $rollbackTransactions = false;
+
+  protected function setWebhookSigningSecret(AcceptanceTester $I)
   {
     // // Create a new RSA key pair
     // $newPK = openssl_pkey_new([
@@ -29,67 +38,55 @@ class WebhookBase extends AcceptanceBase
 
     $privateKey = <<<EOD
 -----BEGIN RSA PRIVATE KEY-----
-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
+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
 -----END RSA PRIVATE KEY-----
 EOD;
 
-    $publicKey = "AAAAB3NzaC1yc2EAAAADAQABAAABgQDAlFe0lKirF8rLHFc/ywckTbUe7U1iiX66aSUQpGxpg3RFDj48afvZ1Otblr79ZYVwrDNvZBPr+k5j+FjAvUvgf/m6vEyoX0gD8srGqFDImpIzk20myd+fbGZ72LHInPKOUwxpL4uN4Tfa7mMv0XyuN/DeICkVsa3Ca9XYcojnTOWSyJ/RbvUg/Sh3NSBEQtw4jB1JrIUCOUoxti65Yt6TZcmiF42IufXTgzAJuP496YlFCHcByM5eyvBNBr6jfrXf6wwAzZXC/frCyCMFOjms/DABPK4WPuTWjcDw2j/ytClmkqdqLZI/NKdy/3vzGLT7iH6N/kIo78Ck/ii6EVPhsJFWvRkQ1V+9HLNTKtq9rANXmCjgk53RGc3XHM5DFthxQd+JxPJ08m0ajKyJugCpkm9+WG5/PJ8V7kfcrUbBDGImpJk/puXn2Dp00eWE0qOs+oE8wfQItZT9tc25wuZp4MBlkh6v7mLQ6oCI1seNArNuBKWdFBjAeI577HA8pLM=";
+    $publicKey = "MIIBCgKCAQEA62rPt5magwvl0GkP9dnJtFnZwQbHjTx7kmLPzxkh34tXFMUhV2vsbpMtRQJAfvXml8P5wSiI8z1whGTh14NVyhJQ67oWW3b5JgvWaNptGrlsJ0IEwAoDs9DfcyRxbzECkYnFiKoVK10tGrbNh69miS0HtX6DVbSvswJZvaMFmNdbp+qAMRQYZnSBPjrp/jpqZfNpjv/zyBeUg5wGc1BIqwECXsVRMSAY0f26r56JU+qTCrwgkLkLh1qK6YHkD1f4RcwC66cql70Y4R66ZGstqHfU7ee5H0sGsfENOtSEr0HOrq94sbLRXOp+zgD8P1gj9++pLZ98yWHfmueoyLK8TQIDAQAB";
 
     // Store both keys in the database
-    if (!$I->tryToSeeInDatabase('core_config_data', ['path' => 'payment/publicsquare_payments/webhook_signing_secret'])) {
+    if (!$I->tryToSeeInDatabase('core_config_data', ['path' => 'payment/publicsquare_payments/publicsquare_webhook_signing_secret'])) {
       $I->haveInDatabase('core_config_data', [
-        'path' => 'payment/publicsquare_payments/webhook_signing_secret',
-        'value' => base64_encode($publicKey),
+        'path' => 'payment/publicsquare_payments/publicsquare_webhook_signing_secret',
+        'value' => $publicKey,
         'scope' => 'default',
         'scope_id' => 0
       ]);
     } else {
       $I->updateInDatabase('core_config_data', [
-        'value' => base64_encode($publicKey),
+        'value' => $publicKey,
       ], [
-        'path' => 'payment/publicsquare_payments/webhook_signing_secret',
+        'path' => 'payment/publicsquare_payments/publicsquare_webhook_signing_secret',
       ]);
     }
 
-    if (!$I->tryToSeeInDatabase('core_config_data', ['path' => 'payment/publicsquare_payments/webhook_signing_secret_pk'])) {
+    if (!$I->tryToSeeInDatabase('core_config_data', ['path' => 'payment/publicsquare_payments/publicsquare_webhook_signing_secret_pk'])) {
       $I->haveInDatabase('core_config_data', [
-        'path' => 'payment/publicsquare_payments/webhook_signing_secret_pk',
+        'path' => 'payment/publicsquare_payments/publicsquare_webhook_signing_secret_pk',
         'value' => $privateKey,
         'scope' => 'default',
         'scope_id' => 0
@@ -98,23 +95,23 @@ EOD;
       $I->updateInDatabase('core_config_data', [
         'value' => $privateKey,
       ], [
-        'path' => 'payment/publicsquare_payments/webhook_signing_secret_pk',
+        'path' => 'payment/publicsquare_payments/publicsquare_webhook_signing_secret_pk',
       ]);
     }
+
+    $I->runShellCommand('bin/magento cache:clean config');
 
     return $privateKey;
   }
 
-  public function createResponseBodySignature(AcceptanceTester $I, mixed $requestBody): string
+  protected function createResponseBodySignature(AcceptanceTester $I, mixed $requestBody): string
   {
-    $privateKey = $I->grabFromDatabase('core_config_data', 'value', ['path' => 'payment/publicsquare_payments/webhook_signing_secret_pk']);
-    // $privateKey = base64_decode($privateKey);
-    codecept_debug('> Private key: ' . $privateKey);
-    $signature = openssl_sign(json_encode($requestBody), $signature, $privateKey, OPENSSL_ALGO_SHA256);
+    $privateKey = $I->grabFromDatabase('core_config_data', 'value', ['path' => 'payment/publicsquare_payments/publicsquare_webhook_signing_secret_pk']);
+    openssl_sign(json_encode($requestBody), $signature, $privateKey, OPENSSL_ALGO_SHA256);
     return base64_encode($signature);
   }
 
-  public function getRecentOrderPaymentId(AcceptanceTester $I, string $status = 'processing'): string
+  protected function getRecentSalesOrderPayment(AcceptanceTester $I, string $status = 'processing'): array
   {
     $orders = $I->grabEntriesFromDatabase('sales_order', ['status' => $status]);
     if (count($orders) === 0) {
@@ -122,6 +119,39 @@ EOD;
     }
     $order = $orders[count($orders) - 1];
     $paymentId = $I->grabFromDatabase('sales_order_payment', 'cc_trans_id', ['entity_id' => $order['entity_id']]);
-    return $paymentId;
+    $additionalInformation = json_decode($I->grabFromDatabase('sales_order_payment', 'additional_information', ['cc_trans_id' => $paymentId]), true);
+    return [
+      'orderId' => $order['increment_id'],
+      'paymentId' => $paymentId,
+      'amount' => $additionalInformation['raw_details_info']['amount']
+    ];
+  }
+
+  protected function getRecentOrderCreditMemo(AcceptanceTester $I, string $status = 'processing'): array
+  {
+    $creditMemos = $I->grabEntriesFromDatabase('sales_creditmemo', ['transaction_id !=' => null]);
+    if (count($creditMemos) === 0) {
+      throw new \Exception("No credit memo found");
+    }
+    $creditMemo = $creditMemos[count($creditMemos) - 1];
+    $paymentId = $I->grabFromDatabase('sales_order_payment', 'cc_trans_id', ['entity_id' => $creditMemo['order_id']]);
+    return [
+      'orderId' => $creditMemo['order_id'],
+      'refundId' => $creditMemo['transaction_id'],
+      'paymentId' => $paymentId
+    ];
+  }
+
+  protected function getRecentSalesOrderPaymentThatsBeenRefunded(AcceptanceTester $I): array
+  {
+    $creditMemo = $this->getRecentOrderCreditMemo($I);
+    $paymentId = $creditMemo['paymentId'];
+    $orderId = $creditMemo['orderId'];
+    $additionalInformation = json_decode($I->grabFromDatabase('sales_order_payment', 'additional_information', ['cc_trans_id' => $paymentId]), true);
+    return [
+      'paymentId' => $paymentId,
+      'orderId' => $orderId,
+      'amount' => $additionalInformation['raw_details_info']['amount']
+    ];
   }
 }

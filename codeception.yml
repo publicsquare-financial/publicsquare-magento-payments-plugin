@@ -13,9 +13,9 @@ extensions:
 modules:
     enabled:
         - Db:
-              dsn: 'mysql:host=127.0.0.1;dbname=magento'
-              user: 'root'
-              password: 'magento'
+            dsn: 'mysql:host=127.0.0.1;dbname=magento'
+            user: 'root'
+            password: 'magento'
         - REST:
             url: 'http://magento.test/rest/all/V1'
             depends: PhpBrowser
