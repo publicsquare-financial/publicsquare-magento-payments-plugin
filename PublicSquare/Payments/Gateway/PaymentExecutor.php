@@ -347,7 +347,13 @@ class PaymentExecutor
 	public function getDeviceInformation()
 	{
 		$deviceInformation = [];
-		if ($ip_address = $this->remoteAddress->getRemoteAddress()) {
+		if (isset($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+			// For Cloudflare proxied requests, use the IP address of the client
+			$deviceInformation['ip_address'] = explode(',', $_SERVER['HTTP_CF_CONNECTING_IP'])[0];
+		} else if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			// For other reverse proxies, use the IP address of the client
+			$deviceInformation['ip_address'] = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+		} else if ($ip_address = $this->remoteAddress->getRemoteAddress()) {
 			$deviceInformation['ip_address'] = explode(',', $ip_address)[0];
 		}
 		if (isset($_SERVER['HTTP_USER_AGENT'])) {
