@@ -9,7 +9,6 @@ define(
       lastNameSelector = '#order-billing_address_lastname',
       elementsFormSelector = '#publicsquare-elements-form',
       paymentMethodNonceSelector = '#publicsquare_payments_payment_method_nonce',
-      paymentsFormSelector = '#payment_form_publicsquare_payments',
       element = $(elementsFormSelector),
       originalOrderSubmit;
 
@@ -38,11 +37,15 @@ define(
     }
 
     function enableSubmitHandler() {
-      if (!window.order || !window.order.submit || window.order.paymentMethod !== 'publicsquare_payments') return;
+      if (!window.order || !window.order.submit) return;
       if (!originalOrderSubmit) {
         originalOrderSubmit = window.order.submit;
       }
-      window.order.submit = onSubmit;
+      if (window.order.paymentMethod === 'publicsquare_payments') {
+        window.order.submit = onSubmit;
+      } else if (originalOrderSubmit) {
+        window.order.submit = originalOrderSubmit;
+      }
     }
 
     function observe() {
@@ -68,13 +71,13 @@ define(
           }, () => {
             observe();
           })
-          enableSubmitHandler();
         })
       }
+      enableSubmitHandler();
     }
 
     const observer = new MutationObserver((mutations) => {
-      if (mutations.find((cur) => $(cur.target).find(paymentsFormSelector).length)) {
+      if (mutations.find((cur) => $(cur.target).is($('.payment-method') || $(cur.target).has('.payment-method')))) {
         renderElements();
       }
     });

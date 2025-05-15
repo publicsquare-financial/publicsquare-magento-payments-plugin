@@ -415,6 +415,44 @@ class PaymentExecutor
 			\Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS,
 			$response
 		);
+		if (array_key_exists("fraud_details", $response)) {
+			if (
+				array_key_exists("decision", $response["fraud_details"])
+			) {
+				$payment->setAdditionalInformation(
+					"fraud_decision",
+					$response["fraud_details"]["decision"]
+				);
+			}
+			if (array_key_exists("rules", $response["fraud_details"])) {
+				$payment->setAdditionalInformation(
+					"fraud_rules",
+					$response["fraud_details"]["rules"]
+				);
+			}
+		}
+		if (
+			array_key_exists(
+				"avs_code",
+				$response["payment_method"]["card"]
+			)
+		) {
+			$payment->setAdditionalInformation(
+				"avsCode",
+				$response["payment_method"]["card"]["avs_code"]
+			);
+		}
+		if (
+			array_key_exists(
+				"cvv2_reply",
+				$response["payment_method"]["card"]
+			)
+		) {
+			$payment->setAdditionalInformation(
+				"cvv2Reply",
+				$response["payment_method"]["card"]["cvv2_reply"]
+			);
+		}
 		$payment->setLastTransId($response["id"]);
 		$payment->setTransactionId($response["id"]);
 		$payment->setIsTransactionClosed($response["status"] == \PublicSquare\Payments\Api\ApiRequestAbstract::REQUIRES_CAPTURE_STATUS ? 0 : 1);
