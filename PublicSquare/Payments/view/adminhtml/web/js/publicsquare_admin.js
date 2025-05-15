@@ -38,7 +38,7 @@ define(
     }
 
     function enableSubmitHandler() {
-      if (!window.order || !window.order.submit) return;
+      if (!window.order || !window.order.submit || window.order.paymentMethod !== 'publicsquare_payments') return;
       if (!originalOrderSubmit) {
         originalOrderSubmit = window.order.submit;
       }
@@ -68,9 +68,9 @@ define(
           }, () => {
             observe();
           })
+          enableSubmitHandler();
         })
       }
-      enableSubmitHandler();
     }
 
     const observer = new MutationObserver((mutations) => {
