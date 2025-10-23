@@ -1,0 +1,112 @@
+<?php
+$enabled = $block->isEnabled();
+$form_action = $block->formAction();
+?>
+
+<?php if ($enabled): ?>
+    <style type="text/css">
+        .psq__cc-add {
+            display: block;
+        }
+
+        .psq__cc-add-form--hidden {
+            visibility: hidden;
+        }
+
+        .psq__cc-add-form {
+            display: block;
+        }
+    </style>
+    <div class="psq__cc-add">
+
+        <button id="psq-cc-add-button" class="psq__cc-add-btn--enabled">Add CC</button>
+
+        <div class="psq__cc-add-form psq__cc-add-form--hidden">
+            <form action="<?php echo $form_action; ?>" method="post">
+                <div class="payment-method">
+
+                    <div class="payment-method-content">
+
+                        <div class="payment-method-billing-address">
+
+                        </div>
+                        <div class="field number required">
+                            <label class="label">
+                                <span></span>
+                            </label>
+                            <input
+                                    type="text"
+                                    id="cardholderName"
+                                    placeholder="Cardholder name"
+                                    style={{ display: 'flex', width: '100%' }}
+                            />
+                            <div class="control">
+                                <div id="psq-payments-cc-num" ></div>
+                                <div id="psq-payments-exp" ></div>
+                                <div id="psq-payments-ccv" ></div>
+                            </div>
+                        </div>
+                        <div class="field choice payment-method-vault-checkbox">
+                            <input type="checkbox"
+                                   name="vault[is_enabled]"
+                                   class="checkbox"
+                            />
+                            <label class="label">
+                                <span></span>
+                            </label>
+                        </div>
+                        <div class="checkout-agreements-block">
+
+                        </div>
+                        <div class="actions-toolbar">
+                            <div class="primary">
+                                <button class="action primary checkout"
+                                        type="submit"
+                                        disabled>
+                                    <span>Save Card</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+    <script type="text/javascript">
+        require(['jquery', 'publicsquarejs'], function psqAddCCInit($, psqSdk) {
+            let formVisible = false;
+           let $card;
+           let $exp;
+           let $ccv;
+           let initialized = false;
+           let psq;
+           const psqPubKey = '<?php echo $block->getPublicKey(); ?>';
+
+
+            $('#psq-cc-add-button').click(async () => {
+                console.log('PSQ: Add CC button clicked. formVisible was %s', formVisible);
+                formVisible = !formVisible;
+                if (formVisible) {
+                    $('.psq__cc-add-form').removeClass('psq__cc-add-form--hidden');
+                    if(!$card) {
+                        psq = await psqSdk.init(psqPubKey);
+
+                        $card = psq.createCardNumberElement();
+                        $exp = psq.createCardExpirationDateElement();
+                        $ccv = psq.createCardVerificationCodeElement();
+
+                    }
+                    $card.mount('#psq-payments-cc-num');
+                    $exp.mount('#psq-payments-exp');
+                    $ccv.mount('#psq-payments-ccv');
+
+                } else {
+                    $('.psq__cc-add-form').addClass('psq__cc-add-form--hidden');
+                    $card.unmount();
+                }
+            });
+        });
+    </script>
+<?php endif; ?>
