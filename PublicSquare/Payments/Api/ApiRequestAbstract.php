@@ -199,6 +199,23 @@ abstract class ApiRequestAbstract
     public function getResponse(): \Laminas\Http\Response
     {
         if (!isset($this->response)) {
+            // OFFLINE MOCK: never hit the network when enabled
+            if (method_exists($this->configHelper, 'isApiMockEnabled') && $this->configHelper->isApiMockEnabled()) {
+                $this->responseData = $this->buildMockResponse();
+                $response = new \Laminas\Http\Response();
+                $response->setStatusCode(200);
+                $response->setContent(json_encode($this->responseData));
+                $this->setResponse($response);
+
+                // Let normal validation/error paths run
+                if (is_null($this->responseData)) {
+                    throw new \Exception("Something went wrong. Please try again.");
+                } else {
+                    $this->validateResponse($this->responseData);
+                }
+                return $this->response;
+            }
+
             /*
             @var \Laminas\Http\Client $client
             */
@@ -303,5 +320,171 @@ abstract class ApiRequestAbstract
             throw new ApiFailedResponseException("Something went wrong. Please try again.");
         }
         return true;
+    }
+
+    /**
+     * Build mock response data based on request parameters
+     *
+     * @return array
+     */
+    protected function buildMockResponse(): array
+    {
+        $cardId = $this->requestData['payment_method']['card'] ?? '';
+        $amount = $this->requestData['amount'] ?? 0;
+        $capture = (bool)($this->requestData['capture'] ?? true);
+
+        switch ($cardId) {
+            case '4242424242424242':
+                return [
+                    'id' => 'pmt_mock_success_4242',
+                    'status' => 'succeeded',
+                    'amount' => $amount,
+                    'amount_capturable' => $capture ? 0 : $amount,
+                    'currency' => 'USD',
+                    'capture' => $capture,
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_4242',
+                            'last4' => '4242',
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                            'avs_code' => 'Y',
+                            'cvv2_reply' => 'M',
+                        ],
+                    ],
+                ];
+            case '4000000000000002':
+                return [
+                    'id' => 'pmt_mock_decline',
+                    'status' => 'declined',
+                    'declined_reason' => 'Decline',
+                    'amount' => $amount,
+                    'currency' => 'USD',
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_dec',
+                            'last4' => '0002',
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                        ],
+                    ],
+                ];
+            case '4000000000009995':
+                return [
+                    'id' => 'pmt_mock_insufficient',
+                    'status' => 'declined',
+                    'declined_reason' => 'Insufficient Funds',
+                    'amount' => $amount,
+                    'currency' => 'USD',
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_insufficient',
+                            'last4' => '9995',
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                        ],
+                    ],
+                ];
+            case '4000000000009987':
+                return [
+                    'id' => 'pmt_mock_lost_stolen',
+                    'status' => 'declined',
+                    'declined_reason' => 'Lost/Stolen',
+                    'amount' => $amount,
+                    'currency' => 'USD',
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_lost_stolen',
+                            'last4' => '9987',
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                        ],
+                    ],
+                ];
+            case '4100000000000019':
+                return [
+                    'id' => 'pmt_mock_rejected',
+                    'status' => 'rejected',
+                    'amount' => $amount,
+                    'currency' => 'USD',
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_rejected',
+                            'last4' => '0019',
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                        ],
+                    ],
+                ];
+            case '4000000000000101':
+                return [
+                    'id' => 'pmt_mock_cvc_fail',
+                    'status' => 'rejected',
+                    'amount' => $amount,
+                    'currency' => 'USD',
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_cvc_fail',
+                            'last4' => '0101',
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                        ],
+                    ],
+                ];
+            case '4000000000000010':
+                return [
+                    'id' => 'pmt_mock_avs_fail',
+                    'status' => 'rejected',
+                    'amount' => $amount,
+                    'currency' => 'USD',
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_avs_fail',
+                            'last4' => '0010',
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                        ],
+                    ],
+                ];
+            case '4111111111111111':
+                return [
+                    'id' => 'pmt_mock_failed',
+                    'status' => 'failed',
+                    'amount' => $amount,
+                    'currency' => 'USD',
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_failed',
+                            'last4' => '1111',
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                        ],
+                    ],
+                ];
+            default:
+                return [
+                    'id' => 'pmt_mock_generic_failed',
+                    'status' => 'failed',
+                    'amount' => $amount,
+                    'currency' => 'USD',
+                    'payment_method' => [
+                        'card' => [
+                            'id' => 'card_mock_generic',
+                            'last4' => substr($cardId, -4),
+                            'brand' => 'visa',
+                            'exp_month' => 12,
+                            'exp_year' => 2029,
+                        ],
+                    ],
+                ];
+        }
     }
 } //end class

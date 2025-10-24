@@ -72,7 +72,7 @@ class CheckoutCest extends AcceptanceBase
         // Reason: Address check fails
         $this->_checkoutWithCard($I, '4000000000000010', $this::GENERIC_FRAUDULENT_MESSAGE);
         // Reason: payment failed
-        // $this->_checkoutWithCard($I, '4111111111111111', $this::GENERIC_FRAUDULENT_MESSAGE);
+        $this->_checkoutWithCard($I, '4111111111111111', $this::GENERIC_FRAUDULENT_MESSAGE);
 
         // verify order was not created.
         $I->dontSeeInDatabase('sales_order', ['customer_email' => $this->customerEmail]);
