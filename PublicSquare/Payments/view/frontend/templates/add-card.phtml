@@ -5,106 +5,137 @@ $form_action = $block->formAction();
 
 <?php if ($enabled): ?>
     <style type="text/css">
-        .psq__cc-add {
+        .psq-add-card {
             display: block;
+            margin-top: 8px;
+
         }
 
-        .psq__cc-add-form--hidden {
+        .psq-add-card__form--hidden {
             visibility: hidden;
         }
 
-        .psq__cc-add-form {
+        .psq-add-card__form {
             display: block;
+            padding: 4px;
         }
-    </style>
-    <div class="psq__cc-add">
 
+        .psq-form__section {
+            display: block;
+            margin: 4px;
+        }
+
+        .psq-form__input {
+            margin: 4px;
+            display: inline-block;
+        }
+
+    </style>
+    <div class="psq-add-card">
         <button id="psq-cc-add-button" class="psq__cc-add-btn--enabled">Add CC</button>
 
-        <div class="psq__cc-add-form psq__cc-add-form--hidden">
-            <form action="<?php echo $form_action; ?>" method="post">
-                <div class="payment-method">
+        <div class="psq-add-card__form psq-add-card__form--hidden psq-form">
+            <p class="psq-form__cta">Enter new card information</p>
+            <div class="psq-form__section">
+                <label for="psq-form-cardholder-name">Cardholder Name</label>
+                <input id="psq-form-cardholder-name"
+                       style="psq-form__input"
+                       type="text"
+                       name="cardholder_name"
+                       value="<?php echo $block->getCustomerName() ?>"/>
 
-                    <div class="payment-method-content">
+            </div>
+            <div class="psq-form__section">
+                <div id="psq-card-element"></div>
 
-                        <div class="payment-method-billing-address">
-
-                        </div>
-                        <div class="field number required">
-                            <label class="label">
-                                <span></span>
-                            </label>
-                            <input
-                                    type="text"
-                                    id="cardholderName"
-                                    placeholder="Cardholder name"
-                                    style={{ display: 'flex', width: '100%' }}
-                            />
-                            <div class="control">
-                                <div id="psq-payments-cc-num" ></div>
-                                <div id="psq-payments-exp" ></div>
-                                <div id="psq-payments-ccv" ></div>
-                            </div>
-                        </div>
-                        <div class="field choice payment-method-vault-checkbox">
-                            <input type="checkbox"
-                                   name="vault[is_enabled]"
-                                   class="checkbox"
-                            />
-                            <label class="label">
-                                <span></span>
-                            </label>
-                        </div>
-                        <div class="checkout-agreements-block">
-
-                        </div>
-                        <div class="actions-toolbar">
-                            <div class="primary">
-                                <button class="action primary checkout"
-                                        type="submit"
-                                        disabled>
-                                    <span>Save Card</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+            </div>
+            <div class="psq-form__actions">
+                <button class="psq-form__button psq-form__button--primary action primary"
+                        type="submit">
+                    <span>Add Payment Method</span>
+                </button>
+                <button class="psq-form__button psq-form__button--cancel action"
+                        type="button">
+                    <span>Cancel</span>
+                </button>
+            </div>
+            <form id="psq-save-to-vault" action="<?php echo $form_action; ?>" method="post">
+                <input id="psq-new-card-id" type="hidden" name="card_id" />
             </form>
         </div>
-
     </div>
     <script type="text/javascript">
         require(['jquery', 'publicsquarejs'], function psqAddCCInit($, psqSdk) {
             let formVisible = false;
-           let $card;
-           let $exp;
-           let $ccv;
-           let initialized = false;
-           let psq;
-           const psqPubKey = '<?php echo $block->getPublicKey(); ?>';
+            const psqPubKey = '<?php echo $block->getPublicKey(); ?>';
+            let psq;
+            let $modal;
 
+            // cc elements bound by psq payments js
+            let $card;
+
+            async function save() {
+                const $form = $('#psq-save-to-vault');
+                try {
+                    if (!$card || !$card.metadata.valid) {
+                        // TODO: ui notif
+                        console.warn('Invalid card! %j', $card.metadata);
+                        throw new Error('The card is invalid. Please check the card details and try again.');
+                    }
+                    const cardholderName = $('#psq-form-cardholder-name').val();
+                    console.log('Creating new card for cardholder %s', cardholderName);
+                    const card = psqSdk.cards.create({cardholder_name: cardholderName, card: $card});
+                    $('#psq-new-card-id').val(card.id);
+                    if (!$form.valid()) {
+                        return;
+                    }
+                    $form.trigger('submit');
+                } catch (err) {
+                    console.error('Failed to save card!', err);
+                } finally {
+                    $form.unbind();
+                }
+
+            }
+
+            function closeForm() {
+                $('.psq-form__button--cancel').unbind();
+                $('.psq-form__button--primary').unbind();
+
+
+                // Remove class last
+                $modal.addClass('psq-add-card__form--hidden');
+            }
+
+            async function openForm() {
+                // Add class first
+                if (!$modal) {
+                    $modal = $('.psq-add-card__form');
+                }
+                $modal.removeClass('psq-add-card__form--hidden');
+
+                if (!$card) {
+                    psq = await psqSdk.init(psqPubKey);
+                    $card = psq.createCardElement({});
+                    $card.mount('#psq-card-element');
+                }
+
+                $('.psq-form__button--cancel').click(() => {
+                    formVisible = false;
+                    closeForm();
+                });
+                $('.psq-form__button--primary').click(async () => {
+                    await save();
+                });
+            }
 
             $('#psq-cc-add-button').click(async () => {
                 console.log('PSQ: Add CC button clicked. formVisible was %s', formVisible);
                 formVisible = !formVisible;
                 if (formVisible) {
-                    $('.psq__cc-add-form').removeClass('psq__cc-add-form--hidden');
-                    if(!$card) {
-                        psq = await psqSdk.init(psqPubKey);
-
-                        $card = psq.createCardNumberElement();
-                        $exp = psq.createCardExpirationDateElement();
-                        $ccv = psq.createCardVerificationCodeElement();
-
-                    }
-                    $card.mount('#psq-payments-cc-num');
-                    $exp.mount('#psq-payments-exp');
-                    $ccv.mount('#psq-payments-ccv');
-
+                    await openForm();
                 } else {
-                    $('.psq__cc-add-form').addClass('psq__cc-add-form--hidden');
-                    $card.unmount();
+                    await closeForm();
                 }
             });
         });
