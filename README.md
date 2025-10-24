@@ -1,4 +1,4 @@
-PublicSquare Financial
+PublicSquare Financial 
 =====================
 
 PublicSquare provides a software platform for retailers to access third-party providers for lease-to-own financing and other lending products based on a consumer's credit profile.
