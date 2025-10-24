@@ -9,7 +9,6 @@ class ConfigTest extends TestCase
 {
     public function testGetAllowedCurrenciesReturnsUSD(): void
     {
-        // PHPUnit can mock non-existent classes automatically!
         $contextMock = $this->createMock(\Magento\Framework\App\Helper\Context::class);
         
         $config = new Config($contextMock);
@@ -23,7 +22,6 @@ class ConfigTest extends TestCase
     
     public function testGetUriiReturnsCorrectBaseUrl(): void
     {
-        // PHPUnit can mock non-existent classes automatically!
         $contextMock = $this->createMock(\Magento\Framework\App\Helper\Context::class);
         
         $config = new Config($contextMock);
