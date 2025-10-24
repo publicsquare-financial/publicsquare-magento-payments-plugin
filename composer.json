@@ -19,7 +19,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "PublicSquare\\Payments\\Test\\Unit\\": "tests/unit/"
+      "PublicSquare\\Payments\\Test\\Unit\\": "tests/unit/",
+      "Magento\\": "tests/unit/stubs/Magento/"
     }
   },
   "config": {
