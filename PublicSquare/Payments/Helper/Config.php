@@ -46,7 +46,7 @@ class Config extends AbstractHelper
      */
     public function __construct(
         Context $context,
-        Json $serializer = null
+        ?Json $serializer = null
     ) {
         parent::__construct($context);
         $this->serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
