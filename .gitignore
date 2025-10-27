@@ -7,3 +7,8 @@ vendor
 .DS_Store
 
 tests/_output
+
+# PHPUnit cache
+.phpunit.result.cache
+.phpunit.cache/
+tests/**/.phpunit.result.cache

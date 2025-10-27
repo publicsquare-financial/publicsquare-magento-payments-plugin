@@ -119,3 +119,9 @@ verify:
 
 install-docker:
 	@./bin/install-docker
+
+unit-test:
+	@./vendor/bin/phpunit -c tests/unit/phpunit.xml
+
+unit-test-verbose:
+	@./vendor/bin/phpunit -c tests/unit/phpunit.xml --testdox
