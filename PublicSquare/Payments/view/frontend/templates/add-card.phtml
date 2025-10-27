@@ -24,6 +24,12 @@ $form_action = $block->formAction();
             display: block;
             margin: 4px;
         }
+
+        .psq-form__input {
+            margin: 4px;
+            display: inline-block;
+        }
+
     </style>
     <div class="psq-add-card">
         <button id="psq-cc-add-button" class="psq__cc-add-btn--enabled">Add CC</button>
@@ -33,10 +39,10 @@ $form_action = $block->formAction();
             <div class="psq-form__section">
                 <label for="psq-form-cardholder-name">Cardholder Name</label>
                 <input id="psq-form-cardholder-name"
-                       style="psq-form__input"
+                       class="psq-form__input"
                        type="text"
                        name="cardholder_name"
-                       value="<?php echo $block->getCustomerName() ?>"/>
+                       value="<?php echo escapeHtml($block->getCustomerName()) ?>"/>
 
             </div>
             <div class="psq-form__section">
@@ -78,7 +84,6 @@ $form_action = $block->formAction();
                     if (!$card || !$card.metadata.valid) {
                         console.warn('Invalid card! %j', $card.metadata);
 
-                        // messageList.addErrorMessage({message: 'The card is invalid. Please check the card details and try again.'});
                         modal({
                                   title: 'Error',
                                   content: 'The card is invalid. Please check the card details and try again.',
@@ -87,6 +92,7 @@ $form_action = $block->formAction();
                                       always: function () { /*noop*/ },
                                   },
                               });
+                        return;
                     }
                     const cardholderName = $('#psq-form-cardholder-name').val();
                     console.log('Creating new card for cardholder %s', cardholderName);

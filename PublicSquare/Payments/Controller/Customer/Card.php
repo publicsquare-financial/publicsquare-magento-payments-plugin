@@ -78,7 +78,7 @@ class Card implements HttpPostActionInterface
         $paymentToken = $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
         $paymentToken->setCustomerId($this->customerSession->getCustomerId());
         $paymentToken->setGatewayToken($cardId);
-        $paymentToken->setPaymentMethodCode($this->psqConfig::CODE);
+        $paymentToken->setPaymentMethodCode(\PublicSquare\Payments\Helper\Config::CODE);
         $paymentToken->setIsVisible(true);
         $paymentToken->setExpiresAt($expiresAt);
         $paymentToken->setWebsiteId($this->customerSession->getCustomer()->getWebsiteId());
@@ -102,7 +102,7 @@ class Card implements HttpPostActionInterface
 
         } catch (AlreadyExistsException $e) {
             $this->logger->debug($e->getMessage());
-            $this->messageManager->addErrorMessage("Token already exists!");
+            $this->messageManager->addErrorMessage(__("Token already exists!"));
         }
         // redirect to settings... or a destination from params...
         $result = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT);

@@ -6,6 +6,7 @@ use Magento\Customer\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\View\Element\Template;
+use Magento\Tests\NamingConvention\true\string;
 use PublicSquare\Payments\Logger\Logger;
 
 class AddCard extends Template
@@ -60,7 +61,7 @@ class AddCard extends Template
         return "/publicsquare-payments/customer/card";
     }
 
-    public function getCustomerName()
+    public function getCustomerName(): string
     {
         return $this->customerName;
     }
