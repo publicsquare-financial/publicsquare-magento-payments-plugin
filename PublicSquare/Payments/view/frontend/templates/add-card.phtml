@@ -24,12 +24,6 @@ $form_action = $block->formAction();
             display: block;
             margin: 4px;
         }
-
-        .psq-form__input {
-            margin: 4px;
-            display: inline-block;
-        }
-
     </style>
     <div class="psq-add-card">
         <button id="psq-cc-add-button" class="psq__cc-add-btn--enabled">Add CC</button>
@@ -60,12 +54,16 @@ $form_action = $block->formAction();
                 </button>
             </div>
             <form id="psq-save-to-vault" action="<?php echo $form_action; ?>" method="post">
-                <input id="psq-new-card-id" type="hidden" name="card_id" />
+                <input id="psq-new-card-id" type="hidden" name="card_id"/>
+                <input id="psq-new-card-exp-year" name="exp_year" type="hidden"/>
+                <input id="psq-new-card-exp-month" name="exp_month" type="hidden"/>
+                <input id="psq-new-card-details" name="details" type="hidden"/>
+
             </form>
         </div>
     </div>
     <script type="text/javascript">
-        require(['jquery', 'publicsquarejs'], function psqAddCCInit($, psqSdk) {
+        require(['jquery', 'publicsquarejs', 'Magento_Ui/js/modal/alert'], function psqAddCCInit($, psqSdk, modal) {
             let formVisible = false;
             const psqPubKey = '<?php echo $block->getPublicKey(); ?>';
             let psq;
@@ -78,20 +76,58 @@ $form_action = $block->formAction();
                 const $form = $('#psq-save-to-vault');
                 try {
                     if (!$card || !$card.metadata.valid) {
-                        // TODO: ui notif
                         console.warn('Invalid card! %j', $card.metadata);
-                        throw new Error('The card is invalid. Please check the card details and try again.');
+
+                        // messageList.addErrorMessage({message: 'The card is invalid. Please check the card details and try again.'});
+                        modal({
+                                  title: 'Error',
+                                  content: 'The card is invalid. Please check the card details and try again.',
+                                  clickableOverlay: true,
+                                  actions: {
+                                      always: function () { /*noop*/ },
+                                  },
+                              });
                     }
                     const cardholderName = $('#psq-form-cardholder-name').val();
                     console.log('Creating new card for cardholder %s', cardholderName);
-                    const card = psqSdk.cards.create({cardholder_name: cardholderName, card: $card});
+                    const card = await psqSdk.cards.create({cardholder_name: cardholderName, card: $card});
+                    console.log('Card created. Posting to vault...');
+
+                    // Update hidden form with information to save to vault
                     $('#psq-new-card-id').val(card.id);
+                    $('#psq-new-card-exp-year').val(card.exp_year);
+                    $('#psq-new-card-exp-month').val(card.exp_month);
+                    $('#psq-new-card-details').val(
+                        JSON.stringify({
+                                           type: card.brand,
+                                           maskedCC: card.last4,
+                                           expirationDate: `${card.exp_month}/${card.exp_year}`,
+                                       }),
+                    );
                     if (!$form.valid()) {
+                        console.warn('Found issues in form!');
+                        modal({
+                                  title: 'Error',
+                                  content: 'Form information incorrect.',
+                                  clickableOverlay: true,
+                                  actions: {
+                                      always: function () { /*noop*/ },
+                                  },
+                              });
                         return;
                     }
+                    // Submit to the Customer/Card controller.
                     $form.trigger('submit');
                 } catch (err) {
                     console.error('Failed to save card!', err);
+                    modal({
+                              title: 'Error',
+                              content: 'Unknown error creating card.',
+                              clickableOverlay: true,
+                              actions: {
+                                  always: function () { /*noop*/ },
+                              },
+                          });
                 } finally {
                     $form.unbind();
                 }
@@ -101,7 +137,6 @@ $form_action = $block->formAction();
             function closeForm() {
                 $('.psq-form__button--cancel').unbind();
                 $('.psq-form__button--primary').unbind();
-
 
                 // Remove class last
                 $modal.addClass('psq-add-card__form--hidden');

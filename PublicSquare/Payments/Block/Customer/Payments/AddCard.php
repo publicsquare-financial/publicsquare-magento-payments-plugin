@@ -44,7 +44,7 @@ class AddCard extends Template
         $this->psqVaultConfigEnabled = $config->getValue('payment/publicsquare_payments_cc_vault/active', ScopeConfigInterface::SCOPE_TYPE_DEFAULT);
         $this->customerName = $session->getCustomer()->getName();
         $this->publicKey = $psqConfig->getPublicAPIKey();
-        $logger->info("Magento_Vault: {$this->vaultEnabled} PSQVaultEnabled: {$this->psqVaultConfigEnabled}");
+        $logger->debug("Magento_Vault: {$this->vaultEnabled} PSQVaultEnabled: {$this->psqVaultConfigEnabled}");
     }
 
     /**
