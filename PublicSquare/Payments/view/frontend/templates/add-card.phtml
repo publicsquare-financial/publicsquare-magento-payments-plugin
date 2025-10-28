@@ -42,7 +42,7 @@ $form_action = $block->formAction();
                        class="psq-form__input"
                        type="text"
                        name="cardholder_name"
-                       value="<?php echo escapeHtml($block->getCustomerName()) ?>"/>
+                       value="<?php echo $escaper->escapeHtml($block->getCustomerName()); ?>"/>
 
             </div>
             <div class="psq-form__section">

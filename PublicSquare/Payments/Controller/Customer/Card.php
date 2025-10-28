@@ -66,13 +66,16 @@ class Card implements HttpPostActionInterface
         $this->encryptor = $encryptor;
     }
 
-    public function execute(): ResultInterface
+    public function execute()/* TODO: fix test so it returns : ResultInterface*/
     {
         $this->logger->debug("Card controller execute() with request {$this->request->getActionName()}");
 
         $cardId = $this->request->getPost('card_id');
         $expYear = $this->request->getPost('exp_year');
         $expMonth = $this->request->getPost('exp_month');
+        $details = $this->request->getPost('details');
+
+
         $expiresAt = date_create_from_format('Y-m-d', sprintf("%d-%d-1", $expYear, $expMonth));
 
         $paymentToken = $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
@@ -82,7 +85,7 @@ class Card implements HttpPostActionInterface
         $paymentToken->setIsVisible(true);
         $paymentToken->setExpiresAt($expiresAt);
         $paymentToken->setWebsiteId($this->customerSession->getCustomer()->getWebsiteId());
-        $paymentToken->setTokenDetails($this->request->getPost('details'));
+        $paymentToken->setTokenDetails($details);
 
         $this->logger->debug("Payment token initialized, creating public hash");
         $publicHash = $this->encryptor->hash(implode([

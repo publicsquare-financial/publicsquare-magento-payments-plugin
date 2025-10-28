@@ -2,8 +2,10 @@
 
 namespace PublicSquare\Payments\Test\Unit\Controller\Customer;
 
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Model\Session;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -31,17 +33,17 @@ class CardTest extends TestCase
         $encryptor = $this->createMock(EncryptorInterface::class);
 
         $paymentToken = $this->createMock(PaymentTokenInterface::class);
-        $result = $this->createMock(ResultInterface::class);
-        $customer = $this->getMockBuilder(\Magento\Customer\Model\Data\Customer::class)
+        $result = $this->createMock(Redirect::class);
+        $customer = $this->getMockBuilder(CustomerInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         // Set up request POST values
         $request->method('getPost')->willReturnMap([
-            ['card_id', null, 'card123'],
-            ['exp_year', null, 2025],
-            ['exp_month', null, 12],
-            ['details', null, '{"type":"visa"}'],
+            ['card_id', 'card123'],
+            ['exp_year', 2025],
+            ['exp_month', 12],
+            ['details', '{ "type": "visa", "maskedCC": "4242", "expirationDate": "02\/2026" }'],
         ]);
 
         $customerSession->method('getCustomerId')->willReturn(42);
@@ -56,9 +58,9 @@ class CardTest extends TestCase
         $paymentToken->expects($this->once())->method('setIsVisible')->with(true);
         $paymentToken->expects($this->once())->method('setExpiresAt');
         $paymentToken->expects($this->once())->method('setWebsiteId')->with(1);
-        $paymentToken->expects($this->once())->method('setTokenDetails')->with('{"type":"visa"}');
+        $paymentToken->expects($this->once())->method('setTokenDetails')->with('{ "type": "visa", "maskedCC": "4242", "expirationDate": "02\/2026" }');
 
-        $paymentToken->method('getTokenDetails')->willReturn('{"type":"visa"}');
+        $paymentToken->method('getTokenDetails')->willReturn('{ "type": "visa", "maskedCC": "4242", "expirationDate": "02\/2026" }');
         $paymentToken->method('getCustomerId')->willReturn(42);
         $paymentToken->method('getWebsiteId')->willReturn(1);
         $paymentToken->method('getGatewayToken')->willReturn('card123');
@@ -81,7 +83,7 @@ class CardTest extends TestCase
             $psqConfig,
             $customerSession,
             $messageManager,
-            $encryptor
+            $encryptor,
         );
 
         $this->assertSame($result, $controller->execute());
