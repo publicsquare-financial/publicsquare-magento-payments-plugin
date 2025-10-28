@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Starting IT stack..."
+docker compose -f compose.it.yaml up -d --remove-orphans
+
+echo "Waiting for db and opensearch health..."
+for i in {1..30}; do
+  DB_STATE=$(docker inspect -f '{{.State.Health.Status}}' publicsquare-magento-payments-plugin-db-1 2>/dev/null || true)
+  OS_STATE=$(docker inspect -f '{{.State.Health.Status}}' publicsquare-magento-payments-plugin-opensearch-1 2>/dev/null || true)
+  if [[ "$DB_STATE" == "healthy" && "$OS_STATE" == "healthy" ]]; then
+    echo "Dependencies healthy."; break
+  fi
+  sleep 2
+done
+
+echo "IT stack is up."
+
+

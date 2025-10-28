@@ -16,12 +16,13 @@ modules:
             port: 4444
             window_size: 1920x1080
             capabilities:
+                browserName: chrome
                 goog:chromeOptions:
                     args: [
-                        # "--headless",
-                        # "--disable-gpu",
-                        # "--no-sandbox",
-                        # "--disable-dev-shm-usage",
+                        "--headless=new",
+                        "--disable-gpu",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
                         "--ignore-certificate-errors",
 #                        "--disable-software-rasterizer",
                         "--disable-extensions",
@@ -33,6 +34,13 @@ modules:
         - \Codeception\Module\Asserts
         - \Tests\Support\Helper\DbHelper
         - \Codeception\Module\Cli
+    config:
+        Db:
+            dsn: 'mysql:host=127.0.0.1;port=33306;dbname=magento'
+            user: 'magento'
+            password: 'magento'
+            populate: false
+            cleanup: false
 # Add Codeception\Step\Retry trait to AcceptanceTester to enable retries
 step_decorators:
     - Codeception\Step\ConditionalAssertion

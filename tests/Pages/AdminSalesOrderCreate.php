@@ -25,11 +25,18 @@ class AdminSalesOrderCreate extends AcceptanceBase
   {
     $I->click('Add Products');
     $this->_waitForLoading($I);
-    $last_product = Locator::lastElement('#sales_order_create_search_grid_table>tbody>tr');
-    $I->waitForElementClickable($last_product);
-    $I->click($last_product);
+    // Select first visible product and add to order
+    $secondCheckboxCss = '#sales_order_create_search_grid_table>tbody>tr:nth-child(2) input[type="checkbox"]';
+    $I->waitForElementClickable($secondCheckboxCss);
+    $I->click($secondCheckboxCss);
     $this->_waitForLoading($I);
-    $I->executeJS("document.querySelector('[title=\"Add Selected Product(s) to Order\"]').click()");
+    $I->waitForElementClickable('[title="Add Selected Product(s) to Order"]');
+    $I->click('[title="Add Selected Product(s) to Order"]');
+    $this->_waitForLoading($I);
+    // If a configure modal appears (e.g., configurable product), accept it and close the modal
+    $I->executeJS("var btn=document.querySelector('.modal-popup .action-primary, .modal-slide .action-primary'); if(btn){btn.click();}");
+    $this->_waitForLoading($I);
+    $I->executeJS("var close=document.querySelector('.modal-popup .action-close, .modal-slide .action-close'); if(close){close.click();}");
     $this->_waitForLoading($I);
   }
 
@@ -49,13 +56,18 @@ class AdminSalesOrderCreate extends AcceptanceBase
 
   protected function _addShippingMethodToOrder(AcceptanceTester $I)
   {
-    $I->click('#order-shipping-method-summary>a');
-    $this->_waitForLoading($I);
+    // Open shipping method section
     $I->waitForElementClickable('#order-shipping-method-summary>a');
     $I->click('#order-shipping-method-summary>a');
     $this->_waitForLoading($I);
-    $I->waitForElementClickable('#order-shipping-method-choose input');
-    $I->click('#order-shipping-method-choose input');
+    // Load shipping methods
+    
+    $I->waitForElementVisible("//span[normalize-space()='Get shipping methods and rates']");
+    $I->click("//span[normalize-space()='Get shipping methods and rates']/parent::a");
+    $this->_waitForLoading($I);
+    // Select Flat Rate explicitly
+    $I->waitForElementClickable('#s_method_flatrate_flatrate');
+    $I->click('#s_method_flatrate_flatrate');
     $this->_waitForLoading($I);
   }
 

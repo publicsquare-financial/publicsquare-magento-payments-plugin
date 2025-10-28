@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Deploying Magento sample data (IT)..."
+COMPOSE_FILE=compose.it.yaml ./bin/cli bin/magento sampledata:deploy
+COMPOSE_FILE=compose.it.yaml ./bin/cli bin/magento setup:upgrade
+COMPOSE_FILE=compose.it.yaml ./bin/cli bin/magento cache:flush
+
+echo "Sample data deployed."
+
+
