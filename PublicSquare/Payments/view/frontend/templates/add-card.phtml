@@ -134,16 +134,11 @@ $form_action = $block->formAction();
                                   always: function () { /*noop*/ },
                               },
                           });
-                } finally {
-                    $form.unbind();
                 }
 
             }
 
             function closeForm() {
-                $('.psq-form__button--cancel').unbind();
-                $('.psq-form__button--primary').unbind();
-
                 // Remove class last
                 $modal.addClass('psq-add-card__form--hidden');
             }
@@ -159,15 +154,16 @@ $form_action = $block->formAction();
                     psq = await psqSdk.init(psqPubKey);
                     $card = psq.createCardElement({});
                     $card.mount('#psq-card-element');
+                    $('.psq-form__button--cancel').click(() => {
+                        formVisible = false;
+                        closeForm();
+                    });
+                    $('.psq-form__button--primary').click(async () => {
+                        await save();
+                    });
                 }
 
-                $('.psq-form__button--cancel').click(() => {
-                    formVisible = false;
-                    closeForm();
-                });
-                $('.psq-form__button--primary').click(async () => {
-                    await save();
-                });
+
             }
 
             $('#psq-cc-add-button').click(async () => {

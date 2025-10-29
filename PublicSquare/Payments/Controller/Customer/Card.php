@@ -19,7 +19,7 @@ class Card implements HttpPostActionInterface
     /**
      * @var PageFactory
      */
-    protected ResultFactory $resultFactory;
+    private ResultFactory $resultFactory;
     private RequestInterface $request;
     private Logger $logger;
 
@@ -27,7 +27,6 @@ class Card implements HttpPostActionInterface
     private PaymentTokenRepositoryInterface $paymentTokenRepository;
 
     private \Magento\Customer\Model\Session $customerSession;
-    private \PublicSquare\Payments\Helper\Config $psqConfig;
     private ManagerInterface $messageManager;
 
     private EncryptorInterface $encryptor;
@@ -60,7 +59,6 @@ class Card implements HttpPostActionInterface
         $this->request = $request;
         $this->paymentTokenFactory = $paymentTokenFactory;
         $this->paymentTokenRepository = $paymentTokenRepository;
-        $this->psqConfig = $psqConfig;
         $this->customerSession = $customerSession;
         $this->messageManager = $messageManager;
         $this->encryptor = $encryptor;

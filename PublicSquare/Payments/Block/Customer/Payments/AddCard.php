@@ -37,8 +37,6 @@ class AddCard extends Template
     )
     {
         parent::__construct($context, $data);
-        $this->psqConfig = $psqConfig;
-        $this->session = $session;
 
         $this->vaultEnabled = $moduleManager->isEnabled('Magento_Vault');
         $this->psqVaultConfigEnabled = $config->getValue('payment/publicsquare_payments_cc_vault/active', ScopeConfigInterface::SCOPE_TYPE_DEFAULT);
@@ -57,7 +55,7 @@ class AddCard extends Template
 
     public function formAction(): string
     {
-        return "/publicsquare-payments/customer/card";
+        return $this->getUrl("publicsquare-payments/customer/card");
     }
 
     public function getCustomerName(): string

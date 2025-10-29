@@ -1,6 +1,6 @@
 <?php
 
-namespace Magento\Vault\Api\Data\Framework\App;
+namespace Magento\Framework\App;
 
 class ObjectManager
 {
