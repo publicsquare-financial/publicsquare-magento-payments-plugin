@@ -3,7 +3,9 @@
 namespace Magento\Framework\Controller\Result;
 
 
-interface Redirect
+use Magento\Framework\Controller\ResultInterface;
+
+interface Redirect extends ResultInterface
 {
 
     function setPath($path, array $params = []): Redirect;

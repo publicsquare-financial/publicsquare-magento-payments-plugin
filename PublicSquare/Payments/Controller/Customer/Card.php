@@ -66,7 +66,7 @@ class Card implements HttpPostActionInterface
         $this->encryptor = $encryptor;
     }
 
-    public function execute()/* TODO: fix test so it returns : ResultInterface*/
+    public function execute(): ResultInterface
     {
         $this->logger->debug("Card controller execute() with request {$this->request->getActionName()}");
 
