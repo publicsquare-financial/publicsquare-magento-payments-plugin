@@ -17,6 +17,18 @@ define(
       loading: false,
       mockIframe: null,
       isMock: false,
+      getMockLast4: function(card) {
+        try {
+          const doc = this.mockIframe && (this.mockIframe.contentDocument || this.mockIframe.contentWindow.document)
+          const numFromInput = doc && doc.getElementById('cardNumber') ? (doc.getElementById('cardNumber').value || '') : ''
+          const source = numFromInput || (card && card.number) || ''
+          const digits = (source + '').replace(/\D/g, '')
+          const last4 = digits.slice(-4)
+          return last4 || '4242'
+        } catch (e) {
+          return '4242'
+        }
+      },
 
       initElements: async function (params = {}, callback) {
         const isMock = (params && typeof params.mock !== 'undefined')
@@ -107,7 +119,8 @@ define(
        */
       createCard: async function (cardholder_name, card) {
         if (this.isMock === true) {
-          return { id: 'card_mock_4242' }
+          const last4 = this.getMockLast4(card)
+          return { id: 'card_mock_' + last4 }
         }
         if (!this.publicsquareJs) {
           throw new Error('PublicSquare not initialized yet')
