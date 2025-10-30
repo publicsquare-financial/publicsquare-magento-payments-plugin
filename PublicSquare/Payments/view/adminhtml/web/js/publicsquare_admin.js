@@ -25,12 +25,22 @@ define(
           throw new Error('Card element invalid or missing');
         }
         // Try to tokenize; if anything goes wrong, block submission (no mock fallback)
-        const card = await publicsquare.createCard(cardholder_name, publicsquare.cardElement);
-        if (card && card.id) {
-          $(paymentMethodNonceSelector).val(card.id);
-        } else {
-          alert('Unable to tokenize card.');
-          throw new Error('Tokenization returned no id');
+        try {
+          const card = await publicsquare.createCard(cardholder_name, publicsquare.cardElement);
+          if (card && card.id) {
+            $(paymentMethodNonceSelector).val(card.id);
+          } else {
+            alert('Unable to tokenize card.');
+            throw new Error('Tokenization returned no id');
+          }
+        } catch (err) {
+          if (err && err.message === 'psq_invalid_blank_card') {
+            alert('The card is invalid. Please check the card details and try again.');
+          } else {
+            alert('Unable to tokenize card.');
+          }
+          $form.trigger('processStop');
+          return;
         }
         if (!$form.valid()) {
           $form.trigger('processStop');

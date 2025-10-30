@@ -119,6 +119,18 @@ define(
        */
       createCard: async function (cardholder_name, card) {
         if (this.isMock === true) {
+          // If the mock input is blank (no digits), throw a specific error
+          try {
+            const doc = this.mockIframe && (this.mockIframe.contentDocument || this.mockIframe.contentWindow.document)
+            const raw = doc && doc.getElementById('cardNumber') ? (doc.getElementById('cardNumber').value || '') : ''
+            const digits = (raw + '').replace(/\D/g, '')
+            if (!digits) {
+              throw new Error('psq_invalid_blank_card')
+            }
+          } catch (e) {
+            if (e && e.message === 'psq_invalid_blank_card') throw e
+            throw new Error('psq_invalid_blank_card')
+          }
           const last4 = this.getMockLast4(card)
           return { id: 'card_mock_' + last4 }
         }
