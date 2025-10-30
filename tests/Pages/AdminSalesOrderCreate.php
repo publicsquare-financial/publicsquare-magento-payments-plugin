@@ -25,10 +25,10 @@ class AdminSalesOrderCreate extends AcceptanceBase
   {
     $I->click('Add Products');
     $this->_waitForLoading($I);
-    // Select first visible product and add to order
-    $secondCheckboxCss = '#sales_order_create_search_grid_table>tbody>tr:nth-child(2) input[type="checkbox"]';
-    $I->waitForElementClickable($secondCheckboxCss);
-    $I->click($secondCheckboxCss);
+    // Select the 3rd product in the list
+    $nonConfigurableCheckboxXpath = "//table[@id='sales_order_create_search_grid_table']//tbody/tr[3]//input[@type='checkbox']";
+    $I->waitForElementClickable(['xpath' => $nonConfigurableCheckboxXpath]);
+    $I->click(['xpath' => $nonConfigurableCheckboxXpath]);
     $this->_waitForLoading($I);
     $I->waitForElementClickable('[title="Add Selected Product(s) to Order"]');
     $I->click('[title="Add Selected Product(s) to Order"]');
@@ -57,11 +57,17 @@ class AdminSalesOrderCreate extends AcceptanceBase
   protected function _addShippingMethodToOrder(AcceptanceTester $I)
   {
     // Open shipping method section
+    $this->_waitForLoading($I);
+    $shippingMethod = "//*[@id='order-shipping-method-summary']/a";
+    $I->waitForElementClickable(['xpath' => $shippingMethod]);
+    $I->click(['xpath' => $shippingMethod]);
+    
     $I->waitForElementClickable('#order-shipping-method-summary>a');
+    $I->scrollTo('#order-shipping-method-summary>a');
     $I->click('#order-shipping-method-summary>a');
     $this->_waitForLoading($I);
-    // Load shipping methods
     
+    // Load shipping methods
     $I->waitForElementVisible("//span[normalize-space()='Get shipping methods and rates']");
     $I->click("//span[normalize-space()='Get shipping methods and rates']/parent::a");
     $this->_waitForLoading($I);
