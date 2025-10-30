@@ -16,9 +16,14 @@ define(
       cardElement: null,
       loading: false,
       mockIframe: null,
+      isMock: false,
 
       initElements: async function (params = {}, callback) {
-        if (window.checkoutConfig && window.checkoutConfig.payment && window.checkoutConfig.payment.publicsquare_payments && window.checkoutConfig.payment.publicsquare_payments.mock) {
+        const isMock = (params && typeof params.mock !== 'undefined')
+          ? !!params.mock
+          : !!(window.checkoutConfig && window.checkoutConfig.payment && window.checkoutConfig.payment.publicsquare_payments && window.checkoutConfig.payment.publicsquare_payments.mock);
+        this.isMock = isMock;
+        if (isMock) {
           // Mock: create a same-origin iframe with expected inputs
           const container = document.querySelector(params.selector)
           if (container) {
@@ -34,9 +39,17 @@ define(
               doc.write(
                 '<!doctype html><html><head><meta charset="utf-8"></head>'+
                 '<body style="margin:0;padding:8px;font-family:sans-serif;">'+
-                '<input id="cardNumber" placeholder="Card Number" style="display:block;width:100%;margin:4px 0;padding:6px;">'+
-                '<input id="expirationDate" placeholder="MM/YY" style="display:block;width:100%;margin:4px 0;padding:6px;">'+
-                '<input id="cvc" placeholder="CVC" style="display:block;width:100%;margin:4px 0;padding:6px;">'+
+                '<div style="background:#fff3cd;color:#664d03;border:1px solid #ffecb5;border-radius:4px;padding:6px 8px;margin-bottom:6px;font-size:12px;">'+
+                  'PublicSquare Mock Payment Element — for testing only.'+
+                '</div>'+
+                '<div style="display:flex;gap:6px;align-items:center;margin:4px 0;">'+
+                  '<input id="cardNumber" placeholder="Card Number"'+
+                    ' style="flex:2;min-width:0;padding:6px;">'+
+                  '<input id="expirationDate" placeholder="MM/YY"'+
+                    ' style="flex:1;min-width:0;padding:6px;">'+
+                  '<input id="cvc" placeholder="CVC"'+
+                    ' style="flex:1;min-width:0;padding:6px;">'+
+                '</div>'+
                 '</body></html>'
               )
               doc.close()
@@ -93,7 +106,7 @@ define(
        * @param {HTMLDivElement} card - This is the card element
        */
       createCard: async function (cardholder_name, card) {
-        if (window.checkoutConfig && window.checkoutConfig.payment && window.checkoutConfig.payment.publicsquare_payments && window.checkoutConfig.payment.publicsquare_payments.mock) {
+        if (this.isMock === true) {
           return { id: 'card_mock_4242' }
         }
         if (!this.publicsquareJs) {

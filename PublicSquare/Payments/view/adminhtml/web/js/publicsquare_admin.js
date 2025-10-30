@@ -20,29 +20,17 @@ define(
         if (!cardholder_name) {
           alert('Cardholder name is required');
           throw new Error('Cardholder name is required');
-        } else if (!publicsquare.cardElement || !publicsquare.cardElement.metadata || publicsquare.cardElement.metadata.valid === false) {
-          // If no card element (e.g., running in mock mode), fabricate a token and continue
-          const mockId = 'card_mock_4242';
-          $(paymentMethodNonceSelector).val(mockId);
-          if (!$form.valid()) {
-            $form.trigger('processStop');
-            return
-          }
-          originalOrderSubmit();
-          return;
+        } else if (!publicsquare.cardElement || (publicsquare.cardElement.metadata && publicsquare.cardElement.metadata.valid === false)) {
+          alert('Payment details are invalid or not ready.');
+          throw new Error('Card element invalid or missing');
         }
-        // Try to tokenize; if anything goes wrong, fall back to mock id
-        try {
-          const card = await publicsquare.createCard(cardholder_name, publicsquare.cardElement);
-          if (card && card.id) {
-            $(paymentMethodNonceSelector).val(card.id);
-          }
-        } catch (err) {
-          $(paymentMethodNonceSelector).val('card_mock_4242');
-        }
-        // Final safeguard: ensure a value is present
-        if (!$(paymentMethodNonceSelector).val()) {
-          $(paymentMethodNonceSelector).val('card_mock_4242');
+        // Try to tokenize; if anything goes wrong, block submission (no mock fallback)
+        const card = await publicsquare.createCard(cardholder_name, publicsquare.cardElement);
+        if (card && card.id) {
+          $(paymentMethodNonceSelector).val(card.id);
+        } else {
+          alert('Unable to tokenize card.');
+          throw new Error('Tokenization returned no id');
         }
         if (!$form.valid()) {
           $form.trigger('processStop');
@@ -85,7 +73,8 @@ define(
         requestAnimationFrame(() => {
           publicsquare.initElements({
             apiKey: config.pk || '',
-            selector: elementsFormSelector
+            selector: elementsFormSelector,
+            mock: !!config.mock
           }, () => {
             observe();
           })
