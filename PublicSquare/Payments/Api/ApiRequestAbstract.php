@@ -335,218 +335,102 @@ abstract class ApiRequestAbstract
 
         $last4 = substr(preg_replace('/[^0-9]/', '', (string)$cardId), -4);
 
-        switch ($cardId) {
-            case '4242424242424242':
-            case 'card_mock_4242':
-                return [
-                    'id' => 'pmt_mock_success_4242',
-                    'status' => 'succeeded',
-                    'amount' => $amount,
-                    'amount_capturable' => $capture ? 0 : $amount,
-                    'currency' => 'USD',
-                    'capture' => $capture,
-                    'fraud_details' => [
-                        'decision' => 'accept',
-                        'rules' => []
+        // Only handle the card cases used by our tests; default to failed
+        if ($last4 === '4242') {
+            return [
+                'id' => 'pmt_mock_success_4242',
+                'status' => 'succeeded',
+                'amount' => $amount,
+                'amount_capturable' => $capture ? 0 : $amount,
+                'currency' => 'USD',
+                'capture' => $capture,
+                'fraud_details' => [
+                    'decision' => 'accept',
+                    'rules' => []
+                ],
+                'payment_method' => [
+                    'card' => [
+                        'id' => 'card_mock_4242',
+                        'last4' => '4242',
+                        'brand' => 'visa',
+                        'exp_month' => 12,
+                        'exp_year' => 2029,
+                        'avs_code' => 'Y',
+                        'cvv2_reply' => 'M',
                     ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_4242',
-                            'last4' => '4242',
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => 'Y',
-                            'cvv2_reply' => 'M',
-                        ],
-                    ],
-                ];
-            case '4000000000000002':
-            case 'card_mock_0002':
-                return [
-                    'id' => 'pmt_mock_decline',
-                    'status' => 'declined',
-                    'declined_reason' => 'Decline',
-                    'amount' => $amount,
-                    'currency' => 'USD',
-                    'fraud_details' => [
-                        'decision' => 'reject',
-                        'rules' => ['Mock Decline Rule']
-                    ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_dec',
-                            'last4' => '0002',
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => 'N',
-                            'cvv2_reply' => 'N',
-                        ],
-                    ],
-                ];
-            case '4000000000009995':
-            case 'card_mock_9995':
-                return [
-                    'id' => 'pmt_mock_insufficient',
-                    'status' => 'declined',
-                    'declined_reason' => 'Insufficient Funds',
-                    'amount' => $amount,
-                    'currency' => 'USD',
-                    'fraud_details' => [
-                        'decision' => 'reject',
-                        'rules' => ['Mock Insufficient Funds Rule']
-                    ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_insufficient',
-                            'last4' => '9995',
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => 'N',
-                            'cvv2_reply' => 'N',
-                        ],
-                    ],
-                ];
-            case '4000000000009987':
-            case 'card_mock_9987':
-                return [
-                    'id' => 'pmt_mock_lost_stolen',
-                    'status' => 'declined',
-                    'declined_reason' => 'Lost/Stolen',
-                    'amount' => $amount,
-                    'currency' => 'USD',
-                    'fraud_details' => [
-                        'decision' => 'reject',
-                        'rules' => ['Mock Lost/Stolen Rule']
-                    ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_lost_stolen',
-                            'last4' => '9987',
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => 'N',
-                            'cvv2_reply' => 'N',
-                        ],
-                    ],
-                ];
-            case '4100000000000019':
-            case 'card_mock_0019':
-                return [
-                    'id' => 'pmt_mock_rejected',
-                    'status' => 'rejected',
-                    'amount' => $amount,
-                    'currency' => 'USD',
-                    'fraud_details' => [
-                        'decision' => 'reject',
-                        'rules' => ['Mock Fraud Rule']
-                    ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_rejected',
-                            'last4' => '0019',
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => 'N',
-                            'cvv2_reply' => 'N',
-                        ],
-                    ],
-                ];
-            case '4000000000000101':
-            case 'card_mock_0101':
-                return [
-                    'id' => 'pmt_mock_cvc_fail',
-                    'status' => 'rejected',
-                    'amount' => $amount,
-                    'currency' => 'USD',
-                    'fraud_details' => [
-                        'decision' => 'reject',
-                        'rules' => ['Mock CVC Rule']
-                    ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_cvc_fail',
-                            'last4' => '0101',
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => 'N',
-                            'cvv2_reply' => 'N',
-                        ],
-                    ],
-                ];
-            case '4000000000000010':
-            case 'card_mock_0010':
-                return [
-                    'id' => 'pmt_mock_avs_fail',
-                    'status' => 'rejected',
-                    'amount' => $amount,
-                    'currency' => 'USD',
-                    'fraud_details' => [
-                        'decision' => 'reject',
-                        'rules' => ['Mock AVS Rule']
-                    ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_avs_fail',
-                            'last4' => '0010',
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => 'N',
-                            'cvv2_reply' => 'N',
-                        ],
-                    ],
-                ];
-            case '4111111111111111':
-            case 'card_mock_1111':
-                return [
-                    'id' => 'pmt_mock_failed',
-                    'status' => 'failed',
-                    'amount' => $amount,
-                    'currency' => 'USD',
-                    'fraud_details' => [
-                        'decision' => 'reject',
-                        'rules' => ['Mock Failure Rule']
-                    ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_failed',
-                            'last4' => '1111',
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => 'N',
-                            'cvv2_reply' => 'N',
-                        ],
-                    ],
-                ];
-            default:
-                return [
-                    'id' => 'pmt_mock_generic_failed',
-                    'status' => $last4 === '4242' ? 'succeeded' : 'failed',
-                    'amount' => $amount,
-                    'currency' => 'USD',
-                    'fraud_details' => [
-                        'decision' => $last4 === '4242' ? 'accept' : 'reject',
-                        'rules' => $last4 === '4242' ? [] : ['Mock Generic Rule']
-                    ],
-                    'payment_method' => [
-                        'card' => [
-                            'id' => 'card_mock_generic',
-                            'last4' => $last4,
-                            'brand' => 'visa',
-                            'exp_month' => 12,
-                            'exp_year' => 2029,
-                            'avs_code' => $last4 === '4242' ? 'Y' : 'N',
-                            'cvv2_reply' => $last4 === '4242' ? 'M' : 'N',
-                        ],
-                    ],
-                ];
+                ],
+            ];
         }
+
+        if ($last4 === '9995') {
+            return [
+                'id' => 'pmt_mock_insufficient',
+                'status' => 'declined',
+                'declined_reason' => 'Insufficient Funds',
+                'amount' => $amount,
+                'currency' => 'USD',
+                'fraud_details' => [
+                    'decision' => 'reject',
+                    'rules' => ['Mock Insufficient Funds Rule']
+                ],
+                'payment_method' => [
+                    'card' => [
+                        'id' => 'card_mock_insufficient',
+                        'last4' => '9995',
+                        'brand' => 'visa',
+                        'exp_month' => 12,
+                        'exp_year' => 2029,
+                        'avs_code' => 'N',
+                        'cvv2_reply' => 'N',
+                    ],
+                ],
+            ];
+        }
+
+        if ($last4 === '0019') {
+            return [
+                'id' => 'pmt_mock_rejected',
+                'status' => 'rejected',
+                'amount' => $amount,
+                'currency' => 'USD',
+                'fraud_details' => [
+                    'decision' => 'reject',
+                    'rules' => ['Mock Fraud Rule']
+                ],
+                'payment_method' => [
+                    'card' => [
+                        'id' => 'card_mock_rejected',
+                        'last4' => '0019',
+                        'brand' => 'visa',
+                        'exp_month' => 12,
+                        'exp_year' => 2029,
+                        'avs_code' => 'N',
+                        'cvv2_reply' => 'N',
+                    ],
+                ],
+            ];
+        }
+
+        return [
+            'id' => 'pmt_mock_generic_failed',
+            'status' => 'failed',
+            'amount' => $amount,
+            'currency' => 'USD',
+            'fraud_details' => [
+                'decision' => 'reject',
+                'rules' => ['Mock Generic Rule']
+            ],
+            'payment_method' => [
+                'card' => [
+                    'id' => 'card_mock_generic',
+                    'last4' => $last4,
+                    'brand' => 'visa',
+                    'exp_month' => 12,
+                    'exp_year' => 2029,
+                    'avs_code' => 'N',
+                    'cvv2_reply' => 'N',
+                ],
+            ],
+        ];
     }
 } //end class
