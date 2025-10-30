@@ -78,9 +78,15 @@ define(
               create: async ({ cardholder_name, card }) => {
                 // Read last4 from the mock iframe if available
                 try {
-                  const doc = this.mockIframe && (this.mockIframe.contentDocument || this.mockIframe.contentWindow.document)
-                  const num = doc && doc.getElementById('cardNumber') ? (doc.getElementById('cardNumber').value || '4242424242424242') : '4242424242424242'
-                  const digits = (num+'').replace(/\D/g,'')
+                  const doc = this.mockIframe && (this.mockIframe.contentDocument || (this.mockIframe.contentWindow && this.mockIframe.contentWindow.document))
+                  let num = '4242424242424242'
+                  if (doc) {
+                    const input = doc.getElementById && doc.getElementById('cardNumber')
+                    if (input && typeof input.value === 'string' && input.value.length) {
+                      num = input.value
+                    }
+                  }
+                  const digits = (String(num)).replace(/\D/g,'')
                   const last4 = digits.slice(-4) || '4242'
                   return { id: 'card_mock_' + last4 }
                 } catch (e) {
