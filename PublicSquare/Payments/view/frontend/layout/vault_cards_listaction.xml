@@ -8,12 +8,25 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="content">
+            <block class="PublicSquare\Payments\Block\Customer\Payments\AddCard"
+                   name="publicsquare_payments.cc.add"
+                   template="PublicSquare_Payments::add-card.phtml"
+            />
             <referenceBlock name="vault.cards.list">
-                <block class="PublicSquare\Payments\Block\Customer\CardRenderer" name="publicsquare_payments.card.renderer" template="Magento_Vault::customer_account/credit_card.phtml"/>
+                <block class="PublicSquare\Payments\Block\Customer\CardRenderer"
+                       name="publicsquare_payments.card.renderer"
+                       template="Magento_Vault::customer_account/credit_card.phtml"
+                />
+
             </referenceBlock>
             <referenceBlock name="vault.token.list">
-                <block class="PublicSquare\Payments\Block\Customer\Payments\VaultTokenRenderer" name="publicsquare_payments.token.renderer" template="Magento_Vault::customer_account/credit_card.phtml"/>
+                <block class="PublicSquare\Payments\Block\Customer\Payments\VaultTokenRenderer"
+                       name="publicsquare_payments.token.renderer"
+                       template="Magento_Vault::customer_account::credit_card.phtml"
+                />
+
             </referenceBlock>
         </referenceContainer>
+
     </body>
 </page>

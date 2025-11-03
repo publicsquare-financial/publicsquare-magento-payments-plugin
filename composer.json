@@ -20,7 +20,8 @@
   "autoload-dev": {
     "psr-4": {
       "PublicSquare\\Payments\\Test\\Unit\\": "tests/unit/",
-      "Magento\\": "tests/unit/stubs/Magento/"
+      "Magento\\": "tests/unit/stubs/Magento/",
+      "Monolog\\": "tests/unit/stubs/Monolog/"
     }
   },
   "config": {

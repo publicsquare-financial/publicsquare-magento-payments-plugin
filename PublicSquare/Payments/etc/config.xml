@@ -38,7 +38,7 @@
                 <can_cancel>1</can_cancel>
                 <can_use_internal>1</can_use_internal>
                 <can_use_checkout>1</can_use_checkout>
-                <can_save_cc>0</can_save_cc>
+                <can_save_cc>1</can_save_cc>
                 <can_use_for_multishipping>0</can_use_for_multishipping>
                 <can_authorize_vault>1</can_authorize_vault>
                 <can_capture_vault>1</can_capture_vault>
