@@ -1,0 +1,12 @@
+<?php
+/** @var PublicSquare\Payments\Block\Frontend\Form $block */
+$code = $block->escapeHtml($block->getMethodCode());
+?>
+<fieldset class="fieldset payment-method"
+    id="payment_form_<?= /* @noEscape */ $code ?>">
+    <div>
+        <h2>Public square payment</h2>
+    </div>
+</fieldset>
+
+

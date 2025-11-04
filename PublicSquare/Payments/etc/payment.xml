@@ -22,6 +22,6 @@
         <method name="publicsquare_payments">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
-        
+        <method name="publicsquare" type="PublicSquarePaymentsFacade" sortOrder="1" group="publicsquare" />
     </methods>
 </payment>
