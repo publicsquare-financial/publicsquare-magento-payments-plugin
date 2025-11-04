@@ -4,9 +4,90 @@ $code = $block->escapeHtml($block->getMethodCode());
 ?>
 <fieldset class="fieldset payment-method"
     id="payment_form_<?= /* @noEscape */ $code ?>">
-    <div>
-        <h2>Public square payment</h2>
+
+    <div class="field _required">
+      <label class="label" for="<?= /* @noEscape */ $code ?>_cardholder_name">
+        <span><?= $block->escapeHtml(__('Name on Card')) ?></span>
+      </label>
+      <div class="control">
+        <input type="text"
+               id="<?= /* @noEscape */ $code ?>_cardholder_name"
+               name="payment[cardholder_name]"
+               class="input-text" />
+      </div>
+
+      <div class="control">
+        <div id="publicsquare-elements-form"></div>
+      </div>
+
     </div>
+
+    <div id="publicsquare_error_message" class="message error" role="alert" style="display:none"></div>
 </fieldset>
 
+<input type="hidden" id="<?= /* @noEscape */ $code ?>_payment_method_nonce"
+       name="payment[payment_method_nonce]" />
+<input type="hidden" id="<?= /* @noEscape */ $code ?>_card_id"
+       name="payment[cardId]" />
 
+<script>
+require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function ($) {
+  'use strict';
+  var code = '<?= $code ?>';
+  var selector = '#publicsquare-elements-form';
+  var apiKey = '<?= $block->escapeJs($block->getPublicApiKey()) ?>';
+  console.log("apiKey: ", apiKey);
+
+  function mount() {
+    console.log("Attempting to mount")
+    if (window.publicsquare && typeof window.publicsquare.initElements === 'function') {
+      console.log("Mounting the public square element")
+      window.publicsquare.initElements({ apiKey: apiKey, selector: selector });
+    }
+    $('#' + code + '_cardholder_name').prop('disabled', false)
+  }
+
+  $(function () {
+    mount();
+
+    // Remount when user re-selects this method (if radios exist on page)
+    $(document).on('change', 'input[name="payment[method]"]', function () {
+      if (this.value === 'publicsquare_payments' && this.checked) {
+        mount();
+      }
+    });
+
+    // Intercept submit to tokenize and set hidden fields
+    var $form = $("#multishipping-billing-form");
+    console.log("form: ", $form)
+    $form.on('submit.publicsquare', async function (e) {
+
+      // If method radios exist, only intercept when our method is selected
+      var method = $('input[name="payment[method]"]:checked').val();
+      if (method && method !== 'publicsquare_payments') { return; }
+
+      var $nonce = $('#' + code + '_payment_method_nonce');
+      if ($nonce.val()) { return; }
+
+      e.preventDefault();
+      try {
+        var card = window.publicsquare && window.publicsquare.cardElement;
+        if (!card) { mount(); card = window.publicsquare && window.publicsquare.cardElement; }
+        console.log("card: ", card)
+        // Read cardholder name from input
+        var cardholderName = ($('#' + code + '_cardholder_name').val() || '').trim();
+        console.log("CardholderName: ", cardholderName);
+        var res = await window.publicsquare.createCard(cardholderName, card);
+        $('#' + code + '_payment_method_nonce').val(res && (res.id || res.token || ''));
+        if (res && res.card && res.card.id) {
+          $('#' + code + '_card_id').val(res.card.id);
+        }
+        $form.off('submit.publicsquare').trigger('submit');
+      } catch (err) {
+        var msg = (err && err.message) || 'Error saving card.';
+        $('#publicsquare_error_message').text(msg).show();
+      }
+    });
+  });
+});
+</script>

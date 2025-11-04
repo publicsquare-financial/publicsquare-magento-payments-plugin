@@ -9,6 +9,11 @@ class Form extends BaseForm
      * Template used to render the payment form on storefront (e.g., multishipping billing step).
      */
     protected $_template = 'PublicSquare_Payments::form/multishipping-cc.phtml';
+
+    public function getPublicApiKey(): string
+    {
+        return (string) $this->gatewayConfig->getPublicAPIKey();
+    }
 }
 
 
