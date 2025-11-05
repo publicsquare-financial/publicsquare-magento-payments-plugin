@@ -26,9 +26,11 @@ $code = $block->escapeHtml($block->getMethodCode());
 </fieldset>
 
 <input type="hidden" id="<?= /* @noEscape */ $code ?>_payment_method_nonce"
-       name="payment[payment_method_nonce]" />
+       name="payment[additional_data][payment_method_nonce]" />
 <input type="hidden" id="<?= /* @noEscape */ $code ?>_card_id"
-       name="payment[cardId]" />
+       name="payment[additional_data][cardId]" />
+<input type="hidden" id="<?= /* @noEscape */ $code ?>_idempotency_key"
+       name="payment[additional_data][idempotencyKey]" />
 
 <script>
 require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function ($) {
@@ -44,11 +46,24 @@ require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function (
       console.log("Mounting the public square element")
       window.publicsquare.initElements({ apiKey: apiKey, selector: selector });
     }
+
     $('#' + code + '_cardholder_name').prop('disabled', false)
+    $('#' + code + '_payment_method_nonce').prop('disabled', false)
+    $('#' + code + '_card_id').prop('disabled', false)
+  }
+
+  function generateIdempotencyKey() {
+    return String(Date.now()) + Math.random().toString(36).substr(2, 9);
   }
 
   $(function () {
     mount();
+
+    // Ensure idempotency key is set
+    var $idempotency = $('#' + code + '_idempotency_key');
+    if (!$idempotency.val()) {
+      $idempotency.val(generateIdempotencyKey());
+    }
 
     // Remount when user re-selects this method (if radios exist on page)
     $(document).on('change', 'input[name="payment[method]"]', function () {
@@ -78,9 +93,14 @@ require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function (
         var cardholderName = ($('#' + code + '_cardholder_name').val() || '').trim();
         console.log("CardholderName: ", cardholderName);
         var res = await window.publicsquare.createCard(cardholderName, card);
+        console.log("Res: ", res);
         $('#' + code + '_payment_method_nonce').val(res && (res.id || res.token || ''));
-        if (res && res.card && res.card.id) {
-          $('#' + code + '_card_id').val(res.card.id);
+        if (res.id) {
+          console.log("card id: ", res.id);
+          $('#' + code + '_card_id').val(res.id);
+        }
+        if (!$idempotency.val()) {
+          $idempotency.val(generateIdempotencyKey());
         }
         $form.off('submit.publicsquare').trigger('submit');
       } catch (err) {
