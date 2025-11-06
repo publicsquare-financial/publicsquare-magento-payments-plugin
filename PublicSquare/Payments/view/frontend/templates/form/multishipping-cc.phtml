@@ -132,12 +132,6 @@ require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function (
         if (!card) { mount(); card = window.publicsquare && window.publicsquare.cardElement; }
         // Read cardholder name from input
         var cardholderName = ($('#' + code + '_cardholder_name').val() || '').trim();
-        // sync saveCard based on vault checkbox if present
-        var $vaultCheckbox = $('#' + code + '_enable_vault');
-        var $saveCardHidden = $('#' + code + '_save_card');
-        if ($vaultCheckbox.length) {
-          $saveCardHidden.val($vaultCheckbox.is(':checked') ? 'true' : '');
-        }
         // regenerate idempotency key on each submit attempt
         $('#' + code + '_idempotency_key').val(generateIdempotencyKey());
         var res = await window.publicsquare.createCard(cardholderName, card);
