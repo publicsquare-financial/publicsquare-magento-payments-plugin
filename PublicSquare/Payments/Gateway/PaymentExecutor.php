@@ -512,6 +512,7 @@ class PaymentExecutor
 			);
 			$this->paymentTokenRepository->save($paymentToken);
 		} catch (\Exception $e) {
+			error_log("Error saving payment method for customer: " . $customerId);
 			error_log($e->getMessage());
 		}
 	}
