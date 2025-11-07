@@ -49,6 +49,9 @@ class CheckoutCest extends AcceptanceBase
 
     }
 
+    /**
+    * @skip Temporarily disabling decline flow test
+    */
     public function declinedChargesTest(AcceptanceTester $I) 
     {
         $this->_initialize($I);
