@@ -512,9 +512,7 @@ class PaymentExecutor
 			);
 			$this->paymentTokenRepository->save($paymentToken);
 		} catch (\Exception $e) {
-			// $this->logger->error($e->getMessage(), [
-			// 	"trace" => $e->getTraceAsString(),
-			// ]);
+			error_log($e->getMessage());
 		}
 	}
 
