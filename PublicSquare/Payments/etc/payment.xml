@@ -12,7 +12,7 @@
  */
  -->
 <payment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="../../../Magento/Payment/etc/payment.xsd">
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Payment:etc/payment.xsd">
     <groups>
         <group id="offline">
             <label>Offline Payment Methods</label>
@@ -22,6 +22,5 @@
         <method name="publicsquare_payments">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
-        
     </methods>
 </payment>
