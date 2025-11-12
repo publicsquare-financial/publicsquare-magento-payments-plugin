@@ -179,6 +179,16 @@ class Config extends AbstractHelper
     } //end getUrii()
 
     /**
+     * Check if API mocking is enabled via environment variable
+     *
+     * @return bool
+     */
+    public function isApiMockEnabled(): bool
+    {
+        return getenv('PUBLICSQUARE_API_MOCK') === '1';
+    }
+
+    /**
      * Get publicsquare payment allowed currencies
      *
      * @param  string $scopeType
