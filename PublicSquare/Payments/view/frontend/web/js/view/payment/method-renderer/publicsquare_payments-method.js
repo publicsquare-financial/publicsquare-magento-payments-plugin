@@ -23,9 +23,6 @@ define([
   "Magento_Ui/js/model/messageList",
   "Magento_Customer/js/model/customer",
   "Magento_Checkout/js/model/place-order",
-
-
-  'Magento_Customer/js/customer-data',
 ], function (
   $,
   Component,
@@ -40,8 +37,6 @@ define([
   messageList,
   customer,
   placeOrderService,
-
-  customerData,
 ) {
   "use strict";
 
