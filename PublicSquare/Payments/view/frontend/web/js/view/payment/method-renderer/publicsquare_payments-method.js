@@ -82,7 +82,9 @@ define([
     placeOrder: async function () {
       const self = this;
       if (self.submitting) return;
+      console.log('publicsquare_payments-method: Begin validation...');
       if (self.validate() && additionalValidators.validate()) {
+        console.log('publicsquare_payments-method: Validation passed');
         self.submitting = true;
         fullScreenLoader.startLoader();
         const billingAddress = quote.billingAddress();
@@ -115,7 +117,9 @@ define([
     placeOrderWithCardId: function (cardId) {
       var self = this;
       self.cardId = cardId;
-      var serviceUrl = urlBuilder.createUrl(
+      console.log('publicsquare_payments-method: Submitting order');
+
+        var serviceUrl = urlBuilder.createUrl(
         customer.isLoggedIn() ?
           '/carts/mine/payment-information' :
           '/guest-carts/:quoteId/payment-information',
@@ -123,13 +127,18 @@ define([
           quoteId: quote.getQuoteId()
         }
       );
-
+        const placeOrderReqBody = {
+           paymentMethod: self.getData(),
+        };
+        if(customer.isLoggedIn() ) {
+           placeOrderReqBody.billingAddress = quote.billingAddress;
+        } else {
+           placeOrderReqBody.email = quote.guestEmail;
+        }
+        console.log('publicsquare_payments-method: Created place order request: %s', JSON.stringify(placeOrderReqBody));
       return placeOrderService(
         serviceUrl,
-        {
-          ...(!customer.isLoggedIn() && { email: quote.guestEmail }),
-          paymentMethod: self.getData()
-        },
+        placeOrderReqBody,
         messageList
       ).then(() => {
         const maskId = window.checkoutConfig.quoteData.entity_id;
@@ -151,6 +160,7 @@ define([
             errorMessage = response.responseJSON.message;
           }
         }
+        console.log('publicsquare_payments-method: Failed to place order! %j', errorMessage);
 
         messageList.addErrorMessage({
           message: $t(errorMessage)
