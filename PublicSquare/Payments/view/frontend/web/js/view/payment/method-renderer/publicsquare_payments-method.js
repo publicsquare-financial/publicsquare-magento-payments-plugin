@@ -136,21 +136,17 @@ define([
            paymentMethod: self.getData(),
         };
         if(customer.isLoggedIn() ) {
-
             console.log('publicsquare_payments-method: Customer is logged in');
-            let billingAddress = quote.billingAddress();
-            if(!billingAddress) {
-                console.log('publicsquare_payments-method: Quote does not have billing address! Checing %j', customer);
-                customer.getBillingAddressList().forEach(_ => console.log('billingAddress: %j', _));
-            } else {
+            if(quote.getItems().every(_ => _.product_type === 'virtual')) {
+                let billingAddress = quote.billingAddress();
+
                 console.log('publicsquare_payments-method: Found address on quote! %j', billingAddress);
+                placeOrderReqBody.billingAddress = billingAddress;
             }
-            placeOrderReqBody.billingAddress = billingAddress;
         } else {
            console.log('publicsquare_payments-method: Customer is NOT logged in');
            placeOrderReqBody.email = quote.guestEmail;
         }
-        console.log('publicsquare_payments-method: Created place order request: %s', JSON.stringify(placeOrderReqBody));
       return placeOrderService(
         serviceUrl,
         placeOrderReqBody,
