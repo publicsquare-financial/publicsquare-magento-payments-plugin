@@ -58,7 +58,7 @@ define([
       cardId: null,
     },
     initialize: function () {
-      var self = this;
+      const self = this;
       self._super();
       this.vaultEnabler = new VaultEnabler();
       this.vaultEnabler.setPaymentCode(this.getVaultCode());
@@ -113,10 +113,10 @@ define([
       }
     },
     placeOrderWithCardId: function (cardId) {
-      var self = this;
+      const self = this;
       self.cardId = cardId;
 
-        var serviceUrl = urlBuilder.createUrl(
+        const serviceUrl = urlBuilder.createUrl(
         customer.isLoggedIn() ?
           '/carts/mine/payment-information' :
           '/guest-carts/:quoteId/payment-information',
@@ -170,7 +170,7 @@ define([
      * @returns {Object}
      */
     getData: function () {
-      var data = {
+      const data = {
         method: this.getCode(),
         additional_data: {
           cardId: this.cardId,
