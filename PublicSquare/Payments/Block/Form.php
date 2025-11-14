@@ -104,6 +104,20 @@ class Form extends Cc
     }
 
     /**
+     * @return bool true if there is a customer record associated to session
+     */
+    public function isCustomerLoggedIn(): bool
+    {
+        try {
+            $quote = $this->sessionQuote->getQuote();
+            $customerId = $quote->getCustomerId();
+            return $customerId !== null && $customerId > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
      * Get card types available for Braintree
      * @return array
      */

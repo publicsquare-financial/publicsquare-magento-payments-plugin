@@ -20,7 +20,7 @@ $code = $block->escapeHtml($block->getMethodCode());
           <div id="publicsquare-elements-form"></div>
         </div>
       </div>
-      <?php if ($block->isVaultEnabled()): ?>
+      <?php if ($block->isVaultEnabled() && $block->isCustomerLoggedIn()): ?>
       <div class="field choice payment-method-vault-checkbox" style="margin-top: 1em">
         <input type="checkbox"
                name="vault[is_enabled]"
