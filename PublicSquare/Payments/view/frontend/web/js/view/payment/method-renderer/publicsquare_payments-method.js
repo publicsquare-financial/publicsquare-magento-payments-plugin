@@ -82,7 +82,9 @@ define([
     placeOrder: async function () {
       const self = this;
       if (self.submitting) return;
+      console.log('publicsquare_payments-method: Begin validation...');
       if (self.validate() && additionalValidators.validate()) {
+        console.log('publicsquare_payments-method: Validation passed');
         self.submitting = true;
         fullScreenLoader.startLoader();
         const billingAddress = quote.billingAddress();
@@ -115,6 +117,7 @@ define([
     placeOrderWithCardId: function (cardId) {
       const self = this;
       self.cardId = cardId;
+      console.log('publicsquare_payments-method: Submitting order');
 
         const serviceUrl = urlBuilder.createUrl(
         customer.isLoggedIn() ?
@@ -128,9 +131,11 @@ define([
            paymentMethod: self.getData(),
         };
         if(customer.isLoggedIn() ) {
+            console.log('publicsquare_payments-method: Customer is logged in');
             if(quote.getItems().every(_ => _.product_type === 'virtual')) {
                 let billingAddress = quote.billingAddress();
 
+                console.log('publicsquare_payments-method: Found address on quote! %j', billingAddress);
                 placeOrderReqBody.billingAddress = billingAddress;
             }
         } else {
@@ -160,6 +165,7 @@ define([
             errorMessage = response.responseJSON.message;
           }
         }
+        console.log('publicsquare_payments-method: Failed to place order! %j', errorMessage);
 
         messageList.addErrorMessage({
           message: $t(errorMessage)
