@@ -30,4 +30,32 @@ class ConfigTest extends TestCase
         $this->assertIsString($result);
         $this->assertEquals('https://api.publicsquare.com', $result);
     }
+    
+    public function testIsApiMockEnabledReturnsFalseByDefault(): void
+    {
+        $contextMock = $this->createMock(\Magento\Framework\App\Helper\Context::class);
+        
+        $config = new Config($contextMock);
+        $result = $config->isApiMockEnabled();
+        
+        $this->assertIsBool($result);
+        $this->assertFalse($result);
+    }
+    
+    public function testIsApiMockEnabledReturnsTrueWhenEnvSet(): void
+    {
+        // Set the environment variable
+        putenv('PUBLICSQUARE_API_MOCK=1');
+        
+        $contextMock = $this->createMock(\Magento\Framework\App\Helper\Context::class);
+        
+        $config = new Config($contextMock);
+        $result = $config->isApiMockEnabled();
+        
+        $this->assertIsBool($result);
+        $this->assertTrue($result);
+        
+        // Clean up
+        putenv('PUBLICSQUARE_API_MOCK');
+    }
 }
