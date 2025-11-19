@@ -25,6 +25,8 @@ class AddCard extends Template
 
     private string $publicKey;
 
+    private string $cardFormLayout;
+
 
     public function __construct(
         Template\Context                     $context,
@@ -33,7 +35,7 @@ class AddCard extends Template
         Session                              $session,
         ScopeConfigInterface                 $config,
         Logger                               $logger,
-        array                                $data = []
+        array                                $data = [],
     )
     {
         parent::__construct($context, $data);
@@ -42,7 +44,9 @@ class AddCard extends Template
         $this->psqVaultConfigEnabled = $config->getValue('payment/publicsquare_payments_cc_vault/active', ScopeConfigInterface::SCOPE_TYPE_DEFAULT);
         $this->customerName = $session->getCustomer()->getName();
         $this->publicKey = $psqConfig->getPublicAPIKey();
+        $this->cardFormLayout = $psqConfig->getCardFormLayout();
         $logger->debug("Magento_Vault: {$this->vaultEnabled} PSQVaultEnabled: {$this->psqVaultConfigEnabled}");
+
     }
 
     /**
@@ -66,5 +70,10 @@ class AddCard extends Template
     public function getPublicKey(): string
     {
         return $this->publicKey;
+    }
+
+    public function getCardFormLayout(): string
+    {
+        return $this->cardFormLayout;
     }
 }

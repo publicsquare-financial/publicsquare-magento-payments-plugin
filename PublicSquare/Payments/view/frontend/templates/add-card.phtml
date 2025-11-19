@@ -4,10 +4,10 @@ $form_action = $block->formAction();
 ?>
 
 <?php if ($enabled): ?>
-    <style type="text/css">
+    <style>
         .psq-add-card {
             display: block;
-            margin-top: 8px;
+            margin-top: 18px;
 
         }
 
@@ -18,16 +18,7 @@ $form_action = $block->formAction();
         .psq-add-card__form {
             display: block;
             padding: 4px;
-        }
-
-        .psq-form__section {
-            display: block;
-            margin: 4px;
-        }
-
-        .psq-form__input {
-            margin: 4px;
-            display: inline-block;
+            margin-top: 8px;
         }
 
     </style>
@@ -35,21 +26,11 @@ $form_action = $block->formAction();
         <button id="psq-cc-add-button" class="psq__cc-add-btn--enabled">Add Card</button>
 
         <div class="psq-add-card__form psq-add-card__form--hidden psq-form">
-            <p class="psq-form__cta">Enter new card information</p>
-            <div class="psq-form__section">
-                <label for="psq-form-cardholder-name">Cardholder Name</label>
-                <input id="psq-form-cardholder-name"
-                       class="psq-form__input"
-                       type="text"
-                       name="cardholder_name"
-                       value="<?php echo $escaper->escapeHtml($block->getCustomerName()); ?>"/>
-
+            <div class="psq-add-card__form__header">
+                <p class="psq-form__cta">Enter new card information</p>
             </div>
-            <div class="psq-form__section">
-                <div id="psq-card-element"></div>
-
-            </div>
-            <div class="psq-form__actions">
+            <?php echo $this->getChildHtml(); ?>
+            <div class="psq-form__footer psq-form__actions">
                 <button class="psq-form__button psq-form__button--primary action primary"
                         type="submit">
                     <span>Add Payment Method</span>
@@ -59,44 +40,32 @@ $form_action = $block->formAction();
                     <span>Cancel</span>
                 </button>
             </div>
+
             <form id="psq-save-to-vault" action="<?php echo $form_action; ?>" method="post">
                 <input id="psq-new-card-id" type="hidden" name="card_id"/>
                 <input id="psq-new-card-exp-year" name="exp_year" type="hidden"/>
                 <input id="psq-new-card-exp-month" name="exp_month" type="hidden"/>
                 <input id="psq-new-card-details" name="details" type="hidden"/>
-
             </form>
         </div>
     </div>
     <script type="text/javascript">
-        require(['jquery', 'publicsquarejs', 'Magento_Ui/js/modal/alert'], function psqAddCCInit($, psqSdk, modal) {
+        require(['jquery', 'publicsquarejs', 'Magento_Ui/js/modal/alert',
+                'PublicSquare_Payments/js/card-form'], function psqAddCCInit($, psqSdk, modal, cardFormBuilder) {
             let formVisible = false;
-            const psqPubKey = '<?php echo $block->getPublicKey(); ?>';
+            const psqPublicKey = '<?php echo $block->getPublicKey(); ?>';
+            const cardFormLayout = '<?php echo $this->getCardFormLayout(); ?>';
             let psq;
             let $modal;
 
             // cc elements bound by psq payments js
-            let $card;
+            let cardForm = null;
 
             async function save() {
-                const $form = $('#psq-save-to-vault');
+                const $vaultForm = $('#psq-save-to-vault');
                 try {
-                    if (!$card || !$card.metadata.valid) {
-                        console.warn('Invalid card! %j', $card.metadata);
 
-                        modal({
-                                  title: 'Error',
-                                  content: 'The card is invalid. Please check the card details and try again.',
-                                  clickableOverlay: true,
-                                  actions: {
-                                      always: function () { /*noop*/ },
-                                  },
-                              });
-                        return;
-                    }
-                    const cardholderName = $('#psq-form-cardholder-name').val();
-                    console.log('Creating new card for cardholder %s', cardholderName);
-                    const card = await psqSdk.cards.create({cardholder_name: cardholderName, card: $card});
+                    const card = await cardForm.createCard();
                     console.log('Card created. Posting to vault...');
 
                     // Update hidden form with information to save to vault
@@ -110,7 +79,7 @@ $form_action = $block->formAction();
                                            expirationDate: `${card.exp_month}/${card.exp_year}`,
                                        }),
                     );
-                    if (!$form.valid()) {
+                    if (!$vaultForm.valid()) {
                         console.warn('Found issues in form!');
                         modal({
                                   title: 'Error',
@@ -123,17 +92,9 @@ $form_action = $block->formAction();
                         return;
                     }
                     // Submit to the Customer/Card controller.
-                    $form.trigger('submit');
+                    $vaultForm.trigger('submit');
                 } catch (err) {
                     console.error('Failed to save card!', err);
-                    modal({
-                              title: 'Error',
-                              content: 'Unknown error creating card.',
-                              clickableOverlay: true,
-                              actions: {
-                                  always: function () { /*noop*/ },
-                              },
-                          });
                 }
 
             }
@@ -150,10 +111,12 @@ $form_action = $block->formAction();
                 }
                 $modal.removeClass('psq-add-card__form--hidden');
 
-                if (!$card) {
-                    psq = await psqSdk.init(psqPubKey);
-                    $card = psq.createCardElement({});
-                    $card.mount('#psq-card-element');
+                if (!cardForm) {
+                    console.debug('layout: %s cardFormBuilder:%o ', cardFormLayout, cardFormBuilder);
+                    cardForm =  cardFormBuilder({type: cardFormLayout});
+                    console.debug('cardForm:%o', cardForm);
+                    await cardForm.bind({psqPublicKey});
+
                     $('.psq-form__button--cancel').click(() => {
                         formVisible = false;
                         closeForm();
@@ -162,8 +125,6 @@ $form_action = $block->formAction();
                         await save();
                     });
                 }
-
-
             }
 
             $('#psq-cc-add-button').click(async () => {
