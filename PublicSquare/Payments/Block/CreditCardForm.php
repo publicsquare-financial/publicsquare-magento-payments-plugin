@@ -13,6 +13,7 @@ class CreditCardForm extends Template
     private string $customerName;
     private bool $psqVaultConfigEnabled;
     private bool $vaultConfigEnabled;
+    private array $creditCardTypes;
 
     public function __construct(
 
@@ -24,7 +25,8 @@ class CreditCardForm extends Template
         Session                              $session,
         array                                $data = [],
 
-    ) {
+    )
+    {
         parent::__construct($context, $data);
         $this->cardFormLayout = $psqConfig->getCardFormLayout();
 
@@ -32,7 +34,9 @@ class CreditCardForm extends Template
         $this->vaultConfigEnabled = $moduleManager->isEnabled('Magento_Vault');
 
         $this->customerName = $session->getCustomer()->getName();
+        $this->creditCardTypes = $psqConfig->getAvailableCardTypes($session->getCustomer()->getStoreId());
     }
+
     public function getTemplate(): string
     {
         if ($this->cardFormLayout === "split-a") {
@@ -41,13 +45,26 @@ class CreditCardForm extends Template
             return "PublicSquare_Payments::card-form-single.phtml";
         }
     }
+
     public function getCustomerName(): string
     {
         return $this->customerName;
     }
 
-    public function showCardholderInput(): bool {
+    public function showCardholderInput(): bool
+    {
         return $this->getData('showCardholderInput');
+    }
+
+    public function getCreditCardTypes(): array
+    {
+        $result = [];
+        foreach ($this->creditCardTypes as $type) {
+            if ($type !== 'jcb' && $type !== 'diners') {
+                $result[$type] = "https://assets.publicsquare.com/sc/web/assets/images/cards/" . urldecode($type) . ".svg";
+            }
+        }
+        return $result;
     }
 
 }
