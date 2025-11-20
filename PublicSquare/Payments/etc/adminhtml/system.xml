@@ -70,7 +70,7 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="publicsquare_payments_cc_vault" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
-                    <label>Vault Enabled</label>  
+                    <label>Vault Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/publicsquare_payments_cc_vault/active</config_path>
                 </field>
@@ -78,6 +78,21 @@
                     <label>Guest Checkout Customer Lookup</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Whether to lookup an existing customer by email address and assign them to the order if found.]]></comment>
+                </field>
+                <field id="card_input_customization"
+                       type="textarea"
+                       sortOrder="20"
+                       showInWebsite="1"
+                       showInDefault="1"
+                       showInStore="1"
+                       canRestore="1">
+
+                    <label>Card Input Customization</label>
+                    <comment>
+                        <![CDATA[
+                        Customize the credit card inputs by providing JSON config here.
+                        ]]>
+                    </comment>
                 </field>
             </group>
         </section>

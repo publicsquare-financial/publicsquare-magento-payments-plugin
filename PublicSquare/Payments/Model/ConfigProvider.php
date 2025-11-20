@@ -66,7 +66,8 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
                     // 'cancelUrl'     => $this->urlBuilder->getUrl('checkout/onepage/cancel', ['_secure' => true]),
                     'successUrl'    => $this->urlBuilder->getUrl('checkout/onepage/success', ['_secure' => true]),
                     'ccVaultCode'   => Config::VAULT_CODE,
-                    'cardImagesBasePath' => Config::PUBLICSQUARE_CARD_IMAGES_BASE_PATH
+                    'cardImagesBasePath' => Config::PUBLICSQUARE_CARD_IMAGES_BASE_PATH,
+                    'cardInputCustomization' => $this->publicsquareConfig->getCardInputCustomizationJSON()
                 ],
             ]
         ];
