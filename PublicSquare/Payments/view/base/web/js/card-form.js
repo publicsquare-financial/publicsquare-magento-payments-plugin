@@ -1,11 +1,16 @@
 define([
            'jquery',
            'publicsquarejs',
-           'Magento_Ui/js/modal/alert',
+           'Magento_Ui/js/model/messageList',
+           'mage/translate',
+
+
        ], function psqAddCCInit(
     $,
     publicsquare,
-    modal) {
+    messageList,
+    $t
+) {
     let psq = null;
     let cardNum = null;
     let cardCVC = null;
@@ -14,7 +19,7 @@ define([
 
 
     function bindCardholderName(selectorOrSupplier) {
-        if(typeof  selectorOrSupplier === 'function') {
+        if (typeof selectorOrSupplier === 'function') {
             $cardholderName = selectorOrSupplier;
         } else {
             $cardholderName = () => $(selectorOrSupplier || '#psq-cardholder').val();
@@ -24,20 +29,12 @@ define([
     function validateSplit() {
         if (!cardNum || !cardExp || !cardCVC) {
             console.warn('Form not initialized');
-            throw Error('Credit card form not initialized!');
+            throw new Error('Credit card form not initialized!');
         }
 
         if (!cardNum.metadata.valid || !cardExp.metadata.valid || !cardCVC.metadata.valid) {
             console.warn('Invalid user input cardNumber:%j cardExpiration:%j cardCvc:%j', cardNum.metadata, cardExp.metadata, cardCVC.metadata);
-            modal({
-                      title: 'Error',
-                      content: 'The card is invalid. Please check the card details and try again.',
-                      clickableOverlay: true,
-                      actions: {
-                          always: function () { /*noop*/ },
-                      },
-                  });
-            return false;
+            throw new Error('The card is invalid. Please check the card details and try again.');
         }
         return true;
     }
@@ -77,14 +74,7 @@ define([
                 }
             } catch (err) {
                 console.error('Failed creating card!', err);
-                modal({
-                          title: 'Error',
-                          content: 'Failed to create card!',
-                          clickableOverlay: true,
-                          actions: {
-                              always: function () { /*noop*/ },
-                          },
-                      });
+                messageList.addErrorMessage({message: $t(error.message || 'Failed to create card!')});
             }
         },
 
@@ -95,20 +85,11 @@ define([
     function validateSingle() {
         if (!card) {
             console.warn('Form not initialized');
-            throw Error('Credit card form not initialized!');
+            throw new Error('Credit card form not initialized!');
         }
         if (!card.metadata.valid) {
             console.warn('Invalid card! %j', card.metadata);
-
-            modal({
-                      title: 'Error',
-                      content: 'The card is invalid. Please check the card details and try again.',
-                      clickableOverlay: true,
-                      actions: {
-                          always: function () { /*noop*/ },
-                      },
-                  });
-            return false;
+            throw  new Error('The card is invalid. Please check the card details and try again.');
         }
         return true;
     }
@@ -137,14 +118,7 @@ define([
                 }
             } catch (err) {
                 console.error('Failed creating card!', err);
-                modal({
-                          title: 'Error',
-                          content: 'Failed to create card!',
-                          clickableOverlay: true,
-                          actions: {
-                              always: function () { /*noop*/ },
-                          },
-                      });
+                messageList.addErrorMessage({message: $t(err.messag || 'Failed to create card!')});
             }
         },
 
@@ -159,7 +133,7 @@ define([
                 return cardFormSplit;
             default:
                 console.warn('Unknown form type %s', type);
-                throw Error(`Form type '${type}' is not valid!`);
+                throw new Error(`Form type '${type}' is not valid!`);
         }
     };
 });

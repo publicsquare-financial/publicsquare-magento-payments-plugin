@@ -1,0 +1,33 @@
+<div class="psq-form__content" aria-label="Credit card form">
+    <?php if ($this->showCardholderInput()): ?>
+        <div class="psq-form__cell psq-form__cell--card-holder field required">
+            <label for="psq-cardholder label" class="psq-form__label">Cardholder Name</label>
+            <div class="psq-form__input psq-form__input--card-holder control">
+                <input id="psq-cardholder"
+                       name="cardholder"
+                       title="Cardholder Name"
+                       aria-label="Cardholder Name"
+                       value="<?php echo $this->getCustomerName(); ?>">
+            </div>
+        </div>
+    <?php endif; ?>
+
+
+    <div class="psq-form__cell psq-form__cell--cc-types" title="Supported credit card types">
+        <ul class="psq-form__cc-types" aria-label="Supported credit card types">
+            <?php foreach ($this->getCreditCardTypes() as $type => $src): ?>
+                <li class="psq-form__cc-type psq-form__cc-type--<?php echo htmlspecialchars($type); ?>"
+                    data-type="<?php echo htmlspecialchars($type); ?>"
+                    title="<?php echo htmlspecialchars($type); ?>">
+                    <img src="<?php echo $src; ?>"
+                         alt="<?php echo htmlspecialchars($type); ?> credit card">
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <div class="psq-form__cell psq-form__cell--cc field required">
+        <span class="psq-form__label">Credit Card Number</span>
+        <div id="psq-card" class="psq-form__input psq-form__input--full-card control"></div>
+    </div>
+</div>
+
