@@ -26,7 +26,7 @@
                     <frontend_model>PublicSquare\Payments\Block\Adminhtml\System\Config\Form\Field\Label</frontend_model>
                 </field>
                 <field id="active" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Enabled</label>  
+                    <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="title" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
@@ -70,7 +70,7 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="publicsquare_payments_cc_vault" translate="label" type="select" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
-                    <label>Vault Enabled</label>  
+                    <label>Vault Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <config_path>payment/publicsquare_payments_cc_vault/active</config_path>
                 </field>
@@ -78,6 +78,22 @@
                     <label>Guest Checkout Customer Lookup</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Whether to lookup an existing customer by email address and assign them to the order if found.]]></comment>
+                </field>
+                <field id="card_form_layout"
+                       translate="label"
+                       type="select"
+                       sortOrder="20"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1"
+                       canRestore="1">
+                    <label>Credit Card Form Layout</label>
+                    <comment><![CDATA[The layout style for the card input forms]]></comment>
+                    <source_model>PublicSquare\Payments\Model\Adminhtml\Source\CardFormLayout</source_model>
+                    <!--<options>
+                        <option value="single">Single Input</option>
+                        <option value="split-a">Separate Inputs</option>
+                    </options>-->
                 </field>
             </group>
         </section>

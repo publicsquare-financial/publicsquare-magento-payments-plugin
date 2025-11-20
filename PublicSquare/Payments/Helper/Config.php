@@ -34,6 +34,8 @@ class Config extends AbstractHelper
     const PUBLICSQUARE_LOGGING_CONFIG_PATH                  = 'payment/publicsquare_payments/debug';
     const PUBLICSQUARE_CARD_IMAGES_BASE_PATH                = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
     const PUBLICSQUARE_CUSTOMER_LOOKUP                       = 'payment/publicsquare_payments/customer_lookup';
+
+    const PUBLICSQUARE_CARD_FORM_LAYOUT                     = 'payment/publicsquare_payments/card_form_layout';
     /**
      * @var \Magento\Framework\Serialize\Serializer\Json
      */
@@ -46,7 +48,7 @@ class Config extends AbstractHelper
      */
     public function __construct(
         Context $context,
-        ?Json $serializer = null
+        ?Json $serializer = null,
     ) {
         parent::__construct($context);
         $this->serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
@@ -62,7 +64,7 @@ class Config extends AbstractHelper
      */
     public function getActive(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): bool {
         return (bool) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_ACTIVE_CONFIG_PATH, $scopeType, $scopeCode);
@@ -77,7 +79,7 @@ class Config extends AbstractHelper
      */
     public function getPublicSquareTitle(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): string {
         return (string) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_TITLE_CONFIG_PATH, $scopeType, $scopeCode);
@@ -92,7 +94,7 @@ class Config extends AbstractHelper
      */
     public function getPublicAPIKey(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): string {
         return (string) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_API_PUBLIC_KEY, $scopeType, $scopeCode);
@@ -107,7 +109,7 @@ class Config extends AbstractHelper
      */
     public function getSecretAPIKey(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): string {
         return (string) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_API_SECRET_KEY, $scopeType, $scopeCode);
@@ -122,7 +124,7 @@ class Config extends AbstractHelper
      */
     public function getEnvironment(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): string {
         return $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_ENVIRONMENT, $scopeType, $scopeCode);
@@ -137,7 +139,7 @@ class Config extends AbstractHelper
      */
     public function getLoggingEnabled(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): bool {
         return (bool) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_LOGGING_CONFIG_PATH, $scopeType, $scopeCode);
@@ -152,7 +154,7 @@ class Config extends AbstractHelper
      */
     public function getGuestCheckoutCustomerLookup(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): bool {
         return (bool) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_CUSTOMER_LOOKUP, $scopeType, $scopeCode);
@@ -167,7 +169,7 @@ class Config extends AbstractHelper
      */
     public function getPaymentAction(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): string {
         return (string) $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_PAYMENT_ACTION, $scopeType, $scopeCode);
@@ -187,14 +189,14 @@ class Config extends AbstractHelper
      */
     public function getAllowedCurrencies(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): array {
         return ['USD'];
     } //end getCaptureAction()
 
     public function getPreAuthorizationType(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
+        $scopeCode = null,
     ): string {
         return $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_PRE_AUTHORIZATION_TYPE, $scopeType, $scopeCode);
@@ -244,5 +246,13 @@ class Config extends AbstractHelper
         $types = $this->getCountrySpecificCardTypeConfig($storeId);
 
         return (!empty($types[$country])) ? $types[$country] : [];
+    }
+
+    /**
+     * @return string The selected layout style
+     */
+    public function getCardFormLayout(): string
+    {
+       return $this->scopeConfig->getValue(self::PUBLICSQUARE_CARD_FORM_LAYOUT);
     }
 } //end class

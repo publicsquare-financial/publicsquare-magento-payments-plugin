@@ -46,6 +46,7 @@
                 <paymentInfoKeys>cc_type,cc_last_4,cc_trans_id,payment_id,fraud_decision,avsStreetAddressResponseCode,cvvResponseCode,cardId,idempotencyKey</paymentInfoKeys>
                 <privateInfoKeys>cardId,idempotencyKey</privateInfoKeys>
                 <cctypes>AE,VI,MC,DI</cctypes>
+                <card_form_layout>single</card_form_layout>
             </publicsquare_payments>
             <publicsquare_payments_cc_vault>
                 <model>PublicSquarePaymentsCCVaultFacade</model>
