@@ -251,8 +251,6 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
 
     public function getCardInputCustomizationJSON(): string|null
     {
-       $result = $this->scopeConfig->getValue(self::PUBLICSQUARE_CARD_INPUT_CUSTOMIZATION );
-       error_log(print_r($result, true));
-       return $result;
+        return $this->scopeConfig->getValue(self::PUBLICSQUARE_CARD_INPUT_CUSTOMIZATION );
     }
 } //end class

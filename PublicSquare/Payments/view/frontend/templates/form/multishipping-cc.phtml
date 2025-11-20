@@ -52,7 +52,7 @@ require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function (
   var code = '<?= $code ?>';
   var selector = '#publicsquare-elements-form';
   var apiKey = '<?= $block->escapeJs($block->getPublicApiKey()) ?>';
-  const cardInputCustomizationJSON = `<?php echo $block->getCardInputCustomizationJSON(); ?>`;
+  const cardInputCustomizationJSON = `<?php echo $escaper->escapeJs($block->getCardInputCustomizationJSON()); ?>`;
   const cardInputCustomization = JSON.parse(cardInputCustomizationJSON || '{}');
 
   function generateIdempotencyKey() {
