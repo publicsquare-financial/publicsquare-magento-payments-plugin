@@ -71,7 +71,9 @@ $form_action = $block->formAction();
     <script type="text/javascript">
         require(['jquery', 'publicsquarejs', 'Magento_Ui/js/modal/alert'], function psqAddCCInit($, psqSdk, modal) {
             let formVisible = false;
-            const psqPubKey = '<?php echo $block->getPublicKey(); ?>';
+            const psqPubKey = `<?php echo $block->getPublicKey(); ?>`;
+            const cardInputCustomizationJSON = `<?php echo $escaper->escapeJs($block->getCardInputCustomizationJSON()); ?>`;
+            const cardInputCustomization = JSON.parse(cardInputCustomizationJSON || '{}');
             let psq;
             let $modal;
 
@@ -152,7 +154,7 @@ $form_action = $block->formAction();
 
                 if (!$card) {
                     psq = await psqSdk.init(psqPubKey);
-                    $card = psq.createCardElement({});
+                    $card = psq.createCardElement(cardInputCustomization);
                     $card.mount('#psq-card-element');
                     $('.psq-form__button--cancel').click(() => {
                         formVisible = false;

@@ -67,11 +67,16 @@ define([
       return self;
     },
     onContainerRendered: function () {
+        const cardInputCustomization = JSON.parse(
+            window.checkoutConfig.payment.publicsquare_payments.cardInputCustomization || '{}'
+        );
+        console.log('psq: Got cardInputCustomization: %j', cardInputCustomization);
       // This runs when the container div on the checkout page renders
       publicsquare.initElements(
         {
           apiKey: this.apiKey,
           selector: this.elementsFormSelector,
+          cardInputCustomization
         },
         () => { },
       );
