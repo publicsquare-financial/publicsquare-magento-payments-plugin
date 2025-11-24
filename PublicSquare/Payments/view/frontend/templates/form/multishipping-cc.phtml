@@ -35,6 +35,8 @@ $code ?>_save_card" name="payment[additional_data][saveCard]"/>
         const cardFormLayout = '<?php echo $this->getCardFormLayout(); ?>';
         let cardForm = undefined;
         let idempotencyKey = utils.generateIdempotencyKey();
+        const cardInputCustomizationJSON = `<?php echo $escaper->escapeJs($block->getCardInputCustomizationJSON()); ?>`;
+        const cardInputCustomization = JSON.parse(cardInputCustomizationJSON || '{}');
 
         function unmount() {
 
@@ -43,7 +45,7 @@ $code ?>_save_card" name="payment[additional_data][saveCard]"/>
         function mount() {
 
             if (!cardForm) {
-                cardForm = cardFormBuilder({type: cardFormLayout});
+                cardForm = cardFormBuilder({type: cardFormLayout, cardInputCustomization});
                 cardForm.bind({psqPublicKey});
             }
 

@@ -24,12 +24,12 @@ define(
           if (this.cardElement) {
             this.cardElement.unmount()
           }
-          this.cardElement = _publicsquare.createCardElement({})
+          this.cardElement = _publicsquare.createCardElement(params.cardInputCustomization)
           this.cardElement.mount(params.selector)
           this.loading = false;
         } else if (!this.loading && this.cardElement) {
           this.cardElement.unmount()
-          this.cardElement = this.publicsquareJs.createCardElement({})
+          this.cardElement = this.publicsquareJs.createCardElement(params.cardInputCustomization)
           this.cardElement.mount(params.selector)
         }
         if (typeof callback === 'function') {

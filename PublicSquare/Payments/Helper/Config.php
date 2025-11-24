@@ -12,11 +12,12 @@
 
 namespace PublicSquare\Payments\Helper;
 
-use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Serialize\Serializer\Json;
+use PublicSquare\Payments\ICardInputCustomizationJSON;
 
-class Config extends AbstractHelper
+class Config extends AbstractHelper implements ICardInputCustomizationJSON
 {
     const CODE = 'publicsquare_payments';
     const VAULT_CODE = 'publicsquare_payments_cc_vault';
@@ -34,6 +35,8 @@ class Config extends AbstractHelper
     const PUBLICSQUARE_LOGGING_CONFIG_PATH                  = 'payment/publicsquare_payments/debug';
     const PUBLICSQUARE_CARD_IMAGES_BASE_PATH                = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
     const PUBLICSQUARE_CUSTOMER_LOOKUP                       = 'payment/publicsquare_payments/customer_lookup';
+    const PUBLICSQUARE_CARD_INPUT_CUSTOMIZATION                        = 'payment/publicsquare_payments/card_input_customization';
+
 
     const PUBLICSQUARE_CARD_FORM_LAYOUT                     = 'payment/publicsquare_payments/card_form_layout';
     /**
@@ -246,6 +249,11 @@ class Config extends AbstractHelper
         $types = $this->getCountrySpecificCardTypeConfig($storeId);
 
         return (!empty($types[$country])) ? $types[$country] : [];
+    }
+
+    public function getCardInputCustomizationJSON(): string|null
+    {
+        return $this->scopeConfig->getValue(self::PUBLICSQUARE_CARD_INPUT_CUSTOMIZATION );
     }
 
     /**

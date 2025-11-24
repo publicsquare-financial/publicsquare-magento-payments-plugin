@@ -26,7 +26,7 @@
                     <frontend_model>PublicSquare\Payments\Block\Adminhtml\System\Config\Form\Field\Label</frontend_model>
                 </field>
                 <field id="active" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Enabled</label>
+                    <label>Enabled</label>  
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="title" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
@@ -79,10 +79,26 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment><![CDATA[Whether to lookup an existing customer by email address and assign them to the order if found.]]></comment>
                 </field>
+                <field id="card_input_customization"
+                       type="textarea"
+                       sortOrder="20"
+                       showInWebsite="1"
+                       showInDefault="1"
+                       showInStore="1"
+                       canRestore="1">
+
+                    <label>Card Input Customization</label>
+                    <comment>
+                        <![CDATA[
+                        Customize the credit card inputs by providing JSON config here.
+                        ]]>
+                    </comment>
+                    <!--<validate>validate-json</validate>-->
+                </field>
                 <field id="card_form_layout"
                        translate="label"
                        type="select"
-                       sortOrder="20"
+                       sortOrder="21"
                        showInDefault="1"
                        showInWebsite="1"
                        showInStore="1"
