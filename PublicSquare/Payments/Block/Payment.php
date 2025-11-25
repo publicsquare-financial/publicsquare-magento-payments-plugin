@@ -38,9 +38,6 @@ class Payment extends Template
         $config = [];
         $config['code'] = $this->getCode();
         $config['pk'] = $this->configProvider->getPublicAPIKey();
-        $config['mock'] = method_exists($this->configProvider, 'isApiMockEnabled')
-            ? $this->configProvider->isApiMockEnabled()
-            : false;
         return json_encode($config, JSON_UNESCAPED_SLASHES);
     }
 

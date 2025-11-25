@@ -20,28 +20,12 @@ define(
         if (!cardholder_name) {
           alert('Cardholder name is required');
           throw new Error('Cardholder name is required');
-        } else if (!publicsquare.cardElement || (publicsquare.cardElement.metadata && publicsquare.cardElement.metadata.valid === false)) {
-          alert('Payment details are invalid or not ready.');
-          throw new Error('Card element invalid or missing');
+        } else if (!publicsquare.cardElement || !publicsquare.cardElement.metadata.valid) {
+          alert('The card is invalid. Please check the card details and try again.');
+          throw new Error('The card is invalid. Please check the card details and try again.');
         }
-        // Try to tokenize; if anything goes wrong, block submission (no mock fallback)
-        try {
-          const card = await publicsquare.createCard(cardholder_name, publicsquare.cardElement);
-          if (card && card.id) {
-            $(paymentMethodNonceSelector).val(card.id);
-          } else {
-            alert('Unable to tokenize card.');
-            throw new Error('Tokenization returned no id');
-          }
-        } catch (err) {
-          if (err && err.message === 'psq_invalid_blank_card') {
-            alert('The card is invalid. Please check the card details and try again.');
-          } else {
-            alert('Unable to tokenize card.');
-          }
-          $form.trigger('processStop');
-          return;
-        }
+        const card = await publicsquare.createCard(cardholder_name, publicsquare.cardElement);
+        $(paymentMethodNonceSelector).val(card.id);
         if (!$form.valid()) {
           $form.trigger('processStop');
           return
@@ -83,8 +67,7 @@ define(
         requestAnimationFrame(() => {
           publicsquare.initElements({
             apiKey: config.pk || '',
-            selector: elementsFormSelector,
-            mock: !!config.mock
+            selector: elementsFormSelector
           }, () => {
             observe();
           })

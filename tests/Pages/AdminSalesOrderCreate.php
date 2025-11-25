@@ -25,18 +25,11 @@ class AdminSalesOrderCreate extends AcceptanceBase
   {
     $I->click('Add Products');
     $this->_waitForLoading($I);
-    // Select the 3rd product in the list
-    $nonConfigurableCheckboxXpath = "//table[@id='sales_order_create_search_grid_table']//tbody/tr[3]//input[@type='checkbox']";
-    $I->waitForElementClickable(['xpath' => $nonConfigurableCheckboxXpath]);
-    $I->click(['xpath' => $nonConfigurableCheckboxXpath]);
+    $last_product = Locator::lastElement('#sales_order_create_search_grid_table>tbody>tr');
+    $I->waitForElementClickable($last_product);
+    $I->click($last_product);
     $this->_waitForLoading($I);
-    $I->waitForElementClickable('[title="Add Selected Product(s) to Order"]');
-    $I->click('[title="Add Selected Product(s) to Order"]');
-    $this->_waitForLoading($I);
-    // If a configure modal appears (e.g., configurable product), accept it and close the modal
-    $I->executeJS("var btn=document.querySelector('.modal-popup .action-primary, .modal-slide .action-primary'); if(btn){btn.click();}");
-    $this->_waitForLoading($I);
-    $I->executeJS("var close=document.querySelector('.modal-popup .action-close, .modal-slide .action-close'); if(close){close.click();}");
+    $I->executeJS("document.querySelector('[title=\"Add Selected Product(s) to Order\"]').click()");
     $this->_waitForLoading($I);
   }
 
@@ -56,24 +49,13 @@ class AdminSalesOrderCreate extends AcceptanceBase
 
   protected function _addShippingMethodToOrder(AcceptanceTester $I)
   {
-    // Open shipping method section
-    $this->_waitForLoading($I);
-    $shippingMethod = "//*[@id='order-shipping-method-summary']/a";
-    $I->waitForElementClickable(['xpath' => $shippingMethod]);
-    $I->click(['xpath' => $shippingMethod]);
-    
-    $I->waitForElementClickable('#order-shipping-method-summary>a');
-    $I->scrollTo('#order-shipping-method-summary>a');
     $I->click('#order-shipping-method-summary>a');
     $this->_waitForLoading($I);
-    
-    // Load shipping methods
-    $I->waitForElementVisible("//span[normalize-space()='Get shipping methods and rates']");
-    $I->click("//span[normalize-space()='Get shipping methods and rates']/parent::a");
+    $I->waitForElementClickable('#order-shipping-method-summary>a');
+    $I->click('#order-shipping-method-summary>a');
     $this->_waitForLoading($I);
-    // Select Flat Rate explicitly
-    $I->waitForElementClickable('#s_method_flatrate_flatrate');
-    $I->click('#s_method_flatrate_flatrate');
+    $I->waitForElementClickable('#order-shipping-method-choose input');
+    $I->click('#order-shipping-method-choose input');
     $this->_waitForLoading($I);
   }
 

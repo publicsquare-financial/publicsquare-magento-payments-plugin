@@ -15,90 +15,8 @@ define(
       publicsquareJs: null,
       cardElement: null,
       loading: false,
-      mockIframe: null,
-      isMock: false,
-      getMockLast4: function(card) {
-        try {
-          const doc = this.mockIframe && (this.mockIframe.contentDocument || this.mockIframe.contentWindow.document)
-          const numFromInput = doc && doc.getElementById('cardNumber') ? (doc.getElementById('cardNumber').value || '') : ''
-          const source = numFromInput || (card && card.number) || ''
-          const digits = (source + '').replace(/\D/g, '')
-          const last4 = digits.slice(-4)
-          return last4 || '4242'
-        } catch (e) {
-          return '4242'
-        }
-      },
 
       initElements: async function (params = {}, callback) {
-        const isMock = (params && typeof params.mock !== 'undefined')
-          ? !!params.mock
-          : !!(window.checkoutConfig && window.checkoutConfig.payment && window.checkoutConfig.payment.publicsquare_payments && window.checkoutConfig.payment.publicsquare_payments.mock);
-        this.isMock = isMock;
-        if (isMock) {
-          // Mock: create a same-origin iframe with expected inputs
-          const container = document.querySelector(params.selector)
-          if (container) {
-            container.innerHTML = ''
-            this.mockIframe = document.createElement('iframe')
-            this.mockIframe.id = 'psq-mock-iframe-' + Date.now()
-            this.mockIframe.setAttribute('frameborder', '0')
-            this.mockIframe.style.cssText = 'width:100%;height:120px;border:0;'
-            container.appendChild(this.mockIframe)
-            try {
-              const doc = this.mockIframe.contentDocument || this.mockIframe.contentWindow.document
-              doc.open()
-              doc.write(
-                '<!doctype html><html><head><meta charset="utf-8"></head>'+
-                '<body style="margin:0;padding:8px;font-family:sans-serif;">'+
-                '<div style="background:#fff3cd;color:#664d03;border:1px solid #ffecb5;border-radius:4px;padding:6px 8px;margin-bottom:6px;font-size:12px;">'+
-                  'PublicSquare Mock Payment Element — for testing only.'+
-                '</div>'+
-                '<div style="display:flex;gap:6px;align-items:center;margin:4px 0;">'+
-                  '<input id="cardNumber" placeholder="Card Number"'+
-                    ' style="flex:2;min-width:0;padding:6px;">'+
-                  '<input id="expirationDate" placeholder="MM/YY"'+
-                    ' style="flex:1;min-width:0;padding:6px;">'+
-                  '<input id="cvc" placeholder="CVC"'+
-                    ' style="flex:1;min-width:0;padding:6px;">'+
-                '</div>'+
-                '</body></html>'
-              )
-              doc.close()
-            } catch (e) {}
-          }
-          this.cardElement = {
-            mount: () => {},
-            unmount: () => { if (this.mockIframe && this.mockIframe.parentNode) this.mockIframe.parentNode.removeChild(this.mockIframe) },
-            metadata: { valid: true }
-          }
-          this.publicsquareJs = {
-            createCardElement: () => this.cardElement,
-            cards: {
-              create: async ({ cardholder_name, card }) => {
-                // Read last4 from the mock iframe if available
-                try {
-                  const doc = this.mockIframe && (this.mockIframe.contentDocument || (this.mockIframe.contentWindow && this.mockIframe.contentWindow.document))
-                  let num = '4242424242424242'
-                  if (doc) {
-                    const input = doc.getElementById && doc.getElementById('cardNumber')
-                    if (input && typeof input.value === 'string' && input.value.length) {
-                      num = input.value
-                    }
-                  }
-                  const digits = (String(num)).replace(/\D/g,'')
-                  const last4 = digits.slice(-4) || '4242'
-                  return { id: 'card_mock_' + last4 }
-                } catch (e) {
-                  return { id: 'card_mock_4242' }
-                }
-              }
-            }
-          }
-          this.loading = false
-          if (typeof callback === 'function') callback(this)
-          return
-        }
         if (!this.publicsquareJs && !this.loading) {
           this.loading = true;
           const _publicsquare = await publicsquarejs.init(params.apiKey)
@@ -106,12 +24,12 @@ define(
           if (this.cardElement) {
             this.cardElement.unmount()
           }
-          this.cardElement = _publicsquare.createCardElement({})
+          this.cardElement = _publicsquare.createCardElement(params.cardInputCustomization)
           this.cardElement.mount(params.selector)
           this.loading = false;
         } else if (!this.loading && this.cardElement) {
           this.cardElement.unmount()
-          this.cardElement = this.publicsquareJs.createCardElement({})
+          this.cardElement = this.publicsquareJs.createCardElement(params.cardInputCustomization)
           this.cardElement.mount(params.selector)
         }
         if (typeof callback === 'function') {
@@ -124,22 +42,6 @@ define(
        * @param {HTMLDivElement} card - This is the card element
        */
       createCard: async function (cardholder_name, card) {
-        if (this.isMock === true) {
-          // If the mock input is blank (no digits), throw a specific error
-          try {
-            const doc = this.mockIframe && (this.mockIframe.contentDocument || this.mockIframe.contentWindow.document)
-            const raw = doc && doc.getElementById('cardNumber') ? (doc.getElementById('cardNumber').value || '') : ''
-            const digits = (raw + '').replace(/\D/g, '')
-            if (!digits) {
-              throw new Error('psq_invalid_blank_card')
-            }
-          } catch (e) {
-            if (e && e.message === 'psq_invalid_blank_card') throw e
-            throw new Error('psq_invalid_blank_card')
-          }
-          const last4 = this.getMockLast4(card)
-          return { id: 'card_mock_' + last4 }
-        }
         if (!this.publicsquareJs) {
           throw new Error('PublicSquare not initialized yet')
         } else {

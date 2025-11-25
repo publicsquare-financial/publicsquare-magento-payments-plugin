@@ -67,9 +67,7 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
                     'successUrl'    => $this->urlBuilder->getUrl('checkout/onepage/success', ['_secure' => true]),
                     'ccVaultCode'   => Config::VAULT_CODE,
                     'cardImagesBasePath' => Config::PUBLICSQUARE_CARD_IMAGES_BASE_PATH,
-                    'mock' => method_exists($this->publicsquareConfig, 'isApiMockEnabled')
-                        ? $this->publicsquareConfig->isApiMockEnabled()
-                        : false,
+                    'cardInputCustomization' => $this->publicsquareConfig->getCardInputCustomizationJSON()
                 ],
             ]
         ];
