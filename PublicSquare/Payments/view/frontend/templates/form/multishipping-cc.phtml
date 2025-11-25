@@ -84,24 +84,11 @@ $code = $escaper->escapeHtml($block->getMethodCode());
                 }
             });
 
-            // Adding this as there are some edge cases where going back doesn't successfully mount keeping it disabled
-            /*$(document).on('click', '#' + code + '_cardholder_name', function (e) {
-             const $el = $(this);
-             if ($el.prop('disabled')) {
-             // Remove disabled so it becomes enabled
-             $el.prop('disabled', false);
-
-             // Optionally: focus the element
-             $el.focus();
-
-             // Optionally: prevent default behaviour if any
-             e.preventDefault();
-             }
-             });*/
-
             // Save card vault
             $(document).on('change', '#psq-save-card', function () {
-                $('#' + code + '_save_card').val(this.checked || false);
+                if(vaultEnabled) {
+                    $('#' + code + '_save_card').val(this.checked || false);
+                }
             });
 
             // Intercept submit to tokenize and set hidden fields
