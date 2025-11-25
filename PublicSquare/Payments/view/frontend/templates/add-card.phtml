@@ -50,24 +50,22 @@ $form_action = $block->formAction();
         </div>
 
         <hr>
-        <div data-bind="scope: '"
     </div>
     <script type="text/javascript">
         require([
                     'jquery',
-                    'mage/translate',
-                'Magento_Ui/js/model/messageList',
-                    'PublicSquare_Payments/js/card-form',
+                    // 'mage/translate',
+                    'Magento_Ui/js/model/messageList',
+                    'PublicSquare_Payments/js/card-form-factory',
                 ], function psqAddCCInit(
             $,
-            $t,
+            // $t,
             messageList,
-            cardFormBuilder,
+            cardFormFactory,
         ) {
             let formVisible = false;
             const cardInputCustomizationJSON = `<?php echo $escaper->escapeJs($block->getCardInputCustomizationJSON()); ?>`;
             const cardInputCustomization = JSON.parse(cardInputCustomizationJSON || '{}');
-            let psq;
             const psqPublicKey = '<?php echo $block->getPublicKey(); ?>';
             const cardFormLayout = '<?php echo $this->getCardFormLayout(); ?>';
             let $modal;
@@ -95,14 +93,14 @@ $form_action = $block->formAction();
                     );
                     if (!$vaultForm.valid()) {
                         console.warn('Found issues in form!');
-                        messageList.addErrorMessage({message: $t('Form information incorrect.')});
+                        messageList.addErrorMessage({message: 'Form information incorrect.'});
                         return;
                     }
                     // Submit to the Customer/Card controller.
                     $vaultForm.trigger('submit');
                 } catch (err) {
                     console.error('Failed to save card!', err);
-                    messageList.addErrorMessage({message: $t(err.message || 'Form information incorrect.')});
+                    messageList.addErrorMessage({message: err.message || 'Form information incorrect.'});
                 }
 
             }
@@ -120,10 +118,10 @@ $form_action = $block->formAction();
                 $modal.removeClass('psq-add-card__form--hidden');
 
                 if (!cardForm) {
-                    console.debug('layout: %s cardFormBuilder:%o ', cardFormLayout, cardFormBuilder);
-                    cardForm = cardFormBuilder({type: cardFormLayout, cardInputCustomization});
+                    console.debug('layout: %s cardFormBuilder:%o ', cardFormLayout, cardFormFactory);
+                    cardForm = cardFormFactory({type: cardFormLayout});
                     console.debug('cardForm:%o', cardForm);
-                    await cardForm.bind({psqPublicKey});
+                    await cardForm.bind({psqPublicKey, cardInputCustomization});
 
                     $('.psq-form__button--cancel').click(() => {
                         formVisible = false;

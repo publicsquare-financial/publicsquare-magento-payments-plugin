@@ -1,5 +1,5 @@
 define([], function requirePsqConfig() {
-    return class PSQConfig {
+    class PSQConfig {
         #rawConfig;
         #basePath;
 
@@ -7,49 +7,52 @@ define([], function requirePsqConfig() {
             this.#rawConfig = rawConfig;
             this.#basePath = basePath || 'publicsquare_payments';
         }
-
+        getBasePath() {
+            return this.#basePath;
+        }
 
         paymentConfig() {
-            return thisthis.#rawConfig[this.#basePath];
+            return this.#rawConfig['payment'];
+        }
+        psqPaymentConfig() {
+            return this.paymentConfig()[this.#basePath];
         }
 
         vaultCode() {
-            return this.paymentConfig().ccVaultCode;
+            return this.psqPaymentConfig().ccVaultCode;
         }
 
         isVaultEnabled(vaultEnabler) {
             return vaultEnabler.isVaultEnabled() && (
-                // TODO: how to read this from js...
-                this.paymentConfig().active === true
+                this.#rawConfig.vault.publicsquare_payments_cc_vault.is_enabled === true
             );
         }
 
         publicKey() {
-            return this.paymentConfig().pk;
+            return this.psqPaymentConfig().pk;
         }
 
         cardFormLayout() {
-            return this.paymentConfig().card_form_layou;
+            return this.psqPaymentConfig().cardFormLayout;
         }
 
         cardTypes() {
-            return this.paymentConfig().card_types;
+            return this.psqPaymentConfig().cardTypes;
+        }
+        cardImagesBasePath() {
+            return this.psqPaymentConfig().cardImagesBasePath;
         }
 
         title() {
-            return this.paymentConfig().title;
+            return this.psqPaymentConfig().title;
         }
 
         submitOrderSuccessUrl() {
-            // TODO: wouldn't this be on the quote?
-            return `${this.paymentConfig().successUrl}?${this.#rawConfig.isCustomerLoggedIn ? "refercust" : "refergues"}=${this.#rawConfig.quoteData.entity_id}`;
-        }
-
-        getBasePath() {
-            return this.#basePath;
+            return `${this.psqPaymentConfig().successUrl}?${this.#rawConfig.isCustomerLoggedIn ? "refercust" : "refergues"}=${this.#rawConfig.quoteData.entity_id}`;
         }
 
 
 
     }
+    return PSQConfig;
 });

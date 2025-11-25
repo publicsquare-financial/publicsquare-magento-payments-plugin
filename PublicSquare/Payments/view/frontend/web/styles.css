@@ -48,6 +48,9 @@
     margin-top: 18px;
     align-content: flex-end;
 }
+.psq-form__footer .psq-form__cell {
+    flex: 1;
+}
 
 .psq-form__header {
     font-size: larger;
@@ -115,6 +118,8 @@
 
 .psq-form__cell--vault .psq-form__label {
     order: 2;
+    top: 3px;
+    position: relative;
 }
 
 .psq-form__button {

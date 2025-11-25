@@ -5,7 +5,7 @@ define([
            'mage/translate',
 
 
-       ], function psqAddCCInit(
+       ], function requireCardForm(
     $,
     publicsquare,
     messageList,
@@ -41,18 +41,18 @@ define([
 
     const cardFormSplit = {
         bind: async (
-            {psqPublicKey, cardNumberSelector, cardExpirationSelector, cardVerificationSelector, cardholderNameSelectorOrSupplier},
+            {psqPublicKey, cardNumberSelector, cardExpirationSelector, cardVerificationSelector, cardholderNameSelectorOrSupplier, cardInputCustomization},
         ) => {
             if (psq === null) {
                 psq = await publicsquare.init(psqPublicKey);
             }
-            cardNum = psq.createCardNumberElement();
+            cardNum = psq.createCardNumberElement(cardInputCustomization);
             cardNum.mount(cardNumberSelector || "#psq-card-num");
 
-            cardExp = psq.createCardExpirationDateElement();
+            cardExp = psq.createCardExpirationDateElement(cardInputCustomization);
             cardExp.mount(cardExpirationSelector || "#psq-exp");
 
-            cardCVC = psq.createCardVerificationCodeElement();
+            cardCVC = psq.createCardVerificationCodeElement(cardInputCustomization);
             cardCVC.mount(cardVerificationSelector || "#psq-cvc");
 
             bindCardholderName(cardholderNameSelectorOrSupplier);
@@ -96,12 +96,12 @@ define([
 
     const cardFormSingle = {
         bind: async (
-            {psqPublicKey, cardSelector, cardholderNameSelectorOrSupplier},
+            {psqPublicKey, cardSelector, cardholderNameSelectorOrSupplier, cardInputCustomization},
         ) => {
             if (psq === null) {
                 psq = await publicsquare.init(psqPublicKey);
             }
-            card = psq.createCardElement();
+            card = psq.createCardElement(cardInputCustomization);
             card.mount(cardSelector || "#psq-card");
 
             bindCardholderName(cardholderNameSelectorOrSupplier);
@@ -125,7 +125,7 @@ define([
     };
 
 
-    return function createCardForm({type}) {
+    return function cardFormFactory({type }) {
         switch (type) {
             case 'single':
                 return cardFormSingle;

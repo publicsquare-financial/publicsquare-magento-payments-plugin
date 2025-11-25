@@ -1,0 +1,136 @@
+<div class="payment-method psq-payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio"
+               name="payment[method]"
+               class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()">
+        <label data-bind="attr: {'for': getCode()}" class="label">
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+
+    <div class="payment-method-content psq-payment-method__content psq-form">
+
+        <div class="psq-form__content" aria-label="Credit card form">
+
+            <!-- ko foreach: getRegion('messages') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+            <div class="field required psq-payment-method__billing-address psq-form__cell psq-form__cell--billing-address">
+                <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+                <!-- ko template: getTemplate() --><!-- /ko -->
+                <!--/ko-->
+            </div>
+
+            <div class="field number required psq-form__cell psq-form__cell--card-holder field required"
+                 data-bind="if: (showCardholderInput())">
+                <label for="psq-cardholder"
+                       class="psq-form__label label"
+                       data-bind="text: ('Cardholder Name')">
+                </label>
+                <div class="psq-form__input psq-form__input--card-holder control">
+                    <input id="psq-cardholder"
+                           name="cardholder"
+                           title="Cardholder Name"
+                           aria-label="Cardholder Name"
+                           data-bind="attr: {
+                                value: cardholderName(),
+                                title: $t('Cardholder Name'),
+                                'aria-label': $t('Cardholder Name'),
+                           }">
+                </div>
+            </div>
+
+            <div class="field required psq-form__cell psq-form__cell--cc-types"
+                 title="Supported credit card types">
+                <ul class="psq-form__cc-types"
+                    aria-label="Supported credit card types"
+                    data-bind="foreach: getIcons(),
+                    attr: {
+                        'aria-label': $t('Supported credit card types'),
+                    }">
+                    <li class="psq-form__cc-type" data-bind="css: getClasses(),
+                    attr:{title: getTitle()}">
+                        <img data-bind="attr: {src: getIconSrc(), alt: getAltText()}">
+                    </li>
+                </ul>
+            </div>
+
+            <div class="psq-form__cell psq-form__cell--cc field required"
+                 data-bind="ifnot: (getCardFormLayout() == 'split-a')">
+                            <span class="psq-form__label"
+                                  data-bind="text: $t('Credit Card Number')">
+                            </span>
+                <div id="psq-card"
+                     class="psq-form__input psq-form__input--full-card control"
+                     data-bind="afterRender: onContainerRendered"></div>
+            </div>
+
+            <div class="psq-form__cell psq-form__cell--cc field required"
+                 data-bind="if: (getCardFormLayout() == 'split-a')">
+                            <span class="psq-form__label label"
+                                  data-bind="text: $t('Credit Card Number')">
+                            </span>
+                <div id="psq-card-num"
+                     class="field required psq-form__input psq-form__input--cc control"
+                     data-bind="afterRender: onContainerRendered">
+                </div>
+            </div>
+            <div class="psq-form__cell psq-form__cell--exp field required"
+                 data-bind="if: (getCardFormLayout() == 'split-a')">
+                    <span class="psq-form__label label"
+                          data-bind="text: $t('Expiration Date')">
+                    </span>
+                <div id="psq-exp" class="psq-form__input psq-form__input--exp control"
+                     data-bind="afterRender: onContainerRendered">
+                </div>
+            </div>
+            <div class="psq-form__cell psq-form__cell--cvc field number required"
+                 data-bind="if: (getCardFormLayout() == 'split-a')">
+
+                            <span class="psq-form__label label"
+                                  data-bind="text: $t('Card Verification Number (CVC)')">
+                            </span>
+                <div id="psq-cvc" class="psq-form__input psq-form__input--cvc control"
+                     data-bind="afterRender: onContainerRendered">
+                </div>
+            </div>
+
+            <div class="field choice payment-method-vault-checkbox psq-form__cell psq-form__cell--vault"
+                 data-bind="if: (isVaultEnabled() && showSaveCard())">
+                <label class="label psq-form__label"
+                       data-bind="attr: {'for': getCode() + '_enable_vault'}, text: $t('Save for later use')">
+                    <span></span>
+                </label>
+                <input type="checkbox"
+                       name="vault[is_enabled]"
+                       class="checkbox control psq-form__input psq-form__input--vault"
+                       data-bind="attr: {'id': getCode() + '_enable_vault'},
+                                   checked: vaultEnabler().isActivePaymentTokenEnabler">
+
+            </div>
+
+            <div class="checkout-agreements-block">
+                &lt;!&ndash; ko foreach: $parent.getRegion('before-place-order') &ndash;&gt;
+                &lt;!&ndash; ko template: getTemplate() &ndash;&gt;&lt;!&ndash; /ko &ndash;&gt;
+                &lt;!&ndash;/ko&ndash;&gt;
+            </div>
+        </div>
+        <div class="actions-toolbar psq-form__footer">
+            <div class="primary psq-form__cell">
+                <button class="action primary checkout psq-form__button--submit"
+                        type="submit"
+                        data-bind="
+                        text: $t('Place Order'),
+                        click: placeOrder,
+                        attr: {title: $t('Place Order')},
+                        css: {disabled: !isPlaceOrderActionAllowed()},
+                        enable: (getCode() == isChecked())
+                        "
+                        disabled>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

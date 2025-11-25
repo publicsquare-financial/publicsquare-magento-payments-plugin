@@ -26,9 +26,9 @@ $code ?>_save_card" name="payment[additional_data][saveCard]"/>
                 'jquery',
                 'mage/translate',
                 'Magento_Ui/js/model/messageList',
-                'PublicSquare_Payments/js/card-form',
+                'PublicSquare_Payments/js/card-form-factory',
                 'PublicSquare_Payments/js/utils',
-            ], function ($, $t, messageList, cardFormBuilder, utils) {
+            ], function ($, $t, messageList, cardFormFactory, utils) {
         'use strict';
         const code = '<?= $code ?>';
         const psqPublicKey = '<?= $block->escapeJs($block->getPublicApiKey()) ?>';
@@ -45,8 +45,8 @@ $code ?>_save_card" name="payment[additional_data][saveCard]"/>
         function mount() {
 
             if (!cardForm) {
-                cardForm = cardFormBuilder({type: cardFormLayout, cardInputCustomization});
-                cardForm.bind({psqPublicKey});
+                cardForm = cardFormFactory({type: cardFormLayout});
+                cardForm.bind({psqPublicKey, cardInputCustomization});
             }
 
             $('#' + code + '_cardholder_name').prop('disabled', false)
