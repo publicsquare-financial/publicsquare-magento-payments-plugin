@@ -52,6 +52,8 @@ require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function (
   var code = '<?= $code ?>';
   var selector = '#publicsquare-elements-form';
   var apiKey = '<?= $block->escapeJs($block->getPublicApiKey()) ?>';
+  const cardInputCustomizationJSON = `<?php echo $escaper->escapeJs($block->getCardInputCustomizationJSON()); ?>`;
+  const cardInputCustomization = JSON.parse(cardInputCustomizationJSON || '{}');
 
   function generateIdempotencyKey() {
     var timestamp = Date.now().toString();
@@ -71,7 +73,7 @@ require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function (
 
   function mount() {
     if (window.publicsquare && typeof window.publicsquare.initElements === 'function') {
-      window.publicsquare.initElements({ apiKey: apiKey, selector: selector });
+      window.publicsquare.initElements({ apiKey: apiKey, selector: selector, cardInputCustomization });
     }
 
     $('#' + code + '_cardholder_name').prop('disabled', false)
