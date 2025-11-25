@@ -1,27 +1,37 @@
 <?php
 /** @var PublicSquare\Payments\Block\Frontend\Form $block */
-$code = $block->escapeHtml($block->getMethodCode());
+$code = $escaper->escapeHtml($block->getMethodCode());
 ?>
-<div class="psq-add-card__form psq-add-card__form--hidden psq-form">
-    <!--<div class="psq-add-card__form__header">
+<div class="psq-add-card__form psq-add-card__form--multi-ship psq-form">
+    <div class="psq-add-card__form__header">
         <p class="psq-form__cta">Enter new card information</p>
-    </div>-->
-    <?php echo $this->getChildHtml(); ?>
-    <!--<div class="psq-form__footer psq-form__actions">
-    </div>-->
+
+    </div>
+    <div class="psq-form__content" aria-label="Credit card form">
+
+        <?php echo $this->getChildHtml(); ?>
+        <!--<div class="psq-form__footer psq-form__actions">
+        </div>-->
+        <div class="psq-form__cell psq-form__cell--vault field number required">
+            <label for="psq-save-card" class="psq-form__label label">Save card for later</label>
+            <input type="checkbox" id="psq-save-card" class="psq-form__input psq-form__input--vault control"></input>
+        </div>
+
+        <div id="publicsquare_error_message" class="message error" role="alert" style="display:none"></div>
+
+        <input type="hidden" id="<?= /* @noEscape */
+        $code ?>_card_id" name="payment[additional_data][cardId]" required/>
+
+        <input type="hidden" id="<?= /* @noEscape */
+        $code ?>_idempotency_key" name="payment[additional_data][idempotencyKey]"/>
+
+        <input type="hidden" id="<?= /* @noEscape */
+        $code ?>_save_card" name="payment[additional_data][saveCard]"/>
+    </div>
 </div>
-<div id="publicsquare_error_message" class="message error" role="alert" style="display:none"></div>
 
-<input type="hidden" id="<?= /* @noEscape */
-$code ?>_card_id" name="payment[additional_data][cardId]" required/>
 
-<input type="hidden" id="<?= /* @noEscape */
-$code ?>_idempotency_key" name="payment[additional_data][idempotencyKey]"/>
-
-<input type="hidden" id="<?= /* @noEscape */
-$code ?>_save_card" name="payment[additional_data][saveCard]"/>
-
-<script>
+<script <?php if ($block->getCspNonceProvider()) echo ' nonce="' . $block->getCspNonceProvider()->generateNonce() . '" ' ?>>
     require([
                 'jquery',
                 'mage/translate',
@@ -49,7 +59,6 @@ $code ?>_save_card" name="payment[additional_data][saveCard]"/>
                 cardForm.bind({psqPublicKey, cardInputCustomization});
             }
 
-            $('#' + code + '_cardholder_name').prop('disabled', false)
             $('#' + code + '_card_id').prop('disabled', false)
             $('#' + code + '_idempotency_key').prop('disabled', false)
             $('#' + code + '_save_card').prop('disabled', false)
@@ -71,23 +80,23 @@ $code ?>_save_card" name="payment[additional_data][saveCard]"/>
             });
 
             // Adding this as there are some edge cases where going back doesn't successfully mount keeping it disabled
-            $(document).on('click', '#' + code + '_cardholder_name', function (e) {
-                const $el = $(this);
-                if ($el.prop('disabled')) {
-                    // Remove disabled so it becomes enabled
-                    $el.prop('disabled', false);
+            /*$(document).on('click', '#' + code + '_cardholder_name', function (e) {
+             const $el = $(this);
+             if ($el.prop('disabled')) {
+             // Remove disabled so it becomes enabled
+             $el.prop('disabled', false);
 
-                    // Optionally: focus the element
-                    $el.focus();
+             // Optionally: focus the element
+             $el.focus();
 
-                    // Optionally: prevent default behaviour if any
-                    e.preventDefault();
-                }
-            });
+             // Optionally: prevent default behaviour if any
+             e.preventDefault();
+             }
+             });*/
 
             // Save card vault
             $(document).on('change', '#' + code + '_enable_vault', function () {
-                $('#' + code + '_save_card').val(this.checked ? 'true' : '');
+                $('#psq-save-card').val(this.checked ? 'true' : '');
             });
 
             // Intercept submit to tokenize and set hidden fields
@@ -102,30 +111,28 @@ $code ?>_save_card" name="payment[additional_data][saveCard]"/>
                 try {
 
                     // Read cardholder name from input
-                    const cardholderName = (
-                        $('#' + code + '_cardholder_name').val() || ''
-                    ).trim();
-                    let card = await cardForm.createCard({cardholderNameOrSupplier: () => cardholderName});
+
+                    let card = await cardForm.createCard();
                     if (!card) {
                         mount();
-                        card = await cardForm.createCard({cardholderNameOrSupplier: () => cardholderName});
+                        card = await cardForm.createCard();
                     }
-                    if(!card) {
+                    if (!card) {
                         // cardForm will create it's own errors in the message list
                         return;
                     }
                     // regenerate idempotency key on each submit attempt
                     $idem.val(idempotencyKey);
-                    if (res.id) {
+                    if (card.id) {
                         $('#' + code + '_card_id').val(card.id);
                     }
                     $form.off('submit.publicsquare').trigger('submit');
                 } catch (err) {
                     console.warn('psq: Failed to submit order.', err);
                     const msg = (
-                                  err && err.message
-                              ) || 'Error saving card.';
-                   messageList.addErrorMessage({message: $t(msg)});
+                                    err && err.message
+                                ) || 'Error saving card.';
+                    messageList.addErrorMessage({message: $t(msg)});
                 }
             });
         });

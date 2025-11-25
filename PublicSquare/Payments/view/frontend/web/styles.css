@@ -36,6 +36,10 @@
     flex-flow: row wrap;
     column-gap: 4px;
     row-gap: 8px;
+}
+
+.psq-form__actions {
+    flex-direction: row-reverse;
     align-content: flex-end;
 }
 
@@ -48,6 +52,7 @@
     margin-top: 18px;
     align-content: flex-end;
 }
+
 .psq-form__footer .psq-form__cell {
     flex: 1;
 }
@@ -77,6 +82,11 @@
     flex: 1 100%;
 }
 
+.psq-form__cell--billing-address,
+.psq-form__cell--cc-types {
+    flex: 1 100%;
+}
+
 .psq-form__cell--card-holder {
     flex: 1 100%;
 }
@@ -89,6 +99,7 @@
     row-gap: 4px;
     align-content: flex-start;
 }
+
 .psq-form__cell--cc-types {
     margin: 0;
     padding: 0;
@@ -129,6 +140,7 @@
 }
 
 .psq-form__button--submit {
+    flex: 1;
 }
 
 .psq-form__button--add {
@@ -162,9 +174,26 @@
     padding: 0;
     margin: 0 4px;
 }
+
 .psq-form__cc-type img {
     width: 40px;
     height: 30px;
     padding: 0;
     margin: 0;
+}
+
+.psq-add-card {
+    display: block;
+    margin-top: 18px;
+
+}
+
+.psq-add-card__form--hidden {
+    visibility: hidden;
+}
+
+.psq-add-card__form {
+    display: block;
+    padding: 4px;
+    margin-top: 8px;
 }

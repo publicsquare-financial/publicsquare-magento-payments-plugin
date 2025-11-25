@@ -51,6 +51,11 @@ define([], function requirePsqConfig() {
             return `${this.psqPaymentConfig().successUrl}?${this.#rawConfig.isCustomerLoggedIn ? "refercust" : "refergues"}=${this.#rawConfig.quoteData.entity_id}`;
         }
 
+        cardInputCustomization() {
+            const json = this.psqPaymentConfig().cardInputCustomization;
+            return json && JSON.parse(json);
+        }
+
 
 
     }

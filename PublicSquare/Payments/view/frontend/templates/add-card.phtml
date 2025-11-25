@@ -4,24 +4,6 @@ $form_action = $block->formAction();
 ?>
 
 <?php if ($enabled): ?>
-    <style>
-        .psq-add-card {
-            display: block;
-            margin-top: 18px;
-
-        }
-
-        .psq-add-card__form--hidden {
-            visibility: hidden;
-        }
-
-        .psq-add-card__form {
-            display: block;
-            padding: 4px;
-            margin-top: 8px;
-        }
-
-    </style>
     <div class="psq-add-card">
         <button id="psq-cc-add-button" class="psq__cc-add-btn--enabled">Add Card</button>
 
@@ -29,7 +11,9 @@ $form_action = $block->formAction();
             <div class="psq-add-card__form__header">
                 <p class="psq-form__cta">Enter new card information</p>
             </div>
-            <?php echo $this->getChildHtml(); ?>
+            <div class="psq-form__content" aria-label="Credit card form">
+                <?php echo $this->getChildHtml(); ?>
+            </div>
             <div class="psq-form__footer psq-form__actions">
                 <button class="psq-form__button psq-form__button--primary action primary"
                         type="submit">

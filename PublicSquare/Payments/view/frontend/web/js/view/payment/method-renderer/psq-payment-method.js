@@ -103,8 +103,9 @@ define(
                         this.processing(true);
                         this.cardForm.bind(
                             {
-                                psqPublicKey: config.psqPublicKey,
+                                psqPublicKey: config.publicKey(),
                                 cardholderNameSelectorOrSupplier: () => this.cardholderName(),
+                                cardInputCustomization: config.cardInputCustomization(),
                             },
                         );
                         console.log('psq: Card form bound.');
@@ -122,7 +123,7 @@ define(
                             const billingAddr = quote.billingAddress();
                             this.cardholderName(`${billingAddr.firstname} ${billingAddr.lastname}`);
                         }
-                        return await this.form.createCard(this.cardholderName());
+                        return await this.cardForm.createCard(this.cardholderName());
                     } catch (err) {
                         console.error('psq: Failed to created card!', err);
                         messageList.addErrorMessage(
@@ -163,20 +164,20 @@ define(
                         const placeOrderReqBody = {
                             paymentMethod: this.getData(),
                         };
-                        this.vaultEnabler().visitAdditionalData(placeOrderReqBody.paymentMethod.additional_data);
+                        this.vaultEnabler().visitAdditionalData(placeOrderReqBody.paymentMethod);
                         if (this.shouldSaveCard() === true) {
                             placeOrderReqBody.paymentMethod.additional_data.saveCard = true;
                         }
 
                         if (utils.shouldAddQuoteAddress(quote)) {
-                            placeOrderReqBody.billingAddress = quote.billingAddres();
+                            placeOrderReqBody.billingAddress = quote.billingAddress();
                         }
                         if (!customerModel.isLoggedIn()) {
                             placeOrderReqBody.email = quote.guestEmail;
                         }
 
                         const orderPlaced = await placeOrderService(
-                            util.createCartUrl({quote, customerModel}),
+                            utils.createCartUrl({quote, customerModel}),
                             placeOrderReqBody,
                             messageList,
                         );
@@ -212,12 +213,13 @@ define(
                  * @returns {*}
                  */
                 getData: function getData() {
+                    const defaultAdditionalData = this.additional_data || {};
                     return {
                         method: config.getBasePath(),
                         additional_data: {
-                            ...this.additional_data,
+                            ...defaultAdditionalData,
 
-                            cardId: this.card?.cardId,
+                            cardId: this.card?.id,
                             idempotencyKey: this.idempotencyKey,
                             saveCard: this.shouldSaveCard(),
                         },
@@ -251,10 +253,13 @@ define(
                  * @returns {*}
                  */
                 getIcons: function getIcons(type) {
-                    if(type) {
+                    if (type) {
                         return this.getCcAvailableTypes().filter((_) => _.type === type)[0];
                     }
-                    return this.getCcAvailableTypes().filter((_) => (_.type !== 'diner' && _.type !== 'jcb'));
+                    return this.getCcAvailableTypes()
+                               .filter((_) => (
+                                   _.type !== 'diner' && _.type !== 'jcb'
+                               ));
                 },
                 /**
                  * @override

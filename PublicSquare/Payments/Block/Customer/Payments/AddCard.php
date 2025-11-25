@@ -6,8 +6,8 @@ use Magento\Customer\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\View\Element\Template;
-use PublicSquare\Payments\ICardInputCustomizationJSON;
 use PublicSquare\Payments\Logger\Logger;
+use PublicSquare\Payments\Model\ICardInputCustomizationJSON;
 
 class AddCard extends Template implements ICardInputCustomizationJSON
 {

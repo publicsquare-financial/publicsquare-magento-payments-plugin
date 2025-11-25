@@ -15,7 +15,7 @@ namespace PublicSquare\Payments\Helper;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Serialize\Serializer\Json;
-use PublicSquare\Payments\ICardInputCustomizationJSON;
+use PublicSquare\Payments\Model\ICardInputCustomizationJSON;
 
 class Config extends AbstractHelper implements ICardInputCustomizationJSON
 {
