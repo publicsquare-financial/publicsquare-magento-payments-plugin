@@ -133,6 +133,9 @@ it-sample-data:
 it-reset:
 	@./bin/it-reset
 
+it-down:
+	@./bin/it-down
+
 it-up:
 	@./bin/it-up
 
