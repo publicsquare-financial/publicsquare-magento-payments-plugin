@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Starting IT stack..."
-docker compose -f compose.it.yaml up -d --remove-orphans
+echo "Starting IT stack using compose.yaml..."
+docker compose up -d --remove-orphans
 
 echo "Waiting for db and opensearch health..."
 for i in {1..30}; do

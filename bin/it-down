@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Stopping IT stack (containers only)..."
-docker compose -f compose.it.yaml down --remove-orphans || true
+echo "Stopping IT stack (containers only) using compose.yaml..."
+docker compose down --remove-orphans || true
 
 echo "IT containers stopped."
 

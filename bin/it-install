@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Installing Magento (IT)..."
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+echo "Installing Magento (IT) using compose.yaml..."
+./bin/cli \
   bin/magento setup:install \
     --db-host=db --db-name=magento --db-user=magento --db-password=magento \
     --base-url=http://magento.test/ \
@@ -16,55 +16,55 @@ COMPOSE_FILE=compose.it.yaml ./bin/cli \
     --use-rewrites=1 --cleanup-database --no-interaction
 
 echo "Normalizing base URLs (HTTP only)..."
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento config:set web/unsecure/base_url http://magento.test/
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento config:set web/secure/use_in_frontend 0
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento config:set web/secure/use_in_adminhtml 0
 
 echo "Compiling DI..."
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   php -d memory_limit=2G bin/magento setup:di:compile
 
-COMPOSE_FILE=compose.it.yaml ./bin/cli bin/magento cache:flush
+./bin/cli bin/magento cache:flush
 
 echo "Ensuring PublicSquare_Payments module is present and enabled..."
-# This path is bind-mounted in compose.it.yaml, so it should exist inside the container
-COMPOSE_FILE=compose.it.yaml ./bin/cli bash -lc 'ls -la /var/www/html/app/code/PublicSquare/Payments >/dev/null 2>&1 || { echo "PublicSquare/Payments not found"; exit 1; }'
+# This path is bind-mounted in compose.yaml, so it should exist inside the container
+./bin/cli bash -lc 'ls -la /var/www/html/app/code/PublicSquare/Payments >/dev/null 2>&1 || { echo "PublicSquare/Payments not found"; exit 1; }'
 
 # Enable module + upgrade schema
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento module:enable PublicSquare_Payments || true
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento setup:upgrade
-COMPOSE_FILE=compose.it.yaml ./bin/cli bin/magento cache:flush
+./bin/cli bin/magento cache:flush
 
 echo "Setting dummy PublicSquare API keys (mocking is enabled via env)..."
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento config:set --scope=default payment/publicsquare_payments/publicsquare_api_public_key pk_test_dummy || true
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento config:set --scope=default payment/publicsquare_payments/publicsquare_api_secret_key sk_test_dummy || true
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento config:set --scope=default payment/publicsquare_payments/active 1 || true
-COMPOSE_FILE=compose.it.yaml ./bin/cli bin/magento cache:flush
+./bin/cli bin/magento cache:flush
 
 echo "Disabling Two-Factor Auth for admin..."
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento module:disable Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth || true
-COMPOSE_FILE=compose.it.yaml ./bin/cli bin/magento cache:flush
+./bin/cli bin/magento cache:flush
 
 echo "Enabling Vault for saved cards..."
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento config:set payment/publicsquare_payments_cc_vault/active 1 || true
-COMPOSE_FILE=compose.it.yaml ./bin/cli bin/magento cache:flush
+./bin/cli bin/magento cache:flush
 
 echo "Disabling SMTP to avoid email send failures in IT..."
-COMPOSE_FILE=compose.it.yaml ./bin/cli \
+./bin/cli \
   bin/magento config:set system/smtp/disable 1 || true
 
 echo "Enabling Flat Rate and Free Shipping..."
-COMPOSE_FILE=compose.it.yaml ./bin/cli bash -lc "bin/magento config:set carriers/flatrate/active 1 && \
+./bin/cli bash -lc "bin/magento config:set carriers/flatrate/active 1 && \
   bin/magento config:set carriers/flatrate/price 0 && \
   bin/magento config:set carriers/flatrate/type I && \
   bin/magento config:set carriers/flatrate/name 'Flat Rate' && \

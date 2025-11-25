@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Stopping IT stack..."
-docker compose -f compose.it.yaml down -v --remove-orphans || true
+echo "Stopping IT stack and removing volumes using compose.yaml..."
+docker compose down -v --remove-orphans || true
 
-echo "Removing IT volumes..."
-docker volume ls -q | grep -E 'publicsquare-magento-payments-plugin_(magento-it-data|db-it-data)' | xargs -r docker volume rm || true
+echo "Removing Magento and DB volumes for this project..."
+docker volume ls -q | grep -E 'publicsquare-magento-payments-plugin_(magento-data|db-data)' | xargs -r docker volume rm || true
 
 echo "IT stack reset complete."
 
