@@ -61,7 +61,7 @@ class CreditCardForm extends Template
         $result = [];
         foreach ($this->creditCardTypes as $type) {
             if ($type !== 'jcb' && $type !== 'diners') {
-                $result[$type] = "https://assets.publicsquare.com/sc/web/assets/images/cards/" . urldecode($type) . ".svg";
+                $result[$type] = "https://assets.publicsquare.com/sc/web/assets/images/cards/" . $type . ".svg";
             }
         }
         return $result;

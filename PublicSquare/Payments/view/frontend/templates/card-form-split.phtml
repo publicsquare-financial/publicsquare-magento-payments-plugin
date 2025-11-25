@@ -15,11 +15,11 @@
 <div class="psq-form__cell psq-form__cell--cc-types" title="Supported credit card types">
     <ul class="psq-form__cc-types" aria-label="Supported credit card types">
         <?php foreach ($this->getCreditCardTypes() as $type => $src): ?>
-            <li class="psq-form__cc-type psq-form__cc-type--<?php echo htmlspecialchars($type); ?>"
-                data-type="<?php echo htmlspecialchars($type); ?>"
-                title="<?php echo htmlspecialchars($type); ?>">
-                <img src="<?php echo $src; ?>"
-                     alt="<?php echo htmlspecialchars($type); ?> credit card">
+            <li class="psq-form__cc-type psq-form__cc-type--<?php echo $escaper->escapeHtmlAttr($type); ?>"
+                data-type="<?php echo $escaper->escapeHtmlAttr($type); ?>"
+                title="<?php echo $escaper->escapeHtmlAttr($type); ?>">
+                <img src="<?php echo $escaper->escapeUrl($src); ?>"
+                     alt="<?php echo $escaper->escapeHtmlAttr($type); ?> credit card">
             </li>
         <?php endforeach; ?>
     </ul>

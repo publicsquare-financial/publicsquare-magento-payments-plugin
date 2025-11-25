@@ -153,7 +153,7 @@ define(
                             return false;
                         }
 
-                        self.submitting = true;
+                        this.submitting = true;
                         const card = await this.createCard();
                         if (!card) {
                             return;
