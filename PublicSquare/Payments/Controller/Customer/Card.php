@@ -74,7 +74,11 @@ class Card implements HttpPostActionInterface
         $details = $this->request->getPost('details');
 
 
-        $expiresAt = date_create_from_format('Y-m-d', sprintf("%d-%d-1", $expYear, $expMonth));
+        $expiresAt = date_create_from_format('Y-m-d', sprintf(
+            "%d-%d-1",
+            $expYear,
+            $expMonth
+        ));
 
         $paymentToken = $this->paymentTokenFactory->create(PaymentTokenFactoryInterface::TOKEN_TYPE_CREDIT_CARD);
         $paymentToken->setCustomerId($this->customerSession->getCustomerId());

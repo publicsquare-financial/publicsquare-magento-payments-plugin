@@ -79,6 +79,10 @@ define(
                                 fullScreenLoader.stopLoader();
                             }
                         });
+                        this.shouldSaveCard.subscribe((value) => {
+                            this.vaultEnabler().isActivePaymentTokenEnabler(value);
+                            console.log('psq: Updated save card to %s', value);
+                        });
 
                         const vaultEnabler = new VaultEnabler();
                         vaultEnabler.setPaymentCode(config.vaultCode());
@@ -164,17 +168,13 @@ define(
                         const placeOrderReqBody = {
                             paymentMethod: this.getData(),
                         };
-                        this.vaultEnabler().visitAdditionalData(placeOrderReqBody.paymentMethod);
-                        if (this.shouldSaveCard() === true) {
-                            placeOrderReqBody.paymentMethod.additional_data.saveCard = true;
-                        }
-
                         if (utils.shouldAddQuoteAddress(quote)) {
                             placeOrderReqBody.billingAddress = quote.billingAddress();
                         }
                         if (!customerModel.isLoggedIn()) {
                             placeOrderReqBody.email = quote.guestEmail;
                         }
+
 
                         const orderPlaced = await placeOrderService(
                             utils.createCartUrl({quote, customerModel}),
@@ -214,23 +214,37 @@ define(
                  */
                 getData: function getData() {
                     const defaultAdditionalData = this.additional_data || {};
-                    return {
+                    const data = {
                         method: config.getBasePath(),
                         additional_data: {
                             ...defaultAdditionalData,
 
                             cardId: this.card?.id,
                             idempotencyKey: this.idempotencyKey,
-                            saveCard: this.shouldSaveCard(),
                         },
-                        ...(
-                            window.checkoutConfig.checkoutAgreements?.agreements ? {
-                                extension_attributes: {
-                                    agreement_ids: window.checkoutConfig.checkoutAgreements.agreements.map(_ => _.agreementId),
-                                },
-                            } : undefined
-                        ),
                     };
+                    if(this.shouldSaveCard()) {
+                        data.additional_data.saveCard = this.shouldSaveCard();
+                        data.additional_data.card = JSON.stringify({
+                            brand: this.card.brand,
+                            exp_month: this.card.exp_month,
+                            exp_year: this.card.exp_year,
+                            last4: this.card.last4,
+                        });
+                    }
+
+                    if (window.checkoutConfig.checkoutAgreements?.agreements) {
+                        data.extension_attributes = {
+                            agreement_ids: window.checkoutConfig.checkoutAgreements.agreements.map(_ => _.agreementId),
+                        }
+                    }
+
+                    if (this.shouldSaveCard() === true) {
+                        data.additional_data.saveCard = true;
+                    }
+
+                    this.vaultEnabler().visitAdditionalData(data);
+                    return data;
                 },
 
                 /**

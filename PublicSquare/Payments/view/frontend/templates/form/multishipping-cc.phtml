@@ -10,12 +10,13 @@ $code = $escaper->escapeHtml($block->getMethodCode());
     <div class="psq-form__content" aria-label="Credit card form">
 
         <?php echo $this->getChildHtml(); ?>
-        <!--<div class="psq-form__footer psq-form__actions">
-        </div>-->
-        <div class="psq-form__cell psq-form__cell--vault field number required">
+
+        <?php if ($block->isVaultEnabled()): ?>
+        <div class="psq-form__cell psq-form__cell--vault field number">
             <label for="psq-save-card" class="psq-form__label label">Save card for later</label>
             <input type="checkbox" id="psq-save-card" class="psq-form__input psq-form__input--vault control"></input>
         </div>
+        <?php endif; ?>
 
         <div id="publicsquare_error_message" class="message error" role="alert" style="display:none"></div>
 
@@ -47,9 +48,13 @@ $code = $escaper->escapeHtml($block->getMethodCode());
         let idempotencyKey = utils.generateIdempotencyKey();
         const cardInputCustomizationJSON = `<?php echo $escaper->escapeJs($block->getCardInputCustomizationJSON()); ?>`;
         const cardInputCustomization = JSON.parse(cardInputCustomizationJSON || '{}');
+        const vaultEnabled = <?php echo $escaper->escapeJs($block->isVaultEnabled()) ?>;
+
 
         function unmount() {
-
+            $('#' + code + '_card_id').prop('disabled', true);
+            $('#' + code + '_idempotency_key').prop('disabled', true);
+            $('#' + code + '_save_card').prop('disabled', true);
         }
 
         function mount() {
@@ -59,9 +64,9 @@ $code = $escaper->escapeHtml($block->getMethodCode());
                 cardForm.bind({psqPublicKey, cardInputCustomization});
             }
 
-            $('#' + code + '_card_id').prop('disabled', false)
-            $('#' + code + '_idempotency_key').prop('disabled', false)
-            $('#' + code + '_save_card').prop('disabled', false)
+            $('#' + code + '_card_id').prop('disabled', false);
+            $('#' + code + '_idempotency_key').prop('disabled', false);
+            $('#' + code + '_save_card').prop('disabled', false);
         }
 
         $(function () {
@@ -95,8 +100,8 @@ $code = $escaper->escapeHtml($block->getMethodCode());
              });*/
 
             // Save card vault
-            $(document).on('change', '#' + code + '_enable_vault', function () {
-                $('#psq-save-card').val(this.checked ? 'true' : '');
+            $(document).on('change', '#psq-save-card', function () {
+                $('#' + code + '_save_card').val(this.checked || false);
             });
 
             // Intercept submit to tokenize and set hidden fields
