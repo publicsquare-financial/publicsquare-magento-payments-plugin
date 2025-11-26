@@ -144,7 +144,6 @@ define(
                         }
                         console.log('psq: Begin placing order...');
                         this.processing(true);
-                        // TODO: Do these validators return errors?
                         if (!this.validate() || !additionalValidators.validate()) {
                             console.warn('psq: Validation failed');
                             messageList.addErrorMessage(
@@ -237,10 +236,6 @@ define(
                         data.extension_attributes = {
                             agreement_ids: window.checkoutConfig.checkoutAgreements.agreements.map(_ => _.agreementId),
                         }
-                    }
-
-                    if (this.shouldSaveCard() === true) {
-                        data.additional_data.saveCard = true;
                     }
 
                     this.vaultEnabler().visitAdditionalData(data);

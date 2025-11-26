@@ -105,10 +105,7 @@ $code = $escaper->escapeHtml($block->getMethodCode());
                     // Read cardholder name from input
 
                     let card = await cardForm.createCard();
-                    if (!card) {
-                        mount();
-                        card = await cardForm.createCard();
-                    }
+
                     if (!card) {
                         // cardForm will create it's own errors in the message list
                         return;
