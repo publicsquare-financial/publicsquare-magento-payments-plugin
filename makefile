@@ -142,8 +142,13 @@ it-up:
 it-install:
 	@./bin/it-install
 
+it-complete-build:
+	@./bin/it-up
+	@./bin/it-install $(call args)
+	@./bin/it-sample-data
+
 it-verify:
 	@./bin/it-verify
 
 it-test:
-	@./vendor/bin/codecept run tests/Acceptance/ --steps --debug
+	@./vendor/bin/codecept run tests/Acceptance/

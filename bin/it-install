@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Accept keys via args when provided (e.g., CI), otherwise prompt interactively
+if [ "$#" -ge 2 ]; then
+  PUBLICSQUARE_PUBLIC_KEY=$1
+  PUBLICSQUARE_SECRET_KEY=$2
+else
+  read -rp "Enter PublicSquare PUBLIC key: " PUBLICSQUARE_PUBLIC_KEY
+  read -rp "Enter PublicSquare SECRET key: " PUBLICSQUARE_SECRET_KEY
+fi
+
+echo "Fixing owner and permissions..."
+./bin/fixowns
+./bin/fixperms
+
 echo "Installing Magento (IT) using compose.yaml..."
 ./bin/cli \
   bin/magento setup:install \
@@ -40,13 +53,18 @@ echo "Ensuring PublicSquare_Payments module is present and enabled..."
   bin/magento setup:upgrade
 ./bin/cli bin/magento cache:flush
 
-echo "Setting dummy PublicSquare API keys (mocking is enabled via env)..."
+echo "Deploying static content (IT)..."
 ./bin/cli \
-  bin/magento config:set --scope=default payment/publicsquare_payments/publicsquare_api_public_key pk_test_dummy || true
+  php -d memory_limit=2G bin/magento setup:static-content:deploy -f
+./bin/cli bin/magento cache:flush
+
+echo "Configuring PublicSquare API keys and enabling payment method..."
 ./bin/cli \
-  bin/magento config:set --scope=default payment/publicsquare_payments/publicsquare_api_secret_key sk_test_dummy || true
+  bin/magento config:set --scope=default payment/publicsquare_payments/publicsquare_api_public_key "$PUBLICSQUARE_PUBLIC_KEY"
 ./bin/cli \
-  bin/magento config:set --scope=default payment/publicsquare_payments/active 1 || true
+  bin/magento config:set --scope=default payment/publicsquare_payments/publicsquare_api_secret_key "$PUBLICSQUARE_SECRET_KEY"
+./bin/cli \
+  bin/magento config:set --scope=default payment/publicsquare_payments/active 1
 ./bin/cli bin/magento cache:flush
 
 echo "Disabling Two-Factor Auth for admin..."
