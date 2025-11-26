@@ -4,18 +4,10 @@ set -euo pipefail
 echo "Starting IT stack using compose.yaml..."
 docker compose up -d --remove-orphans
 
-DB_CONTAINER=$(docker compose ps -q db 2>/dev/null || true)
-OS_CONTAINER=$(docker compose ps -q opensearch 2>/dev/null || true)
-
-if [[ -z "$DB_CONTAINER" || -z "$OS_CONTAINER" ]]; then
-  echo "Unable to determine container IDs for db or opensearch."
-  exit 1
-fi
-
 echo "Waiting for db and opensearch health..."
 for i in {1..30}; do
-  DB_STATE=$(docker inspect -f '{{.State.Health.Status}}' "$DB_CONTAINER" 2>/dev/null || true)
-  OS_STATE=$(docker inspect -f '{{.State.Health.Status}}' "$OS_CONTAINER" 2>/dev/null || true)
+  DB_STATE=$(docker inspect -f '{{.State.Health.Status}}' publicsquare-magento-payments-plugin-db-1 2>/dev/null || true)
+  OS_STATE=$(docker inspect -f '{{.State.Health.Status}}' publicsquare-magento-payments-plugin-opensearch-1 2>/dev/null || true)
   if [[ "$DB_STATE" == "healthy" && "$OS_STATE" == "healthy" ]]; then
     echo "Dependencies healthy."; break
   fi
