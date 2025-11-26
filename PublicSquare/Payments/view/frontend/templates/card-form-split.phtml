@@ -6,7 +6,7 @@
                    name="cardholder"
                    title="Cardholder Name"
                    aria-label="Cardholder Name"
-                   value="<?php echo $this->getCustomerName(); ?>">
+                   value="<?php echo $escaper->escapeHtmlAttr($this->getCustomerName()); ?>">
         </div>
     </div>
 <?php endif; ?>
