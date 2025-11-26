@@ -120,7 +120,7 @@ Once your IT environment is up (for example via `make it-complete-build`), you c
 make it-test
 ```
 
-This runs:
+To run codecept with detail breakdown of steps and debugging add these flags:
 
 ```bash
 ./vendor/bin/codecept run tests/Acceptance/ --steps --debug
