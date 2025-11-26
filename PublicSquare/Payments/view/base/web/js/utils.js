@@ -4,7 +4,6 @@ define([
     urlBuilder,
 ) {
     'use strict';
-    const cardIconBaseUrl = 'https://assets.publicsquare.com/sc/web/assets/images/cards'
 
     return {
         generateIdempotencyKey: function generateIdempotencyKey() {
@@ -22,10 +21,5 @@ define([
         shouldAddQuoteAddress: function hasOnlyVirtualItems(quote) {
             return quote.getItems().every(_ => _.product_type === 'virtual');
         },
-        cardIconSrc: function cardIconSrc(cardType) {
-            return `${cardIconBaseUrl}/${cardType}.svg`;
-        },
-
-
     };
 });

@@ -70,7 +70,9 @@ class ConfigProvider implements \Magento\Checkout\Model\ConfigProviderInterface
                     'cardInputCustomization' => $this->publicsquareConfig->getCardInputCustomizationJSON(),
                     'cardFormLayout' => $this->publicsquareConfig->getCardFormLayout(),
                     'cardTypes' => $this->publicsquareConfig->getAvailableCardTypes(),
-                    'title' => $this->publicsquareConfig->getPublicSquareTitle()
+                    'title' => $this->publicsquareConfig->getPublicSquareTitle(),
+                    'ccAvailableTypes' => $this->publicsquareConfig->getCcAvailableTypes(),
+                    'ccFilteredTypes' => $this->publicsquareConfig->getFilteredCcAvailableTypes(),
                 ],
             ]
         ];

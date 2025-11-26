@@ -37,10 +37,12 @@ define([], function requirePsqConfig() {
         }
 
         cardTypes() {
-            return this.psqPaymentConfig().cardTypes;
+            // unwrap php "array object"
+            return Object.values(this.psqPaymentConfig().ccAvailableTypes);
         }
-        cardImagesBasePath() {
-            return this.psqPaymentConfig().cardImagesBasePath;
+        iconList() {
+            // unwrap php "array object"
+            return Object.values(this.psqPaymentConfig().ccFilteredTypes);
         }
 
         title() {

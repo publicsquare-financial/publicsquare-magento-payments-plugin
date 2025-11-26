@@ -34,7 +34,7 @@ class CreditCardForm extends Template
         $this->vaultConfigEnabled = $moduleManager->isEnabled('Magento_Vault');
 
         $this->customerName = $session->getCustomer()->getName();
-        $this->creditCardTypes = $psqConfig->getAvailableCardTypes($session->getCustomer()->getStoreId());
+        $this->creditCardTypes = $psqConfig->getFilteredCcAvailableTypes();
     }
 
     public function getTemplate(): string
@@ -58,13 +58,7 @@ class CreditCardForm extends Template
 
     public function getCreditCardTypes(): array
     {
-        $result = [];
-        foreach ($this->creditCardTypes as $type) {
-            if ($type !== 'jcb' && $type !== 'diners') {
-                $result[$type] = "https://assets.publicsquare.com/sc/web/assets/images/cards/" . $type . ".svg";
-            }
-        }
-        return $result;
+        return $this->creditCardTypes;
     }
 
 }

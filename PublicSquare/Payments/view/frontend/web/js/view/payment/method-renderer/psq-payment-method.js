@@ -252,15 +252,7 @@ define(
                  * @returns {*}
                  */
                 getCcAvailableTypes: function getCcAvailableTypes() {
-                    return config.cardTypes().map(type => {
-                        return {
-                            type,
-                            getTitle: () => type,
-                            getIconSrc: () => `${config.cardImagesBasePath()}/${type}.svg`,
-                            getAltText: () => 'credit card type',
-                            getClasses: () => `psq-form__cc-type--${type}`,
-                        }
-                    });
+                    return config.cardTypes();
                 },
                 /**
                  * @override
@@ -270,10 +262,10 @@ define(
                     if (type) {
                         return this.getCcAvailableTypes().filter((_) => _.type === type)[0];
                     }
-                    return this.getCcAvailableTypes()
-                               .filter((_) => (
-                                   _.type !== 'diner' && _.type !== 'jcb'
-                               ));
+                    const icons = config.iconList();
+                    console.trace('psq: Got %d icons', icons.length);
+
+                    return icons;
                 },
                 /**
                  * @override
