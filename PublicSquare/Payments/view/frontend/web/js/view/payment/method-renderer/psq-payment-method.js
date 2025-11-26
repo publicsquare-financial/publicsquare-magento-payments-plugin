@@ -258,7 +258,7 @@ define(
                         return this.getCcAvailableTypes().filter((_) => _.type === type)[0];
                     }
                     const icons = config.iconList();
-                    console.trace('psq: Got %d icons', icons.length);
+                    console.debug('psq: Got %d icons', icons.length);
 
                     return icons;
                 },
