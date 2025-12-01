@@ -39,6 +39,11 @@ echo "Normalizing base URLs (HTTP only)..."
 ./bin/cli \
   bin/magento config:set web/secure/use_in_adminhtml 0
 
+./bin/cli \
+  bin/magento module:enable Magento_Csp || true
+./bin/cli \
+   bin/magento cache:clean || true
+
 echo "Compiling DI..."
 ./bin/cli \
   php -d memory_limit=2G bin/magento setup:di:compile
@@ -50,6 +55,7 @@ echo "Ensuring PublicSquare_Payments module is present and enabled..."
 ./bin/cli bash -lc 'ls -la /var/www/html/app/code/PublicSquare/Payments >/dev/null 2>&1 || { echo "PublicSquare/Payments not found"; exit 1; }'
 
 # Enable module + upgrade schema
+
 ./bin/cli \
   bin/magento module:enable PublicSquare_Payments || true
 ./bin/cli \
