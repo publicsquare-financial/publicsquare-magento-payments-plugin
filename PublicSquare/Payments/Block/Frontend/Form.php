@@ -4,6 +4,7 @@ namespace PublicSquare\Payments\Block\Frontend;
 
 use Magento\Backend\Model\Session\Quote;
 use Magento\Csp\Helper\CspNonceProvider;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Payment\Gateway\Config\Config;
@@ -39,14 +40,12 @@ class Form extends BaseForm implements ICardInputCustomizationJSON
         Manager                                            $moduleManager,
         \Magento\Customer\Model\Session                    $session,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        CspNonceProvider|null                              $cspNonceProvider,
         array                                              $data = [],
     )
     {
         parent::__construct($context, $paymentConfig, $sessionQuote, $psqConfig, $ccType, $paymentDataHelper, $data);
         $this->cardInputStyleJSON = $psqConfig->getCardInputCustomizationJSON();
         $this->cardFormLayout = $psqConfig->getCardFormLayout();
-        $this->cspNonceProvider = $cspNonceProvider;
 
         // Since we can't wire the card form Block we'll just construct the block here.
         $cardFormData = ["showCardholderInput" => true];
@@ -58,6 +57,17 @@ class Form extends BaseForm implements ICardInputCustomizationJSON
             $session,
             $cardFormData,
         );
+
+        if($moduleManager->isEnabled('Magento_Csp')) {
+            try {
+                $this->cspNonceProvider = ObjectManager::getInstance()->get(CspNonceProvider::class);
+            } catch (\Throwable $exception) {
+                error_log($exception->getMessage());
+                $this->cspNonceProvider = null;
+            }
+        } else {
+            $this->cspNonceProvider = null;
+        }
 
     }
 
