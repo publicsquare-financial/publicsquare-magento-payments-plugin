@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Checking magento.test from Selenium container..."
+docker exec -it publicsquare-magento-payments-plugin-selenium-1 curl -I http://magento.test || true
+
+echo "If not 200/301/302, check Magento logs:"
+echo "  docker compose exec web tail -n 200 var/log/exception.log"
+
+

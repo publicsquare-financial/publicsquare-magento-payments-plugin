@@ -22,7 +22,6 @@ echo "Setting PSQ plugin active"
 bin/magento config:set --scope="default" payment/publicsquare_payments/active 1
 echo "Disabling Two Factor Auth"
 bin/magento module:disable Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth
-bin/magento config:set twofactorauth/general/enable 0 || true
 echo "Setting deploy mode to production"
 bin/magento deploy:mode:set production
 bin/magento setup:upgrade
