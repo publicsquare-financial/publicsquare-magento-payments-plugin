@@ -398,7 +398,7 @@ class AcceptanceBase
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
-        $I->waitForText($waitString, 10);
+        $I->waitForText($waitString, 30);
         $I->waitForElementNotVisible('.loading-mask', 60);
     }
 

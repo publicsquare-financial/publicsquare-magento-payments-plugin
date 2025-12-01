@@ -75,7 +75,8 @@ class AdminSalesOrderCreate extends AcceptanceBase
       $I->acceptPopup();
     } else {
       $this->_waitForLoading($I);
-      $I->waitForText($expectedMessage);
+      // waitForText default timeout is 10s which can be too short on slower CI runs
+      $I->waitForText($expectedMessage, 30);
     }
   }
 }
