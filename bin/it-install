@@ -6,8 +6,11 @@ if [ "$#" -ge 2 ]; then
   PUBLICSQUARE_PUBLIC_KEY=$1
   PUBLICSQUARE_SECRET_KEY=$2
 else
-  read -rp "Enter PublicSquare PUBLIC key: " PUBLICSQUARE_PUBLIC_KEY
-  read -rp "Enter PublicSquare SECRET key: " PUBLICSQUARE_SECRET_KEY
+  # Use silent input so keys are not echoed to the terminal
+  read -rsp "Enter PublicSquare PUBLIC key: " PUBLICSQUARE_PUBLIC_KEY
+  echo
+  read -rsp "Enter PublicSquare SECRET key: " PUBLICSQUARE_SECRET_KEY
+  echo
 fi
 
 echo "Fixing owner and permissions..."
