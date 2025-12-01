@@ -156,7 +156,7 @@ define(
                              $.mage.__($t(`Found errors in card input customization JSON!`));
                             /*el.validationMessage = `Found errors in card input customization JSON! ${message}`;
                             el.validity.customError = true;*/
-                            // return false;
+                            return false;
                         } else {
                             return true;
                         }
@@ -165,6 +165,7 @@ define(
                         $.mage.__(`Invalid JSON! ${err.message}`);
                     }
                 },
+                'Invalid JSON'
             );
             return target;
         }
