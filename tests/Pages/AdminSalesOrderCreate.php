@@ -61,6 +61,7 @@ class AdminSalesOrderCreate extends AcceptanceBase
 
     protected function _addPaymentMethodToOrder(AcceptanceTester $I, string $cardNumber = '4242424242424242')
     {
+        echo "Adding payment method to order\n";
         $I->waitForElementClickable('#p_method_publicsquare_payments');
         $I->click('#p_method_publicsquare_payments');
         $this->_waitForLoading($I);
@@ -72,6 +73,7 @@ class AdminSalesOrderCreate extends AcceptanceBase
             '#publicsquare-elements-form',
             '#publicsquare-elements-form iframe'
         );
+        echo "Payment method added to order\n";
     }
 
     protected function _submitOrder(
@@ -79,6 +81,7 @@ class AdminSalesOrderCreate extends AcceptanceBase
         string           $expectedMessage = 'You created the order.',
         bool             $acceptPopup = false)
     {
+        echo "Submitting order\n";
         $I->waitForElementClickable('#edit_form #order-totals button');
         $I->click('#edit_form #order-totals button');
         if ($acceptPopup) {
@@ -88,5 +91,6 @@ class AdminSalesOrderCreate extends AcceptanceBase
             // waitForText default timeout is 10s which can be too short on slower CI runs
             $I->waitForText($expectedMessage, 30);
         }
+        echo "Order submitted\n";
     }
 }

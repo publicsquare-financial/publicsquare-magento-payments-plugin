@@ -330,6 +330,7 @@ class AcceptanceBase
 
     protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR, $iframeSelector = self::IFRAME_CSS)
     {
+        echo "Checking for payment method to be visible...\n";
         $I->waitForElementNotVisible(".loading-mask", 60);
         $I->waitForElementVisible($containerSelector, 30);
         $I->waitForElementClickable($containerSelector, 30);
@@ -343,6 +344,7 @@ class AcceptanceBase
         $I->waitForElementVisible('//*[@id="cvc"]');
         $I->switchToIframe();
         $this->_waitForLoading($I);
+        echo "Payment method is visible.\n";
     }
 
     protected function _clearField(AcceptanceTester $I, $field)
@@ -367,8 +369,7 @@ class AcceptanceBase
 
     protected function _fillCardForm(AcceptanceTester $I, $cardNumber = '4242424242424242', $expirationDate = '12/29', $cvc = '123', $containerSelector = self::DEFAULT_CONTAINER_SELECTOR, $iframeSelector = self::IFRAME_CSS)
     {
-        echo "----------BEGIN PAGE SOURCE--------\n" . $I->grabPageSource() . "\n----------END PAGE SOURCE--------\n";
-        echo "Current URI: " . $I->grabFromCurrentUrl();
+        echo "Filling card form\n";
 
         $this->_makeSurePaymentMethodIsVisible($I, $containerSelector, $iframeSelector);
         $this->_clearCardForm($I, $containerSelector, $iframeSelector);
@@ -379,6 +380,7 @@ class AcceptanceBase
         $I->fillField('//*[@id="expirationDate"]', $expirationDate);
         $I->fillField('//*[@id="cvc"]', $cvc);
         $I->switchToIframe();
+        echo "Card form filled\n";
     }
 
     protected function _enableSaveCard(AcceptanceTester $I)
