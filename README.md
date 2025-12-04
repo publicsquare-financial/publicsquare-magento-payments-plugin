@@ -49,32 +49,81 @@ $ bin/magento sampledata:deploy
 $ bin/magento setup:upgrade
 ```
 
-* Disable two-factor authentication for convenience (don't do this in prod)
+### Local environment using this repo (Docker + sample data)
+
+This repository also includes a self-contained Docker setup and helper scripts to provision a full local environment (containers, Magento, this plugin, and sample data).
+
+1. **Start / provision the IT stack (first time or after reset)**
+
+   ```bash
+   # Will bring up containers, install Magento, deploy static content,
+   # configure PublicSquare keys, and install Magento sample data.
+   make it-complete-build
+   ```
+
+   - If you don't pass any arguments, `it-install` (called under the hood) will **prompt for your PublicSquare PUBLIC and SECRET keys**.
+   - In CI or when scripting, you can pass the keys explicitly:
+
+   ```bash
+   make it-complete-build <PUBLICSQUARE_PUBLIC_KEY> <PUBLICSQUARE_SECRET_KEY>
+   ```
+
+2. **Subsequent runs**
+
+   - To restart the stack without reinstalling Magento:
+
+     ```bash
+     make it-down
+     make it-up
+     ```
+
+   - To tear everything down and reset volumes:
+
+     ```bash
+     make it-reset
+     ```
+
+### Deploying plugin changes in the IT/local environment
+
+When you change this plugin's code and want Magento to pick up the changes (DI, static content, etc.) inside the IT Docker stack, use:
 
 ```bash
-$ bin/magento module:disable Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth
-$ bin/magento cache:flush
+make deploy
 ```
 
-* Create new admin user
+This runs `bin/deploy` inside the `web` container, which will:
+
+- Run `composer install` inside the container
+- Enable maintenance mode
+- Clear generated code and preprocessed view files
+- Run `bin/magento setup:upgrade`
+- Recompile DI (`bin/magento setup:di:compile`)
+- Redeploy static content (`bin/magento setup:static-content:deploy en_US -f`)
+- Disable maintenance mode and flush caches
+
+Use this after code changes to ensure Magento is fully rebuilt and serving updated assets.
+
+### Automated tests
+
+#### Running acceptance tests locally
 
 ```bash
-$ bin/create-user
+composer install
+php vendor/bin/codecept run Acceptance --steps
 ```
 
-* Copy this plugin into the `app/code` directory within your Docker container
+#### Running integration/acceptance tests against the IT stack
+
+Once your IT environment is up (for example via `make it-complete-build`), you can execute the full Codeception test suite wired for the Docker stack with:
 
 ```bash
-$ make install-docker
+make it-test
 ```
 
-* Navigate to the payment methods page in Magento admin (Stores > Configuration > Sales > Payment Methods) and confirm that PublicSquare Payments shows up in the "Other Payment Methods" section.
-
-# AUTOMATED TESTS
-
-### Running Acceptance Tests
+To run codecept with detail breakdown of steps and debugging add these flags:
 
 ```bash
-$ composer install
-$ php vendor/bin/codecept run Acceptance --steps
+./vendor/bin/codecept run tests/Acceptance/ --steps --debug
 ```
+
+using the configuration in `codeception.yml` and `tests/Acceptance.suite.yml`, against `http://magento.test` via Selenium/WebDriver.

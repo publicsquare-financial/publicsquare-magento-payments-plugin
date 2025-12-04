@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Accept keys via args when provided (e.g., CI), otherwise prompt interactively
+if [ "$#" -ge 2 ]; then
+  PUBLICSQUARE_PUBLIC_KEY=$1
+  PUBLICSQUARE_SECRET_KEY=$2
+else
+  # Use silent input so keys are not echoed to the terminal
+  read -rsp "Enter PublicSquare PUBLIC key: " PUBLICSQUARE_PUBLIC_KEY
+  echo
+  read -rsp "Enter PublicSquare SECRET key: " PUBLICSQUARE_SECRET_KEY
+  echo
+fi
+
+echo "Fixing owner and permissions..."
+./bin/fixowns
+./bin/fixperms
+
+echo "Installing Magento (IT) using compose.yaml..."
+./bin/cli \
+  bin/magento setup:install \
+    --db-host=db --db-name=magento --db-user=magento --db-password=magento \
+    --base-url=http://magento.test/ \
+    --base-url-secure=https://magento.test/ \
+    --use-secure=0 --use-secure-admin=0 \
+    --backend-frontname=admin \
+    --admin-firstname=admin --admin-lastname=admin \
+    --admin-email=admin@example.com --admin-user=admin --admin-password=AdminPassword1234 \
+    --language=en_US --currency=USD --timezone=America/Chicago \
+    --search-engine=opensearch --opensearch-host=opensearch --opensearch-port=9200 \
+    --use-rewrites=1 --cleanup-database --no-interaction
+
+echo "Normalizing base URLs (HTTP only)..."
+./bin/cli \
+  bin/magento config:set web/unsecure/base_url http://magento.test/
+./bin/cli \
+  bin/magento config:set web/secure/use_in_frontend 0
+./bin/cli \
+  bin/magento config:set web/secure/use_in_adminhtml 0
+
+./bin/cli \
+  bin/magento module:enable Magento_Csp || true
+./bin/cli \
+   bin/magento cache:clean || true
+
+echo "Compiling DI..."
+./bin/cli \
+  php -d memory_limit=2G bin/magento setup:di:compile
+
+./bin/cli bin/magento cache:flush
+
+echo "Ensuring PublicSquare_Payments module is present and enabled..."
+# This path is bind-mounted in compose.yaml, so it should exist inside the container
+./bin/cli bash -lc 'ls -la /var/www/html/app/code/PublicSquare/Payments >/dev/null 2>&1 || { echo "PublicSquare/Payments not found"; exit 1; }'
+
+# Enable module + upgrade schema
+
+./bin/cli \
+  bin/magento module:enable PublicSquare_Payments || true
+./bin/cli \
+  bin/magento setup:upgrade
+./bin/cli bin/magento cache:flush
+
+echo "Deploying static content (IT)..."
+./bin/cli \
+  php -d memory_limit=2G bin/magento setup:static-content:deploy -f
+./bin/cli bin/magento cache:flush
+
+echo "Configuring PublicSquare API keys and enabling payment method..."
+./bin/cli \
+  bin/magento config:set --scope=default payment/publicsquare_payments/publicsquare_api_public_key "$PUBLICSQUARE_PUBLIC_KEY"
+./bin/cli \
+  bin/magento config:set --scope=default payment/publicsquare_payments/publicsquare_api_secret_key "$PUBLICSQUARE_SECRET_KEY"
+./bin/cli \
+  bin/magento config:set --scope=default payment/publicsquare_payments/active 1
+./bin/cli bin/magento cache:flush
+
+echo "Disabling Two-Factor Auth for admin..."
+./bin/cli \
+  bin/magento module:disable Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth || true
+./bin/cli bin/magento cache:flush
+
+echo "Enabling Vault for saved cards..."
+./bin/cli \
+  bin/magento config:set payment/publicsquare_payments_cc_vault/active 1 || true
+./bin/cli bin/magento cache:flush
+
+echo "Disabling SMTP to avoid email send failures in IT..."
+./bin/cli \
+  bin/magento config:set system/smtp/disable 1 || true
+
+echo "Enabling Flat Rate and Free Shipping..."
+./bin/cli bash -lc "bin/magento config:set carriers/flatrate/active 1 && \
+  bin/magento config:set carriers/flatrate/price 0 && \
+  bin/magento config:set carriers/flatrate/type I && \
+  bin/magento config:set carriers/flatrate/name 'Flat Rate' && \
+  bin/magento config:set carriers/freeshipping/active 1 && \
+  bin/magento config:set carriers/freeshipping/free_shipping_subtotal 0 && \
+  bin/magento cache:flush"
+
+echo "IT install complete."
+
+
