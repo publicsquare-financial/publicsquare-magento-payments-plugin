@@ -331,6 +331,8 @@ class AcceptanceBase
     protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR, $iframeSelector = self::IFRAME_CSS)
     {
         echo "Checking for payment method to be visible...\n";
+        // ensure in the base frame
+        $I->switchToFrame();
         $I->waitForElementNotVisible(".loading-mask", 60);
         $I->waitForElementVisible($containerSelector, 30);
         $I->waitForElementClickable($containerSelector, 30);
