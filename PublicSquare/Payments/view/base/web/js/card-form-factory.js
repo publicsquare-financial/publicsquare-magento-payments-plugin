@@ -73,7 +73,7 @@ define(
                     psq = await publicsquare.init(psqPublicKey);
                 }
                 if (this.bound()) {
-                    console.trace('psq: Form already bound!');
+                    console.debug('psq: Form already bound!');
                     return;
                 }
                 cardNum = psq.createCardNumberElement(cardInputCustomization);
@@ -146,7 +146,7 @@ define(
                     psq = await publicsquare.init(psqPublicKey);
                 }
                 if (this.bound()) {
-                    console.trace('psq: Form already bound!');
+                    console.debug('psq: Form already bound!');
                     return;
                 }
                 card = psq.createCardElement(cardInputCustomization);

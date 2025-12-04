@@ -17,7 +17,6 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Serialize\Serializer\Json;
 use PublicSquare\Payments\Model\ICardInputCustomizationJSON;
 use stdClass;
-use function Aws\map;
 
 class Config extends AbstractHelper implements ICardInputCustomizationJSON
 {
