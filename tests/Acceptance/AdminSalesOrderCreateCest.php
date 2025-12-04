@@ -30,7 +30,7 @@ class AdminSalesOrderCreateCest extends AdminSalesOrderCreate
             // Then, succeed the payment
             $this->_fillCardForm($I, '4242424242424242', '12/29', '123', '#publicsquare-elements-form');
             $this->_submitOrder($I);
-        }catch ($exception){
+        }catch (\Exception $exception){
             echo "Failed on url: " . $I->grabFromCurrentUrl();
             throw $exception;
         }
