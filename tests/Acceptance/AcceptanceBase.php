@@ -328,15 +328,15 @@ class AcceptanceBase
         $I->click('Next');
     }
 
-    protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
+    protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR, $iframeSelector = self::IFRAME_CSS)
     {
         $I->waitForElementNotVisible(".loading-mask", 60);
         $I->waitForElementVisible($containerSelector, 30);
         $I->waitForElementClickable($containerSelector, 30);
         $I->waitForElementNotVisible(".loading-mask", 60);
         $I->click($containerSelector);
-        $I->waitForElementVisible($this::IFRAME_CSS);
-        $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
+        $I->waitForElementVisible($iframeSelector);
+        $x = $I->grabAttributeFrom($iframeSelector, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
         $I->waitForElementVisible('//*[@id="cardNumber"]');
         $I->waitForElementVisible('//*[@id="expirationDate"]');
@@ -352,11 +352,11 @@ class AcceptanceBase
         $I->pressKey($field, [\Facebook\WebDriver\WebDriverKeys::BACKSPACE]);
     }
 
-    protected function _clearCardForm(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
+    protected function _clearCardForm(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR, $iframeSelector = self::IFRAME_CSS)
     {
-        $this->_makeSurePaymentMethodIsVisible($I, $containerSelector);
-        $I->waitForElementVisible($this::IFRAME_CSS);
-        $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
+        $this->_makeSurePaymentMethodIsVisible($I, $containerSelector, $iframeSelector);
+        $I->waitForElementVisible($iframeSelector);
+        $x = $I->grabAttributeFrom($iframeSelector, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
         $this->_clearField($I, '//*[@id="cardNumber"]');
         $this->_clearField($I, '//*[@id="expirationDate"]');
@@ -369,8 +369,8 @@ class AcceptanceBase
     {
         echo "Current URI: " . $I->grabFromCurrentUrl();
         echo "----------BEGIN PAGE SOURCE--------\n" . $I->grabPageSource() . "\n----------END PAGE SOURCE--------\n";
-        $this->_makeSurePaymentMethodIsVisible($I, $containerSelector);
-        $this->_clearCardForm($I, $containerSelector);
+        $this->_makeSurePaymentMethodIsVisible($I, $containerSelector, $iframeSelector);
+        $this->_clearCardForm($I, $containerSelector, $iframeSelector);
         $I->waitForElementVisible($iframeSelector);
         $x = $I->grabAttributeFrom($iframeSelector, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
@@ -404,9 +404,9 @@ class AcceptanceBase
         $I->waitForElementNotVisible('.loading-mask', 60);
     }
 
-    protected function _checkoutWithVirtualCard(AcceptanceTester $I, $cardNumber='4242424242424242', $waitString='Thank you for your purchase!')
+    protected function _checkoutWithVirtualCard(AcceptanceTester $I, $cardNumber='4242424242424242', $containerSelector = self::DEFAULT_CONTAINER_SELECTOR, $waitString='Thank you for your purchase!', $iframeSelector = self::IFRAME_CSS)
     {
-        $this->_makeSurePaymentMethodIsVisible($I);
+        $this->_makeSurePaymentMethodIsVisible($I, $containerSelector, $iframeSelector);
         $I->fillField('.payment-method._active input[name="firstname"]', 'Billy');
         $I->fillField('.payment-method._active input[name="lastname"]', 'Bob');
         $I->fillField('.payment-method._active input[name="street[0]"]', '123 Main St');
