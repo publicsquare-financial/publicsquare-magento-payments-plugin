@@ -7,7 +7,7 @@ use Codeception\Step\Argument\PasswordArgument;
 
 class AcceptanceBase
 {
-    const IFRAME_CSS = '#publicsquare-elements-form iframe';
+    const IFRAME_CSS = '#psq-card iframe';
 
     const DEFAULT_CONTAINER_SELECTOR = '#publicsquare_payments';
 
@@ -426,7 +426,7 @@ class AcceptanceBase
     {
         $this->_waitForLoading($I);
         $I->see('Payment Method');
-        $I->checkOption('.payment-methods input#publicsquare_payments_cc_vault_1');
+        $I->checkOption('.psq-form .psq-form__cell--vault input.psq-form__input--vault');
         $submitButton = '.payment-method._active button[type="submit"]';
         $this->_waitForLoading($I);
         $I->waitForElementClickable($submitButton);
