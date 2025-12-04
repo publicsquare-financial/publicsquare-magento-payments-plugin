@@ -64,7 +64,7 @@ class AdminSalesOrderCreate extends AcceptanceBase
     $I->waitForElementClickable('#p_method_publicsquare_payments');
     $I->click('#p_method_publicsquare_payments');
     $this->_waitForLoading($I);
-    $this->_fillCardForm($I, $cardNumber, '12/29', '123', '#publicsquare-elements-form');
+    $this->_fillCardForm($I, $cardNumber, '12/29', '123', '#publicsquare-elements-form', '#publicsquare-elements-form iframe');
   }
 
   protected function _submitOrder(AcceptanceTester $I, string $expectedMessage = 'You created the order.', bool $acceptPopup = false)

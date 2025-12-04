@@ -365,14 +365,14 @@ class AcceptanceBase
         $I->switchToIframe();
     }
 
-    protected function _fillCardForm(AcceptanceTester $I, $cardNumber = '4242424242424242', $expirationDate = '12/29', $cvc = '123', $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
+    protected function _fillCardForm(AcceptanceTester $I, $cardNumber = '4242424242424242', $expirationDate = '12/29', $cvc = '123', $containerSelector = self::DEFAULT_CONTAINER_SELECTOR, $iframeSelector = self::IFRAME_CSS)
     {
         echo "Current URI: " . $I->grabFromCurrentUrl();
         echo "----------BEGIN PAGE SOURCE--------\n" . $I->grabPageSource() . "\n----------END PAGE SOURCE--------\n";
         $this->_makeSurePaymentMethodIsVisible($I, $containerSelector);
         $this->_clearCardForm($I, $containerSelector);
-        $I->waitForElementVisible($this::IFRAME_CSS);
-        $x = $I->grabAttributeFrom($this::IFRAME_CSS, 'id');
+        $I->waitForElementVisible($iframeSelector);
+        $x = $I->grabAttributeFrom($iframeSelector, 'id');
         $I->switchToIframe('//*[@id="'.$x.'"]');
         $I->fillField('//*[@id="cardNumber"]', $cardNumber);
         $I->fillField('//*[@id="expirationDate"]', $expirationDate);
