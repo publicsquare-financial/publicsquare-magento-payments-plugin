@@ -7,7 +7,7 @@ use Codeception\Step\Argument\PasswordArgument;
 
 class AcceptanceBase
 {
-    const IFRAME_CSS = '#publicsquare-elements-form iframe';
+    const IFRAME_CSS = '#psq-card iframe';
 
     const DEFAULT_CONTAINER_SELECTOR = '#publicsquare_payments';
 
@@ -384,11 +384,11 @@ class AcceptanceBase
         $I->click('input[name="vault[is_enabled]"]');
     }
 
-    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false, $saveCard = false)
+    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false, $saveCard = false, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
     {
         $I->reloadPage();
         $I->amOnPage('/checkout/#payment');
-        $this->_fillCardForm($I, $cardNumber, '12/29', '123');
+        $this->_fillCardForm($I, $cardNumber, '12/29', '123', $containerSelector);
         if ($saveCard) {
             $this->_enableSaveCard($I);
         }
@@ -426,7 +426,7 @@ class AcceptanceBase
     {
         $this->_waitForLoading($I);
         $I->see('Payment Method');
-        $I->checkOption('.payment-methods input#publicsquare_payments_cc_vault_1');
+        $I->checkOption('.psq-form .psq-form__cell--vault input.psq-form__input--vault');
         $submitButton = '.payment-method._active button[type="submit"]';
         $this->_waitForLoading($I);
         $I->waitForElementClickable($submitButton);
@@ -460,10 +460,9 @@ class AcceptanceBase
         $I->waitForText("You saved the product.");
     }
 
-    protected function _doSuccessfulCheckout(AcceptanceTester $I) {
+    protected function _doSuccessfulCheckout(AcceptanceTester $I,$cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false, $saveCard = false, $cardContainerSelector = self::DEFAULT_CONTAINER_SELECTOR) {
         $this->_initialize($I);
         $this->_addProductToCart($I);
         $this->_goToCheckout($I);
-        $this->_checkoutWithCard($I);
-    }
+        $this->_checkoutWithCard($I, $cardNumber, $waitString, $termsAndConditions, $saveCard, $cardContainerSelector);}
 }
