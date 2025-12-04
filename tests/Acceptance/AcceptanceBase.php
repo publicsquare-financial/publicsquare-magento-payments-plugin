@@ -384,11 +384,11 @@ class AcceptanceBase
         $I->click('input[name="vault[is_enabled]"]');
     }
 
-    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false, $saveCard = false)
+    protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false, $saveCard = false, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
     {
         $I->reloadPage();
         $I->amOnPage('/checkout/#payment');
-        $this->_fillCardForm($I, $cardNumber, '12/29', '123');
+        $this->_fillCardForm($I, $cardNumber, '12/29', '123', $containerSelector);
         if ($saveCard) {
             $this->_enableSaveCard($I);
         }
@@ -460,10 +460,9 @@ class AcceptanceBase
         $I->waitForText("You saved the product.");
     }
 
-    protected function _doSuccessfulCheckout(AcceptanceTester $I) {
+    protected function _doSuccessfulCheckout(AcceptanceTester $I,$cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false, $saveCard = false, $cardContainerSelector = self::DEFAULT_CONTAINER_SELECTOR) {
         $this->_initialize($I);
         $this->_addProductToCart($I);
         $this->_goToCheckout($I);
-        $this->_checkoutWithCard($I);
-    }
+        $this->_checkoutWithCard($I, $cardNumber, $waitString, $termsAndConditions, $saveCard, $cardContainerSelector);}
 }
