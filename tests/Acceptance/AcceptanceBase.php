@@ -338,10 +338,13 @@ class AcceptanceBase
         $I->click($containerSelector);
         $I->waitForElementVisible($iframeSelector);
         $x = $I->grabAttributeFrom($iframeSelector, 'id');
-        $I->switchToIframe('//*[@id="'.$x.'"]');
+        $iframeXpath = "//*[@id='$x']";
+        echo "Switching to iframe by xpath: '" . $iframeXpath . "'\n";
+        $I->switchToIframe($iframeXpath);
         $I->waitForElementVisible('//*[@id="cardNumber"]');
         $I->waitForElementVisible('//*[@id="expirationDate"]');
         $I->waitForElementVisible('//*[@id="cvc"]');
+        echo "Returning to parent frame\n";
         $I->switchToIframe();
         $this->_waitForLoading($I);
         echo "Payment method is visible.\n";
