@@ -367,8 +367,9 @@ class AcceptanceBase
 
     protected function _fillCardForm(AcceptanceTester $I, $cardNumber = '4242424242424242', $expirationDate = '12/29', $cvc = '123', $containerSelector = self::DEFAULT_CONTAINER_SELECTOR, $iframeSelector = self::IFRAME_CSS)
     {
-        echo "Current URI: " . $I->grabFromCurrentUrl();
         echo "----------BEGIN PAGE SOURCE--------\n" . $I->grabPageSource() . "\n----------END PAGE SOURCE--------\n";
+        echo "Current URI: " . $I->grabFromCurrentUrl();
+
         $this->_makeSurePaymentMethodIsVisible($I, $containerSelector, $iframeSelector);
         $this->_clearCardForm($I, $containerSelector, $iframeSelector);
         $I->waitForElementVisible($iframeSelector);
