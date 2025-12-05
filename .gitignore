@@ -1,3 +1,4 @@
+
 .vscode
 .idea
 
@@ -11,4 +12,5 @@ tests/_output
 # PHPUnit cache
 .phpunit.result.cache
 .phpunit.cache/
-tests/**/.phpunit.result.cachemagento-install/
+tests/**/.phpunit.result.cache
+magento-install/

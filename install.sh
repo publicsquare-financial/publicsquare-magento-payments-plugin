@@ -13,7 +13,7 @@ __ensure_line_in_file() {
     local FILEPATH="$1"
     local LINE="$2"
 
-    grep -F -- "$LINE" "$FILEPATH" >/dev/null 2>&1 || echo "$LINE" >> "$FILEPATH"
+    grep -F -- "${LINE}" "${FILEPATH}" >/dev/null 2>&1 || echo "\n${LINE}\n" >> "${FILEPATH}"
 }
 
 read -p "This will install Magento in ${MAGENTO_DIR}. For this to be successful this directory needs to be empty AND any previous containers/volumes needs to be removed.
