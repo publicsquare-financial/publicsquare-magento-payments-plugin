@@ -11,4 +11,4 @@ tests/_output
 # PHPUnit cache
 .phpunit.result.cache
 .phpunit.cache/
-tests/**/.phpunit.result.cache
+tests/**/.phpunit.result.cachemagento-install/
