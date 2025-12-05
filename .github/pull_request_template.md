@@ -42,4 +42,5 @@
 - [ ] Tests pass
 - [ ] Added relevant tests
 - [ ] Logging & Observability
+- [ ] Composer version updated
 

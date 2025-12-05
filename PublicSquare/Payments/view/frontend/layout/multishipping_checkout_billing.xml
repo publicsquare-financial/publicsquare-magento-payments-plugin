@@ -1,0 +1,29 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="PublicSquare_Payments::styles.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="PublicSquare\Payments\Block\Frontend\Form"
+                   name="publisquare_payments.multiship"
+                   template="PublicSquare_Payments::form/multishipping-cc.phtml"
+                   cacheable="false">
+                <!--
+                This nested block is actually manually created inside the
+                PublicSquare\Payments\Block\Frontend\Form block.
+
+                It seems like the only thing this layout XML actually
+                does is add the CSS file in the head.
+                -->
+                <block class="PublicSquare\Payments\Block\CreditCardForm"
+                       name="publicsquare_payments.cc.form">
+                    <arguments>
+                        <argument name="showCardholderInput" xsi:type="boolean">true</argument>
+                    </arguments>
+                </block>
+                <container name="payment_methods_before" label="Payment Methods Before"/>
+                <container name="payment_methods_after" label="Payment Methods After"/>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

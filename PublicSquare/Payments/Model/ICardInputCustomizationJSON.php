@@ -1,6 +1,6 @@
 <?php
 
-namespace PublicSquare\Payments;
+namespace PublicSquare\Payments\Model;
 
 interface ICardInputCustomizationJSON
 {

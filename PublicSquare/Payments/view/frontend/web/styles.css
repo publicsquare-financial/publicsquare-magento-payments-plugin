@@ -8,7 +8,7 @@
  * @license   http://opensource.org/licenses/osl-3.0.php (OSL 3.0)
  * @link https://publicsquare.com/
  */
- 
+
 #publicsquare-elements-form {
     margin-bottom: 1em;
     border: 1px solid #ddd;
@@ -18,4 +18,182 @@
 
 .payment-method-vault-checkbox {
     margin-bottom: 1em;
+}
+
+.psq-form {
+    display: flex;
+    flex-flow: row wrap;
+    column-gap: 4px;
+    row-gap: 8px;
+    align-content: flex-start;
+}
+
+.psq-form__header,
+.psq-form__content,
+.psq-form__footer {
+    flex: 1 100%;
+    display: flex;
+    flex-flow: row wrap;
+    column-gap: 4px;
+    row-gap: 8px;
+}
+
+.psq-form__actions {
+    flex-direction: row-reverse;
+    align-content: flex-end;
+}
+
+.psq-form__header,
+.psq-form__content {
+    align-content: flex-start;
+}
+
+.psq-form__footer {
+    margin-top: 18px;
+    align-content: flex-end;
+}
+
+.psq-form__footer .psq-form__cell {
+    flex: 1;
+}
+
+.psq-form__header {
+    font-size: larger;
+}
+
+
+.psq-form__label {
+    display: block;
+}
+
+.psq-form__cell {
+    padding: 4px 8px;
+}
+
+.psq-form__cell--cc {
+    flex: 1 100%;
+}
+
+.psq-form__cell--exp {
+    flex: 1 100%;
+}
+
+.psq-form__cell--cvc {
+    flex: 1 100%;
+}
+
+.psq-form__cell--billing-address,
+.psq-form__cell--cc-types {
+    flex: 1 100%;
+}
+
+.psq-form__cell--card-holder {
+    flex: 1 100%;
+}
+
+.psq-form__cell--vault {
+    flex: 1 100%;
+    display: flex;
+    flex-flow: row wrap;
+    column-gap: 4px;
+    row-gap: 4px;
+    align-content: flex-start;
+}
+
+.psq-form__cell--cc-types {
+    margin: 0;
+    padding: 0;
+}
+
+.psq-form__input {
+    border: 1px;
+    width: 100%;
+}
+
+.psq-form__input--cc {
+}
+
+.psq-form__input--exp {
+}
+
+.psq-form__input--cvc {
+}
+
+.psq-form__input--card-holder {
+}
+
+.psq-form__input--vault {
+    width: auto;
+    order: 1;
+}
+
+.psq-form__cell--vault .psq-form__label {
+    order: 2;
+    top: 3px;
+    position: relative;
+}
+
+.psq-form__button {
+}
+
+.psq-form__button--vault {
+}
+
+.psq-form__button--submit {
+    flex: 1;
+}
+
+.psq-form__button--add {
+}
+
+.psq-form__button--cancel {
+}
+
+.psq-form__cta {
+    font-weight: bolder;
+}
+
+.psq-form input {
+    border: none;
+}
+
+.psq-form__cc-types {
+    text-decoration: none;
+    display: block;
+    padding-inline-start: 0;
+    opacity: 70%;
+    margin: 0;
+    margin-block-end: 0;
+    margin-bottom: 0;
+}
+
+.psq-form__cc-type {
+    display: inline-block;
+    width: 40px;
+    height: 30px;
+    padding: 0;
+    margin: 0 4px;
+}
+
+.psq-form__cc-type img {
+    width: 40px;
+    height: 30px;
+    padding: 0;
+    margin: 0;
+}
+
+.psq-add-card {
+    display: block;
+    margin-top: 18px;
+
+}
+
+.psq-add-card__form--hidden {
+    visibility: hidden;
+}
+
+.psq-add-card__form {
+    display: block;
+    padding: 4px;
+    margin-top: 8px;
 }
