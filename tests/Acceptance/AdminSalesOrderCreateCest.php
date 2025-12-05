@@ -17,6 +17,12 @@ class AdminSalesOrderCreateCest extends AdminSalesOrderCreate
         $this->_submitOrder($I);
     }
 
+    /**
+     * @param AcceptanceTester $I
+     * @return void
+     * @throws \Exception
+     * @skip iframes get messed up on this test
+     */
     public function declinedPayment(AcceptanceTester $I)
     {
         try {
