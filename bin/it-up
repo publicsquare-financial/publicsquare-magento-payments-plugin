@@ -1,19 +1,69 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Starting IT stack using compose.yaml..."
-docker compose up -d --remove-orphans
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${DIR}/.." >/dev/null 2>&1 && pwd )"
 
-echo "Waiting for db and opensearch health..."
-for i in {1..30}; do
-  DB_STATE=$(docker inspect -f '{{.State.Health.Status}}' publicsquare-magento-payments-plugin-db-1 2>/dev/null || true)
-  OS_STATE=$(docker inspect -f '{{.State.Health.Status}}' publicsquare-magento-payments-plugin-opensearch-1 2>/dev/null || true)
-  if [[ "$DB_STATE" == "healthy" && "$OS_STATE" == "healthy" ]]; then
-    echo "Dependencies healthy."; break
+# Use the same targeted Magento install directory / version / host convention as bin/it-install.
+# Default to a 'magento-install' directory at the project root, but allow override via first arg.
+MAGENTO_DIR="${1:-$ROOT_DIR/magento-install}"
+MAGENTO_VERSION="${2:-2.4.8-p3}"
+MAGENTO_HOST="${3:-magento.test}"
+
+# Ensure .gitignore contains the install path
+__ensure_line_in_file() {
+  local FILEPATH="$1"
+  local LINE="$2"
+
+  grep -F -- "${LINE}" "${FILEPATH}" >/dev/null 2>&1 || echo -e "\n${LINE}\n" >> "${FILEPATH}"
+}
+
+NEEDS_INSTALL=0
+if [[ ! -d "${MAGENTO_DIR}" ]]; then
+  echo "Magento install directory '${MAGENTO_DIR}' does not exist. Initial Magento setup will be run."
+  NEEDS_INSTALL=1
+else
+  # Directory exists, but we also want to ensure the core src tree is present.
+  if [[ ! -x "${MAGENTO_DIR}/bin/magento" || ! -d "${MAGENTO_DIR}/src/app" || ! -f "${MAGENTO_DIR}/src/composer.json" ]]; then
+    echo "Magento directory '${MAGENTO_DIR}' exists but does not look initialized (missing core src files)."
+    echo "Initial Magento setup will be run and the directory will be recreated."
+    NEEDS_INSTALL=1
   fi
-  sleep 2
-done
+fi
 
-echo "IT stack is up."
+if [[ "${NEEDS_INSTALL}" -eq 1 ]]; then
+  echo
+  echo "Magento will be installed in ${MAGENTO_DIR} using markshust/docker-magento onelinesetup."
+  echo "For this to be successful this directory should be empty and any previous containers/volumes removed."
+  echo
+  # If the directory exists but was incomplete, remove it so onelinesetup can recreate cleanly.
+  if [[ -d "${MAGENTO_DIR}" ]]; then
+    echo "Removing existing directory '${MAGENTO_DIR}' so it can be recreated..."
+    rm -rf "${MAGENTO_DIR}"
+  fi
+  mkdir -vp "${MAGENTO_DIR}"
+  cd "${MAGENTO_DIR}"
 
+  echo "Running Magento onelinesetup for host '${MAGENTO_HOST}' and version '${MAGENTO_VERSION}'..."
+  curl -s https://raw.githubusercontent.com/markshust/docker-magento/master/lib/onelinesetup \
+    | bash -s -- "${MAGENTO_HOST}" community "${MAGENTO_VERSION}"
+  echo "Initial Magento onelinesetup completed."
 
+  # Clean up inner git repo and ensure we ignore the install directory in this project
+  rm -rf "${MAGENTO_DIR}.git"
+  __ensure_line_in_file "${ROOT_DIR}/.gitignore" "${MAGENTO_DIR##*/}/"
+else
+  echo "Existing Magento install detected at '${MAGENTO_DIR}', skipping onelinesetup."
+  cd "${MAGENTO_DIR}"
+fi
+
+if [[ ! -x "${MAGENTO_DIR}/bin/start" ]]; then
+  echo "Expected '${MAGENTO_DIR}/bin/start' to exist and be executable, but it was not found."
+  echo "Ensure the Magento installation in '${MAGENTO_DIR}' completed successfully."
+  exit 1
+fi
+
+echo "Starting IT Magento stack in '${MAGENTO_DIR}'..."
+"${MAGENTO_DIR}/bin/start"
+
+echo "IT Magento stack is starting. Use '${MAGENTO_DIR}/bin/cli' for Magento CLI commands."
