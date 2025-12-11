@@ -1,10 +1,50 @@
 #!/usr/bin/env bash
-bin/cli composer install
-bin/magento maintenance:enable
-bin/cli rm -rf generated/code var/view_preprocessed
-bin/magento cache:flush
-bin/magento setup:upgrade
-bin/magento setup:di:compile
-bin/magento setup:static-content:deploy en_US "$@" -f
-bin/magento maintenance:disable
-bin/magento cache:flush
+set -euo pipefail
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${DIR}/.." >/dev/null 2>&1 && pwd )"
+
+# Use the same targeted Magento install directory / version / host convention as bin/it-install / bin/it-up.
+# Defaults:
+#   MAGENTO_DIR   -> "<repo-root>/magento-install"
+#   MAGENTO_VERSION & MAGENTO_HOST are accepted for parity but unused here (kept for consistent CLI shape).
+MAGENTO_DIR="${1:-$ROOT_DIR/magento-install}"
+MAGENTO_VERSION="${2:-2.4.8-p3}"
+MAGENTO_HOST="${3:-magento.test}"
+
+# Remaining args (from the 4th arg onwards) are passed through as locale codes to static-content:deploy.
+if [[ "$#" -gt 3 ]]; then
+  shift 3
+  STATIC_LOCALES=("$@")
+else
+  # Default locale if none were provided.
+  STATIC_LOCALES=("en_US")
+fi
+
+if [[ ! -x "${MAGENTO_DIR}/bin/cli" ]]; then
+  echo "Expected '${MAGENTO_DIR}/bin/cli' to exist and be executable, but it was not found."
+  echo "Run './bin/it-up' first to provision the targeted Magento environment."
+  exit 1
+fi
+
+CLI="${MAGENTO_DIR}/bin/cli"
+
+echo "Deploying Magento code to IT environment in '${MAGENTO_DIR}'..."
+
+# Ensure we execute within the Magento install directory for any relative paths
+cd "${MAGENTO_DIR}"
+
+# Install/update PHP dependencies inside the Magento container
+"${CLI}" composer install
+
+# Standard Magento deploy sequence
+"${CLI}" bin/magento maintenance:enable
+"${CLI}" rm -rf generated/code var/view_preprocessed
+"${CLI}" bin/magento cache:flush
+"${CLI}" bin/magento setup:upgrade
+"${CLI}" bin/magento setup:di:compile
+"${CLI}" bin/magento setup:static-content:deploy "${STATIC_LOCALES[@]}" -f
+"${CLI}" bin/magento maintenance:disable
+"${CLI}" bin/magento cache:flush
+
+echo "Deployment complete for Magento install at '${MAGENTO_DIR}'. You may access the site at https://${MAGENTO_HOST}"

@@ -55,7 +55,19 @@ define([], function requirePsqConfig() {
 
         cardInputCustomization() {
             const json = this.psqPaymentConfig().cardInputCustomization;
-            return json && JSON.parse(json);
+            if (!json) {
+                // Default to empty config instead of null to avoid
+                // errors in the PublicSquare JS SDK when it expects an object.
+                return {};
+            }
+            try {
+                return JSON.parse(json);
+            } catch (e) {
+                // If admin configuration contains invalid JSON, fall back
+                // gracefully rather than breaking checkout initialization.
+                console.error('psq: Invalid cardInputCustomization JSON', e, json);
+                return {};
+            }
         }
 
 
