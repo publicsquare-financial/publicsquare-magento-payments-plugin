@@ -5,7 +5,10 @@ ROOT_DIR="$( cd "${DIR}/.." >/dev/null 2>&1 && pwd )"
 
 # Set install directory / magento version / host
 MAGENTO_DIR="${1:-$ROOT_DIR/magento-install}"
-MAGENTO_VERSION="${2:-2.4.8-p3}"
+DEFAULT_MAGENTO_VERSION="2.4.8-p3"
+# Allow MAGENTO_VERSION to be overridden via environment variable,
+# otherwise fall back to CLI arg 2, then to DEFAULT_MAGENTO_VERSION.
+MAGENTO_VERSION="${MAGENTO_VERSION:-${2:-$DEFAULT_MAGENTO_VERSION}}"
 MAGENTO_HOST="${3:-magento.test}"
 
 set -euo pipefail
