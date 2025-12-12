@@ -15,15 +15,6 @@ DEFAULT_MAGENTO_VERSION="2.4.8-p3"
 MAGENTO_VERSION="${MAGENTO_VERSION:-${2:-$DEFAULT_MAGENTO_VERSION}}"
 MAGENTO_HOST="${3:-magento.test}"
 
-# Remaining args (from the 4th arg onwards) are passed through as locale codes to static-content:deploy.
-if [[ "$#" -gt 3 ]]; then
-  shift 3
-  STATIC_LOCALES=("$@")
-else
-  # Default locale if none were provided.
-  STATIC_LOCALES=("en_US")
-fi
-
 if [[ ! -x "${MAGENTO_DIR}/bin/cli" ]]; then
   echo "Expected '${MAGENTO_DIR}/bin/cli' to exist and be executable, but it was not found."
   echo "Run './bin/it-up' first to provision the targeted Magento environment."
@@ -46,7 +37,8 @@ cd "${MAGENTO_DIR}"
 "${CLI}" bin/magento cache:flush
 "${CLI}" bin/magento setup:upgrade
 "${CLI}" bin/magento setup:di:compile
-"${CLI}" bin/magento setup:static-content:deploy "${STATIC_LOCALES[@]}" -f
+"${CLI}" bin/magento indexer:reindex
+"${CLI}" bin/magento setup:static-content:deploy -f
 "${CLI}" bin/magento maintenance:disable
 "${CLI}" bin/magento cache:flush
 
