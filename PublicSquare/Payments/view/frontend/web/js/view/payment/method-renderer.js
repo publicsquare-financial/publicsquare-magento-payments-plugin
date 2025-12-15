@@ -11,7 +11,7 @@ define(
         rendererList.push(
             {
                 type: 'publicsquare_payments',
-                component: 'PublicSquare_Payments/js/view/payment/method-renderer/publicsquare_payments-method'
+                component: 'PublicSquare_Payments/js/view/payment/method-renderer/psq-payment-method'
             }
         );
         /**

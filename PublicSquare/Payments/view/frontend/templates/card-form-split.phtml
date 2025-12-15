@@ -1,0 +1,38 @@
+<?php if ($this->showCardholderInput()): ?>
+    <div class="psq-form__cell psq-form__cell--card-holder field required">
+        <label for="psq-cardholder label" class="psq-form__label">Cardholder Name</label>
+        <div class="psq-form__input psq-form__input--card-holder control">
+            <input id="psq-cardholder"
+                   name="cardholder"
+                   title="Cardholder Name"
+                   aria-label="Cardholder Name"
+                   value="<?php echo $escaper->escapeHtmlAttr($this->getCustomerName()); ?>">
+        </div>
+    </div>
+<?php endif; ?>
+
+
+<div class="psq-form__cell psq-form__cell--cc-types" title="Supported credit card types">
+    <ul class="psq-form__cc-types" aria-label="Supported credit card types">
+        <?php foreach ($this->getCreditCardTypes() as $type): ?>
+            <li class="psq-form__cc-type <?php echo $escaper->escapeHtmlAttr($type->classes); ?>"
+                data-type="<?php echo $escaper->escapeHtmlAttr($type->type); ?>"
+                title="<?php echo $escaper->escapeHtmlAttr($type->title); ?>">
+                <img src="<?php echo $escaper->escapeUrl($type->iconSrc); ?>"
+                     alt="<?php echo $escaper->escapeHtmlAttr($type->altText); ?>">
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+<div class="psq-form__cell psq-form__cell--cc field required">
+    <span class="psq-form__label label">Credit Card Number</span>
+    <div id="psq-card-num" class="psq-form__input psq-form__input--cc control"></div>
+</div>
+<div class="psq-form__cell psq-form__cell--exp field required">
+    <span class="psq-form__label label">Expiration Date</span>
+    <div id="psq-exp" class="psq-form__input psq-form__input--exp control"></div>
+</div>
+<div class="psq-form__cell psq-form__cell--cvc field number required">
+    <span class="psq-form__label label">Card Verification Number (CVC)</span>
+    <div id="psq-cvc" class="psq-form__input psq-form__input--cvc control"></div>
+</div>

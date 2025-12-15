@@ -95,6 +95,22 @@
                     </comment>
                     <!--<validate>validate-json</validate>-->
                 </field>
+                <field id="card_form_layout"
+                       translate="label"
+                       type="select"
+                       sortOrder="21"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1"
+                       canRestore="1">
+                    <label>Credit Card Form Layout</label>
+                    <comment><![CDATA[The layout style for the card input forms]]></comment>
+                    <source_model>PublicSquare\Payments\Model\Adminhtml\Source\CardFormLayout</source_model>
+                    <!--<options>
+                        <option value="single">Single Input</option>
+                        <option value="split-a">Separate Inputs</option>
+                    </options>-->
+                </field>
             </group>
         </section>
     </system>

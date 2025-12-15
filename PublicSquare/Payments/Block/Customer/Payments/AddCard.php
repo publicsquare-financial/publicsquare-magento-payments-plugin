@@ -6,8 +6,8 @@ use Magento\Customer\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\View\Element\Template;
-use PublicSquare\Payments\ICardInputCustomizationJSON;
 use PublicSquare\Payments\Logger\Logger;
+use PublicSquare\Payments\Model\ICardInputCustomizationJSON;
 
 class AddCard extends Template implements ICardInputCustomizationJSON
 {
@@ -26,6 +26,8 @@ class AddCard extends Template implements ICardInputCustomizationJSON
 
     private string $publicKey;
 
+    private string $cardFormLayout;
+
     private string|null $cardInputCustomJSON;
 
     public function __construct(
@@ -35,7 +37,7 @@ class AddCard extends Template implements ICardInputCustomizationJSON
         Session                              $session,
         ScopeConfigInterface                 $config,
         Logger                               $logger,
-        array                                $data = []
+        array                                $data = [],
     )
     {
         parent::__construct($context, $data);
@@ -46,7 +48,9 @@ class AddCard extends Template implements ICardInputCustomizationJSON
         $this->publicKey = $psqConfig->getPublicAPIKey();
 
         $this->cardInputCustomJSON = $psqConfig->getCardInputCustomizationJSON();
+        $this->cardFormLayout = $psqConfig->getCardFormLayout();
         $logger->debug("Magento_Vault: {$this->vaultEnabled} PSQVaultEnabled: {$this->psqVaultConfigEnabled}");
+
     }
 
     /**
@@ -70,6 +74,11 @@ class AddCard extends Template implements ICardInputCustomizationJSON
     public function getPublicKey(): string
     {
         return $this->publicKey;
+    }
+
+    public function getCardFormLayout(): string
+    {
+        return $this->cardFormLayout;
     }
 
     public function getCardInputCustomizationJSON(): string|null

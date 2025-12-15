@@ -1,151 +1,129 @@
 <?php
 /** @var PublicSquare\Payments\Block\Frontend\Form $block */
-$code = $block->escapeHtml($block->getMethodCode());
+$code = $escaper->escapeHtml($block->getMethodCode());
 ?>
-<fieldset class="fieldset payment-method"
-    id="payment_form_<?= /* @noEscape */ $code ?>">
-
-    <div class="field _required">
-      <label class="label" for="<?= /* @noEscape */ $code ?>_cardholder_name">
-        <span><?= $block->escapeHtml(__('Name on Card')) ?></span>
-      </label>
-      <div class="control" style="margin-bottom: 1em">
-        <input type="text"
-               id="<?= /* @noEscape */ $code ?>_cardholder_name"
-               name="payment[cardholder_name]"
-               class="input-text" required />
-      </div>
-      <div class="field number required">
-        <div class="control">
-          <div id="publicsquare-elements-form"></div>
-        </div>
-      </div>
-      <?php if ($block->isVaultEnabled() && $block->isCustomerLoggedIn()): ?>
-      <div class="field choice payment-method-vault-checkbox" style="margin-top: 1em">
-        <input type="checkbox"
-               name="vault[is_enabled]"
-               class="checkbox"
-               id="<?= /* @noEscape */ $code ?>_enable_vault" />
-        <label class="label" for="<?= /* @noEscape */ $code ?>_enable_vault">
-          <span><?= $block->escapeHtml(__('Save for later use.')) ?></span>
-        </label>
-      </div>
-      <?php endif; ?>
+<div class="psq-add-card__form psq-add-card__form--multi-ship psq-form">
+    <div class="psq-add-card__form__header">
+        <p class="psq-form__cta">Enter new card information</p>
 
     </div>
+    <div class="psq-form__content" aria-label="Credit card form">
 
-    <div id="publicsquare_error_message" class="message error" role="alert" style="display:none"></div>
-</fieldset>
+        <?php echo $this->getChildHtml(); ?>
 
-<input type="hidden" id="<?= /* @noEscape */ $code ?>_card_id"
-       name="payment[additional_data][cardId]" required />
+        <?php if ($block->isVaultEnabled()): ?>
+        <div class="psq-form__cell psq-form__cell--vault field number">
+            <label for="psq-save-card" class="psq-form__label label">Save card for later</label>
+            <input type="checkbox" id="psq-save-card" class="psq-form__input psq-form__input--vault control"></input>
+        </div>
+        <?php endif; ?>
 
-<input type="hidden" id="<?= /* @noEscape */ $code ?>_idempotency_key"
-       name="payment[additional_data][idempotencyKey]" />
+        <div id="publicsquare_error_message" class="message error" role="alert" style="display:none"></div>
 
-<input type="hidden" id="<?= /* @noEscape */ $code ?>_save_card"
-       name="payment[additional_data][saveCard]" />
+        <input type="hidden" id="<?= /* @noEscape */
+        $code ?>_card_id" name="payment[additional_data][cardId]" required/>
 
-<script>
-require(['jquery', 'PublicSquare_Payments/js/publicsquare_payments'], function ($) {
-  'use strict';
-  var code = '<?= $code ?>';
-  var selector = '#publicsquare-elements-form';
-  var apiKey = '<?= $block->escapeJs($block->getPublicApiKey()) ?>';
-  const cardInputCustomizationJSON = `<?php echo $escaper->escapeJs($block->getCardInputCustomizationJSON()); ?>`;
-  const cardInputCustomization = JSON.parse(cardInputCustomizationJSON || '{}');
+        <input type="hidden" id="<?= /* @noEscape */
+        $code ?>_idempotency_key" name="payment[additional_data][idempotencyKey]"/>
 
-  function generateIdempotencyKey() {
-    var timestamp = Date.now().toString();
-    var random = Math.random().toString(36).substr(2, 9);
-    return timestamp + random;
-  }
+        <input type="hidden" id="<?= /* @noEscape */
+        $code ?>_save_card" name="payment[additional_data][saveCard]"/>
+    </div>
+</div>
 
-  function unmount() {
-    $('#' + code + '_cardholder_name').prop('disabled', true)
-    $('#' + code + '_cardholder_name').val('')
 
-    $('#' + code + '_card_id').prop('disabled', true)
+<script <?php if ($block->getCspNonceProvider()) echo ' nonce="' . $block->getCspNonceProvider()->generateNonce() . '" ' ?>>
+    require([
+                'jquery',
+                'mage/translate',
+                'Magento_Ui/js/model/messageList',
+                'PublicSquare_Payments/js/card-form-factory',
+                'PublicSquare_Payments/js/utils',
+            ], function ($, $t, messageList, cardFormFactory, utils) {
+        'use strict';
+        const code = '<?= $code ?>';
+        const psqPublicKey = '<?= $block->escapeJs($block->getPublicApiKey()) ?>';
+        const cardFormLayout = '<?php echo $this->getCardFormLayout(); ?>';
+        let cardForm = undefined;
+        let idempotencyKey = utils.generateIdempotencyKey();
+        const cardInputCustomizationJSON = `<?php echo $escaper->escapeJs($block->getCardInputCustomizationJSON()); ?>`;
+        const cardInputCustomization = JSON.parse(cardInputCustomizationJSON || '{}');
+        const vaultEnabled = <?php echo $escaper->escapeJs($block->isVaultEnabled()) ?>;
 
-    $('#' + code + '_idempotency_key').prop('disabled', true)
-    $('#' + code + '_save_card').prop('disabled', true)
-  }
 
-  function mount() {
-    if (window.publicsquare && typeof window.publicsquare.initElements === 'function') {
-      window.publicsquare.initElements({ apiKey: apiKey, selector: selector, cardInputCustomization });
-    }
-
-    $('#' + code + '_cardholder_name').prop('disabled', false)
-    $('#' + code + '_card_id').prop('disabled', false)
-    $('#' + code + '_idempotency_key').prop('disabled', false)
-    $('#' + code + '_save_card').prop('disabled', false)
-  }
-
-  $(function () {
-    // ensure idempotency key exists on load
-    var $idem = $('#' + code + '_idempotency_key');
-    if (!$idem.val()) {
-      $idem.val(generateIdempotencyKey());
-    }
-
-    mount();
-
-    // Remount when user re-selects this method
-    $(document).on('change', 'input[name="payment[method]"]', function () {
-      if (this.value === 'publicsquare_payments' && this.checked) {
-        mount();
-      } else {
-        unmount();
-      }
-    });
-
-    // Adding this as there are some edge cases where going back doesn't successfully mount keeping it disabled
-    $(document).on('click', '#' + code + '_cardholder_name', function (e) {
-      var $el = $(this);
-      if ($el.prop('disabled')) {
-          // Remove disabled so it becomes enabled
-          $el.prop('disabled', false);
-
-          // Optionally: focus the element
-          $el.focus();
-
-          // Optionally: prevent default behaviour if any
-          e.preventDefault();
-      }
-    });
-
-    // Save card vault
-    $(document).on('change', '#' + code + '_enable_vault', function () {
-      $('#' + code + '_save_card').val(this.checked ? 'true' : '');
-    });
-
-    // Intercept submit to tokenize and set hidden fields
-    var $form = $("#multishipping-billing-form");
-    $form.on('submit.publicsquare', async function (e) {
-
-      // If method radios exist, only intercept when our method is selected
-      var method = $('input[name="payment[method]"]:checked').val();
-      if (method && method !== 'publicsquare_payments') { return; }
-
-      e.preventDefault();
-      try {
-        var card = window.publicsquare && window.publicsquare.cardElement;
-        if (!card) { mount(); card = window.publicsquare && window.publicsquare.cardElement; }
-        // Read cardholder name from input
-        var cardholderName = ($('#' + code + '_cardholder_name').val() || '').trim();
-        // regenerate idempotency key on each submit attempt
-        $('#' + code + '_idempotency_key').val(generateIdempotencyKey());
-        var res = await window.publicsquare.createCard(cardholderName, card);
-        if (res.id) {
-          $('#' + code + '_card_id').val(res.id);
+        function unmount() {
+            $('#' + code + '_card_id').prop('disabled', true);
+            $('#' + code + '_idempotency_key').prop('disabled', true);
+            $('#' + code + '_save_card').prop('disabled', true);
         }
-        $form.off('submit.publicsquare').trigger('submit');
-      } catch (err) {
-        var msg = (err && err.message) || 'Error saving card.';
-        $('#publicsquare_error_message').text(msg).show();
-      }
+
+        function mount() {
+
+            if (!cardForm) {
+                cardForm = cardFormFactory({type: cardFormLayout});
+                cardForm.bind({psqPublicKey, cardInputCustomization});
+            }
+
+            $('#' + code + '_card_id').prop('disabled', false);
+            $('#' + code + '_idempotency_key').prop('disabled', false);
+            $('#' + code + '_save_card').prop('disabled', false);
+        }
+
+        $(function () {
+            // ensure idempotency key exists on load
+            const $idem = $('#' + code + '_idempotency_key');
+
+            mount();
+
+            // Remount when user re-selects this method
+            $(document).on('change', 'input[name="payment[method]"]', function () {
+                if (this.value === 'publicsquare_payments' && this.checked) {
+                    mount();
+                } else {
+                    unmount();
+                }
+            });
+
+            // Save card vault
+            $(document).on('change', '#psq-save-card', function () {
+                if(vaultEnabled) {
+                    $('#' + code + '_save_card').val(this.checked || false);
+                }
+            });
+
+            // Intercept submit to tokenize and set hidden fields
+            const $form = $("#multishipping-billing-form");
+            $form.on('submit.publicsquare', async function (e) {
+
+                // If method radios exist, only intercept when our method is selected
+                const method = $('input[name="payment[method]"]:checked').val();
+                if (method && method !== 'publicsquare_payments') { return; }
+
+                e.preventDefault();
+                try {
+
+                    // Read cardholder name from input
+
+                    let card = await cardForm.createCard();
+
+                    if (!card) {
+                        // cardForm will create it's own errors in the message list
+                        return;
+                    }
+                    // regenerate idempotency key on each submit attempt
+                    $idem.val(idempotencyKey);
+                    if (card.id) {
+                        $('#' + code + '_card_id').val(card.id);
+                    }
+                    $form.off('submit.publicsquare').trigger('submit');
+                } catch (err) {
+                    console.warn('psq: Failed to submit order.', err);
+                    const msg = (
+                                    err && err.message
+                                ) || 'Error saving card.';
+                    messageList.addErrorMessage({message: $t(msg)});
+                }
+            });
+        });
     });
-  });
-});
 </script>
