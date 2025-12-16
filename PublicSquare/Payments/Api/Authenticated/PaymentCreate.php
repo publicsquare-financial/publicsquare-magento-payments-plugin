@@ -81,6 +81,16 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
                 "country" => $billingAddress->getCountryId(),
             ],
         ];
+        if($this->configHelper->isPaymentDynamicDescriptorEnabled()) {
+            $dynamicDescriptor = [
+                "merchant_name" => $this->configHelper->getPaymentDynamicDescriptorMerchant() ?: $this->configHelper->getMerchantName(),
+                "merchant_contact" => $this->configHelper->getPaymentDynamicDescriptorContact(),
+            ];
+
+            if($dynamicDescriptor["merchant_name"] != null) {
+                $this->requestData['dynamic_descriptor'] = $dynamicDescriptor;
+            }
+        }
         if ($shippingAddress) {
             $this->requestData['shipping_address'] = [
                 "address_line_1" => $shippingAddress->getStreet()[0],

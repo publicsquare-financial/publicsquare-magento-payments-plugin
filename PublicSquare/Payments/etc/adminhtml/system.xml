@@ -95,6 +95,19 @@
                     </comment>
                     <!--<validate>validate-json</validate>-->
                 </field>
+                <field id="dynamic_descriptor_enabled" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Enable Dynamic Payment Descriptors</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[Set merchant name and contact on payment descriptor.]]></comment>
+                </field>
+                <field id="dynamic_descriptor_merchant" translate="label" type="text" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Dynamic Payment Descriptor Merchant Name</label>
+                    <comment><![CDATA[The merchant name to use on the payment descriptor. Example: Test Corporation.]]></comment>
+                </field>
+                <field id="dynamic_descriptor_merchant_contact" translate="label" type="text" sortOrder="22" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Dynamic Payment Descriptor Merchant Contact</label>
+                    <comment><![CDATA[The contact info to use on the payment descriptor. Example: +15552604982]]></comment>
+                </field>
             </group>
         </section>
     </system>
