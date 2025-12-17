@@ -12,3 +12,4 @@ tests/_output
 .phpunit.result.cache
 .phpunit.cache/
 tests/**/.phpunit.result.cache
+magento-install/
