@@ -108,7 +108,7 @@ This feature must also be enabled in the PSQ Portal under Settings → Features 
                     <depends>
                         <field id="dynamic_descriptor_enabled">1</field>
                     </depends>
-                    <validate>validate-length maximum-length-22</validate>
+                    <validate>required-entry validate-length minimum-length-1 maximum-length-22</validate>
                 </field>
                 <field id="dynamic_descriptor_merchant_contact" translate="label" type="text" sortOrder="22" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Dynamic Payment Descriptor Merchant Contact</label>
@@ -116,7 +116,7 @@ This feature must also be enabled in the PSQ Portal under Settings → Features 
                     <depends>
                         <field id="dynamic_descriptor_enabled">1</field>
                     </depends>
-                    <validate>validate-length maximum-length-13</validate>
+                    <validate>validate-length minimum-length-1 maximum-length-13</validate>
                 </field>
             </group>
         </section>
