@@ -29,7 +29,7 @@ curl -s https://raw.githubusercontent.com/markshust/docker-magento/master/lib/on
     | bash -s -- "${MAGENTO_HOST}" community "${MAGENTO_VERSION}"
 echo "Initial install completed"
 
-rm -rf "${MAGENTO_DIR}.git"
+rm -rf "${MAGENTO_DIR}/.git"
 __ensure_line_in_file "${DIR}/.gitignore" "${MAGENTO_DIR##*/}/"
 
 
