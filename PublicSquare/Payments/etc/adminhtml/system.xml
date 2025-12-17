@@ -96,9 +96,11 @@
                     <!--<validate>validate-json</validate>-->
                 </field>
                 <field id="dynamic_descriptor_enabled" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
-                    <label>Enable Dynamic Payment Descriptors</label>
+                    <label>Enable Dynamic Payment Descriptor</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment><![CDATA[Set merchant name and contact on payment descriptor.]]></comment>
+                    <comment><![CDATA[If enabled, the merchant name and contact below will be sent on payments.
+If not set, PSQ defaults will be used.
+This feature must also be enabled in the PSQ Portal under Settings → Features → Dynamic Descriptor (Request Feature).]]></comment>
                 </field>
                 <field id="dynamic_descriptor_merchant" translate="label" type="text" sortOrder="21" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Dynamic Payment Descriptor Merchant Name</label>
