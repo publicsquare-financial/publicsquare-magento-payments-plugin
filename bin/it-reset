@@ -1,12 +1,42 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Stopping IT stack and removing volumes using compose.yaml..."
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${DIR}/.." >/dev/null 2>&1 && pwd )"
+MAGENTO_DIR="${ROOT_DIR}/magento-install"
+
+cd "${ROOT_DIR}"
+
+echo "Stopping IT stack and removing volumes using root compose.yaml (if any)..."
 docker compose down -v --remove-orphans || true
 
-echo "Removing Magento and DB volumes for this project..."
+echo "Stopping and removing magento-install Docker stack (if present)..."
+if [[ -d "${MAGENTO_DIR}" && -x "${MAGENTO_DIR}/bin/removeall" ]]; then
+  echo "Running magento-install/bin/removeall non-interactively..."
+  (cd "${MAGENTO_DIR}" && yes | ./bin/removeall) || true
+else
+  echo "magento-install/bin/removeall not found, proceeding with manual cleanup..."
+fi
+
+echo "Removing any remaining magento-install containers..."
+MAGENTO_CONTAINERS="$(docker ps -a -q --filter 'name=magento-install-')"
+if [[ -n "${MAGENTO_CONTAINERS}" ]]; then
+  docker rm -f ${MAGENTO_CONTAINERS} || true
+fi
+
+echo "Removing any remaining magento-install networks..."
+MAGENTO_NETWORKS="$(docker network ls -q --filter 'name=magento-install')"
+if [[ -n "${MAGENTO_NETWORKS}" ]]; then
+  docker network rm ${MAGENTO_NETWORKS} || true
+fi
+
+echo "Removing any remaining magento-install volumes..."
+docker volume ls -q | grep -E '^magento-install_' | xargs -r docker volume rm || true
+
+echo "Removing legacy Magento and DB volumes for this project (root compose.yaml)..."
 docker volume ls -q | grep -E 'publicsquare-magento-payments-plugin_(magento-data|db-data)' | xargs -r docker volume rm || true
 
-echo "IT stack reset complete."
+echo "Removing magento-install directory at project root..."
+rm -rf "${MAGENTO_DIR}"
 
-
+echo "IT stack fully reset. You can now run 'make it-up' for a clean install."
