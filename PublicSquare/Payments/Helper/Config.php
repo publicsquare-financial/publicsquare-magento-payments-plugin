@@ -271,7 +271,9 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
 
     public function isPaymentDynamicDescriptorEnabled(): bool
     {
-        return $this->scopeConfig->getValue(self::DYN_DESC_ENABLED) === Boolean::VALUE_YES;
+        $enabled = $this->scopeConfig->getValue(self::DYN_DESC_ENABLED);
+        // coerce to boolean
+        return $enabled ? true : false;
     }
 
     public function getPaymentDynamicDescriptorMerchant(): string|null
