@@ -12,6 +12,7 @@
 
 namespace PublicSquare\Payments\Helper;
 
+use Magento\Eav\Model\Entity\Attribute\Source\Boolean;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Serialize\Serializer\Json;
@@ -270,7 +271,7 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
 
     public function isPaymentDynamicDescriptorEnabled(): bool
     {
-        return $this->scopeConfig->getValue(self::DYN_DESC_ENABLED) === true;
+        return $this->scopeConfig->getValue(self::DYN_DESC_ENABLED) === Boolean::VALUE_YES;
     }
 
     public function getPaymentDynamicDescriptorMerchant(): string|null
