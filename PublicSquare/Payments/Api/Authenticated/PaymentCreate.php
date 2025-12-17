@@ -87,15 +87,14 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
             $contact = $this->configHelper->getPaymentDynamicDescriptorMerchantContact();
             $dynamicDescriptor = [];
 
-            if($merchantName !== null && strlen($merchantName) > 0) {
+            if ($merchantName !== null && $merchantName != '') {
                 $dynamicDescriptor['merchant_name'] = substr($merchantName, 0, min(strlen($merchantName), 22));
             }
-            if($contact !== null && strlen($contact) > 0) {
+            if ($contact !== null && $contact != '') {
                 $dynamicDescriptor['merchant_contact'] = substr($contact, 0, min(strlen($contact), 13));
             }
 
-
-            if (isset($dynamicDescriptor["merchant_name"]) || isset($dynamicDescriptor["merchant_contact"])) {
+            if (array_key_exists('merchant_name', $dynamicDescriptor)) {
                 $this->requestData['dynamic_descriptor'] = $dynamicDescriptor;
             }
         }
@@ -169,7 +168,6 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
         try {
             $this->checkResponseStatus($data);
         } catch (ApiRejectedResponseException $e) {
-            error_log("Failed to create payment!" . json_encode($data));
             $this->logger->error("PSQ Payment rejected", [
                 "response" => $this->getSanitizedResponseData(),
             ]);
