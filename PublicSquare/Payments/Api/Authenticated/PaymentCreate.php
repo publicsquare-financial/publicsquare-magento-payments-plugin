@@ -95,7 +95,7 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
             }
 
 
-            if ($dynamicDescriptor["merchant_name"] !== null || $dynamicDescriptor["merchant_contact"] !== null) {
+            if (isset($dynamicDescriptor["merchant_name"]) || isset($dynamicDescriptor["merchant_contact"])) {
                 $this->requestData['dynamic_descriptor'] = $dynamicDescriptor;
             }
         }
