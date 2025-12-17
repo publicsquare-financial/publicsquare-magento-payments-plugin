@@ -141,6 +141,4 @@ echo "Disabling SMTP to avoid email send failures in IT..."
 #  bin/magento config:set carriers/freeshipping/free_shipping_subtotal 0 && \
 #  bin/magento cache:flush"
 
-cd "${DIR}"
 echo "IT install complete. You may now access Magento at https://${MAGENTO_HOST}"
-open "https://${MAGENTO_HOST}" || true
