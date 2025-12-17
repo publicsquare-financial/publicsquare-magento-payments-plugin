@@ -53,7 +53,7 @@ if [[ "${NEEDS_INSTALL}" -eq 1 ]]; then
   echo "Initial Magento onelinesetup completed."
 
   # Clean up inner git repo and ensure we ignore the install directory in this project
-  rm -rf "${MAGENTO_DIR}.git"
+  rm -rf "${MAGENTO_DIR}/.git"
   __ensure_line_in_file "${ROOT_DIR}/.gitignore" "${MAGENTO_DIR##*/}/"
 else
   echo "Existing Magento install detected at '${MAGENTO_DIR}', skipping onelinesetup."
