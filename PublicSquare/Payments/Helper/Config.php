@@ -12,28 +12,35 @@
 
 namespace PublicSquare\Payments\Helper;
 
-use Magento\Framework\Serialize\Serializer\Json;
+use Magento\Eav\Model\Entity\Attribute\Source\Boolean;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Serialize\Serializer\Json;
+use PublicSquare\Payments\ICardInputCustomizationJSON;
 
-class Config extends AbstractHelper
+class Config extends AbstractHelper implements ICardInputCustomizationJSON
 {
     const CODE = 'publicsquare_payments';
     const VAULT_CODE = 'publicsquare_payments_cc_vault';
-    const PUBLICSQUARE_ACTIVE_CONFIG_PATH                   = 'payment/publicsquare_payments/active';
-    const PUBLICSQUARE_TITLE_CONFIG_PATH                    = 'payment/publicsquare_payments/title';
-    const PUBLICSQUARE_ENVIRONMENT                          = 'payment/publicsquare_payments/environment';
-    const PUBLICSQUARE_API_PUBLIC_KEY                       = 'payment/publicsquare_payments/publicsquare_api_public_key';
-    const PUBLICSQUARE_API_SECRET_KEY                       = 'payment/publicsquare_payments/publicsquare_api_secret_key';
-    const PUBLICSQUARE_SECURITY_TYPE                        = 'payment/publicsquare_payments/security_type';
-    const PUBLICSQUARE_PRE_AUTHORIZATION_TYPE               = 'payment/publicsquare_payments/pre_authorization_type';
-    const PUBLICSQUARE_CVV_VERIFICATION                     = 'payment/publicsquare_payments/cvv_verification';
-    const PUBLICSQUARE_THREE_D_SECURE_AUTHENTICATION        = 'payment/publicsquare_payments/three_d_secure_authentication';
-    const PUBLICSQUARE_CARD_TYPES                           = 'payment/publicsquare_payments/card_types';
-    const PUBLICSQUARE_PAYMENT_ACTION                       = 'payment/publicsquare_payments/payment_action';
-    const PUBLICSQUARE_LOGGING_CONFIG_PATH                  = 'payment/publicsquare_payments/debug';
-    const PUBLICSQUARE_CARD_IMAGES_BASE_PATH                = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
-    const PUBLICSQUARE_CUSTOMER_LOOKUP                       = 'payment/publicsquare_payments/customer_lookup';
+    const PUBLICSQUARE_ACTIVE_CONFIG_PATH = 'payment/publicsquare_payments/active';
+    const PUBLICSQUARE_TITLE_CONFIG_PATH = 'payment/publicsquare_payments/title';
+    const PUBLICSQUARE_ENVIRONMENT = 'payment/publicsquare_payments/environment';
+    const PUBLICSQUARE_API_PUBLIC_KEY = 'payment/publicsquare_payments/publicsquare_api_public_key';
+    const PUBLICSQUARE_API_SECRET_KEY = 'payment/publicsquare_payments/publicsquare_api_secret_key';
+    const PUBLICSQUARE_SECURITY_TYPE = 'payment/publicsquare_payments/security_type';
+    const PUBLICSQUARE_PRE_AUTHORIZATION_TYPE = 'payment/publicsquare_payments/pre_authorization_type';
+    const PUBLICSQUARE_CVV_VERIFICATION = 'payment/publicsquare_payments/cvv_verification';
+    const PUBLICSQUARE_THREE_D_SECURE_AUTHENTICATION = 'payment/publicsquare_payments/three_d_secure_authentication';
+    const PUBLICSQUARE_CARD_TYPES = 'payment/publicsquare_payments/card_types';
+    const PUBLICSQUARE_PAYMENT_ACTION = 'payment/publicsquare_payments/payment_action';
+    const PUBLICSQUARE_LOGGING_CONFIG_PATH = 'payment/publicsquare_payments/debug';
+    const PUBLICSQUARE_CARD_IMAGES_BASE_PATH = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
+    const PUBLICSQUARE_CUSTOMER_LOOKUP = 'payment/publicsquare_payments/customer_lookup';
+    const PUBLICSQUARE_CARD_INPUT_CUSTOMIZATION = 'payment/publicsquare_payments/card_input_customization';
+    const DYN_DESC_ENABLED = 'payment/publicsquare_payments/dynamic_descriptor_enabled';
+    const DYN_DESC_MERCHANT = 'payment/publicsquare_payments/dynamic_descriptor_merchant';
+    const DYN_DESC_MERCHANT_CONTACT = 'payment/publicsquare_payments/dynamic_descriptor_merchant_contact';
+
     /**
      * @var \Magento\Framework\Serialize\Serializer\Json
      */
@@ -46,8 +53,9 @@ class Config extends AbstractHelper
      */
     public function __construct(
         Context $context,
-        Json $serializer = null
-    ) {
+        ?Json   $serializer = null,
+    )
+    {
         parent::__construct($context);
         $this->serializer = $serializer ?: \Magento\Framework\App\ObjectManager::getInstance()
             ->get(Json::class);
@@ -56,74 +64,79 @@ class Config extends AbstractHelper
     /**
      * Get publicsquare payment method active
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return boolean
      */
     public function getActive(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): bool {
-        return (bool) $this->scopeConfig
+        $scopeCode = null,
+    ): bool
+    {
+        return (bool)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_ACTIVE_CONFIG_PATH, $scopeType, $scopeCode);
     } //end getPublicSquareActive()
 
     /**
      * Get publicsquare payment method title
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return string
      */
     public function getPublicSquareTitle(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): string {
-        return (string) $this->scopeConfig
+        $scopeCode = null,
+    ): string
+    {
+        return (string)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_TITLE_CONFIG_PATH, $scopeType, $scopeCode);
     } //end getPublicSquareTitle()
 
     /**
      * Get public api key
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return string
      */
     public function getPublicAPIKey(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): string {
-        return (string) $this->scopeConfig
+        $scopeCode = null,
+    ): string
+    {
+        return (string)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_API_PUBLIC_KEY, $scopeType, $scopeCode);
     } //end getPublicAPIKey()
 
     /**
      * Get secret api key
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return string
      */
     public function getSecretAPIKey(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): string {
-        return (string) $this->scopeConfig
+        $scopeCode = null,
+    ): string
+    {
+        return (string)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_API_SECRET_KEY, $scopeType, $scopeCode);
     } //end getSecretAPIKey()
 
     /**
      * Get publicsquare payment method sort order
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return string
      */
     public function getEnvironment(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): string {
+        $scopeCode = null,
+    ): string
+    {
         return $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_ENVIRONMENT, $scopeType, $scopeCode);
     } //end getPublicSquareEnvironment()
@@ -131,45 +144,48 @@ class Config extends AbstractHelper
     /**
      * Get publicsquare payment method debug logging enabled
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return boolean
      */
     public function getLoggingEnabled(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): bool {
-        return (bool) $this->scopeConfig
+        $scopeCode = null,
+    ): bool
+    {
+        return (bool)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_LOGGING_CONFIG_PATH, $scopeType, $scopeCode);
     } //end getPublicSquareLoggingEnabled()
 
     /**
      * Get setting for customer lookup during checkout
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return boolean
      */
     public function getGuestCheckoutCustomerLookup(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): bool {
-        return (bool) $this->scopeConfig
+        $scopeCode = null,
+    ): bool
+    {
+        return (bool)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_CUSTOMER_LOOKUP, $scopeType, $scopeCode);
     } //end getGuestCheckoutCustomerLookup()
 
     /**
      * Get publicsquare payment capture action
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return string
      */
     public function getPaymentAction(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): string {
-        return (string) $this->scopeConfig
+        $scopeCode = null,
+    ): string
+    {
+        return (string)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_PAYMENT_ACTION, $scopeType, $scopeCode);
     } //end getPaymentAction()
 
@@ -181,21 +197,23 @@ class Config extends AbstractHelper
     /**
      * Get publicsquare payment allowed currencies
      *
-     * @param  string $scopeType
-     * @param  null   $scopeCode
+     * @param string $scopeType
+     * @param null $scopeCode
      * @return string
      */
     public function getAllowedCurrencies(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): array {
+        $scopeCode = null,
+    ): array
+    {
         return ['USD'];
     } //end getCaptureAction()
 
     public function getPreAuthorizationType(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-        $scopeCode = null
-    ): string {
+        $scopeCode = null,
+    ): string
+    {
         return $this->scopeConfig
             ->getValue(self::PUBLICSQUARE_PRE_AUTHORIZATION_TYPE, $scopeType, $scopeCode);
     }
@@ -244,5 +262,27 @@ class Config extends AbstractHelper
         $types = $this->getCountrySpecificCardTypeConfig($storeId);
 
         return (!empty($types[$country])) ? $types[$country] : [];
+    }
+
+    public function getCardInputCustomizationJSON(): string|null
+    {
+        return $this->scopeConfig->getValue(self::PUBLICSQUARE_CARD_INPUT_CUSTOMIZATION);
+    }
+
+    public function isPaymentDynamicDescriptorEnabled(): bool
+    {
+        $enabled = $this->scopeConfig->getValue(self::DYN_DESC_ENABLED);
+        // coerce to boolean
+        return $enabled ? true : false;
+    }
+
+    public function getPaymentDynamicDescriptorMerchant(): string|null
+    {
+        return $this->scopeConfig->getValue(self::DYN_DESC_MERCHANT);
+    }
+
+    public function getPaymentDynamicDescriptorMerchantContact(): string|null
+    {
+        return $this->scopeConfig->getValue(self::DYN_DESC_MERCHANT_CONTACT);
     }
 } //end class

@@ -4,7 +4,8 @@
   "type": "composer-plugin",
   "autoload": {
     "psr-4": {
-      "Tests\\": "tests/"
+      "Tests\\": "tests/",
+      "PublicSquare\\Payments\\": "PublicSquare/Payments/"
     }
   },
   "require-dev": {
@@ -13,7 +14,15 @@
     "codeception/module-webdriver": "^4.0",
     "codeception/module-db": "^3.1",
     "codeception/module-phpbrowser": "^3.0",
-    "codeception/module-cli": "^2.0"
+    "codeception/module-cli": "^2.0",
+    "phpunit/phpunit": "^10.0"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PublicSquare\\Payments\\Test\\Unit\\": "tests/unit/",
+      "Magento\\": "tests/unit/stubs/Magento/",
+      "Monolog\\": "tests/unit/stubs/Monolog/"
+    }
   },
   "config": {
     "allow-plugins": {

@@ -12,9 +12,9 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
-use \PublicSquare\Payments\Exception\ApiRejectedResponseException;
-use \PublicSquare\Payments\Exception\ApiDeclinedResponseException;
-use \PublicSquare\Payments\Exception\ApiFailedResponseException;
+use PublicSquare\Payments\Exception\ApiDeclinedResponseException;
+use PublicSquare\Payments\Exception\ApiFailedResponseException;
+use PublicSquare\Payments\Exception\ApiRejectedResponseException;
 
 class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
 {
@@ -31,23 +31,26 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
     protected $logger;
 
     public function __construct(
-        \Laminas\Http\ClientFactory $clientFactory,
+        \Laminas\Http\ClientFactory          $clientFactory,
         \PublicSquare\Payments\Helper\Config $configHelper,
         \PublicSquare\Payments\Logger\Logger $logger,
-        float $amount,
-        string $cardId,
-        bool $capture,
-        string $phone,
-        string $email,
-        \Magento\Quote\Model\Quote\Address $billingAddress,
-        $shippingAddress = null,
-        $idempotencyKey = null,
-        $externalId = "",
-        $deviceInformation = null
-    ) {
+        float                                $amount,
+        string                               $cardId,
+        bool                                 $capture,
+        string                               $phone,
+        string                               $email,
+        \Magento\Quote\Model\Quote\Address   $billingAddress,
+                                             $shippingAddress = null,
+                                             $idempotencyKey = null,
+                                             $externalId = "",
+                                             $deviceInformation = null,
+    )
+    {
         parent::__construct($clientFactory, $configHelper, $logger);
         if ($idempotencyKey) {
-            $this->idempotencyKey = hash('sha256', $idempotencyKey.'-'.$email.'-authorize');
+            // Include externalId to ensure uniqueness across multishipping orders created in a single submit
+            $suffix = $externalId ? ('-' . $externalId) : '';
+            $this->idempotencyKey = hash('sha256', $idempotencyKey . '-' . $email . '-authorize' . $suffix);
         }
         $this->requestData = [
             "external_id" => $externalId,
@@ -69,7 +72,7 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
                 "address_line_1" => $billingAddress->getStreet()[0],
                 "address_line_2" => array_key_exists(
                     1,
-                    $billingAddress->getStreet()
+                    $billingAddress->getStreet(),
                 )
                     ? $billingAddress->getStreet()[1]
                     : "",
@@ -79,12 +82,28 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
                 "country" => $billingAddress->getCountryId(),
             ],
         ];
+        if ($this->configHelper->isPaymentDynamicDescriptorEnabled()) {
+            $merchantName = $this->configHelper->getPaymentDynamicDescriptorMerchant();
+            $contact = $this->configHelper->getPaymentDynamicDescriptorMerchantContact();
+            $dynamicDescriptor = [];
+
+            if ($merchantName !== null && $merchantName != '') {
+                $dynamicDescriptor['merchant_name'] = substr($merchantName, 0, min(strlen($merchantName), 22));
+            }
+            if ($contact !== null && $contact != '') {
+                $dynamicDescriptor['merchant_contact'] = substr($contact, 0, min(strlen($contact), 13));
+            }
+
+            if (array_key_exists('merchant_name', $dynamicDescriptor)) {
+                $this->requestData['dynamic_descriptor'] = $dynamicDescriptor;
+            }
+        }
         if ($shippingAddress) {
             $this->requestData['shipping_address'] = [
                 "address_line_1" => $shippingAddress->getStreet()[0],
                 "address_line_2" => array_key_exists(
                     1,
-                    $shippingAddress->getStreet()
+                    $shippingAddress->getStreet(),
                 )
                     ? $shippingAddress->getStreet()[1]
                     : "",
@@ -99,7 +118,8 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
         }
     } //end __construct()
 
-    static function formatPhoneNumber(string $rawPhoneNumber): string {
+    static function formatPhoneNumber(string $rawPhoneNumber): string
+    {
         $phoneNumber = str_replace(" ", "-", $rawPhoneNumber);
         $phoneNumber = preg_replace("/\D+/", "", $phoneNumber);
 
@@ -115,7 +135,7 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
         if (substr_count($phoneNumber, "-") == 3) {
             $phoneNumber = substr(
                 $phoneNumber,
-                strpos($phoneNumber, "-") + 1
+                strpos($phoneNumber, "-") + 1,
             );
         }
         return $phoneNumber;
@@ -144,7 +164,7 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
     protected function validateResponse(mixed $data): bool
     {
         $status = $data["status"] ?? "";
-        
+
         try {
             $this->checkResponseStatus($data);
         } catch (ApiRejectedResponseException $e) {
@@ -153,8 +173,8 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
             ]);
             throw new ApiRejectedResponseException(
                 __(
-                    "The payment could not be completed. Please verify your details and try again."
-                )
+                    "The payment could not be completed. Please verify your details and try again.",
+                ),
             );
         } catch (ApiDeclinedResponseException $e) {
             $this->logger->error("PSQ Payment declined", [
@@ -163,9 +183,9 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
             throw new ApiDeclinedResponseException(
                 __(
                     "The payment could not be processed. Reason: " .
-                        $data["declined_reason"] ??
-                        "declined"
-                )
+                    $data["declined_reason"] ??
+                    "declined",
+                ),
             );
         }
 
@@ -180,8 +200,8 @@ class PaymentCreate extends \PublicSquare\Payments\Api\ApiRequestAbstract
             ]);
             throw new ApiFailedResponseException(
                 __(
-                    "The payment could not be completed. Please verify your details and try again."
-                )
+                    "The payment could not be completed. Please verify your details and try again.",
+                ),
             );
         }
     } //end validateResponse()

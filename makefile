@@ -119,3 +119,36 @@ verify:
 
 install-docker:
 	@./bin/install-docker
+
+unit-test:
+	@./vendor/bin/phpunit -c tests/unit/phpunit.xml
+
+unit-test-verbose:
+	@./vendor/bin/phpunit -c tests/unit/phpunit.xml --testdox
+
+# Integration testing helpers
+it-sample-data:
+	@./bin/it-sample-data
+
+it-reset:
+	@./bin/it-reset
+
+it-down:
+	@./bin/it-down
+
+it-up:
+	@./bin/it-up
+
+it-install:
+	@./bin/it-install
+
+it-complete-build:
+	@./bin/it-up
+	@./bin/it-install $(call args)
+	@./bin/it-sample-data
+
+it-verify:
+	@./bin/it-verify
+
+it-test:
+	@./vendor/bin/codecept run tests/Acceptance/
