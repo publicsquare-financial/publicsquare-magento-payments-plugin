@@ -379,7 +379,19 @@ class PaymentExecutor
 
 			$billingAddress = $quote->getBillingAddress();
 			$shippingAddress = $quote->getShippingAddress();
-			$emailToUse = $quote->getCustomerEmail();
+			
+			$emailToUse = $order->getCustomerEmail()
+			?: ($order->getBillingAddress() ? $order->getBillingAddress()->getEmail() : null);
+
+			if (!$emailToUse) {
+				$this->logger->warning(
+					'PublicSquare Payments: no email found when creating payment',
+					['quoteId' => $quote->getId(), 'orderId' => $order->getId()]
+				);
+				$this->throwUserFriendlyException(
+					new \Exception('Email is missing for order id: ' . $order->getId())
+				);
+			}
 
 			if ($quote->getIsVirtual()) {
 				$shippingAddress = null;
@@ -394,7 +406,7 @@ class PaymentExecutor
 					"cardId" => $cardId,
 					"capture" => $capture,
 					"phone" => $billingAddress->getTelephone(),
-					"email" => $emailToUse,
+					"email" => (string) $emailToUse,
 					"shippingAddress" => $shippingAddress,
 					"billingAddress" => $billingAddress,
 					"externalId" => $order->getIncrementId() ?? ($order->getId() ?? ""),
