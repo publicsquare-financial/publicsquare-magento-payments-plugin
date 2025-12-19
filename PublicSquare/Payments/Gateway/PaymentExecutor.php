@@ -389,7 +389,7 @@ class PaymentExecutor
 					['quoteId' => $quote->getId(), 'orderId' => $order->getId()]
 				);
 				$this->throwUserFriendlyException(
-					new \Exception('Email is missing for order id: ' . $order->getId())
+					new \Exception('An email address is required to complete your order.')
 				);
 			}
 
