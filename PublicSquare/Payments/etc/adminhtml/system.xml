@@ -93,6 +93,7 @@
                         Customize the credit card inputs by providing JSON config here.
                         ]]>
                     </comment>
+                    <validate>validate-card-input-customization</validate>
                     <!--<validate>validate-json</validate>-->
                 </field>
                 <field id="card_form_layout"
