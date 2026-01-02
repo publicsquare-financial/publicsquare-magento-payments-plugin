@@ -276,13 +276,13 @@ class PaymentExecutor
 					$payment->setIsTransactionClosed(1);
 
                     // Capture the refund id and save it in the additional data JSON column.
-                    $additionalInfo = $payment->getAdditionalInformation();
-                    if($additionalInfo == null) {
-                        $additionalInfo = [];
+                    if(isset($refundResponse['id'])) {
+                        $additionalInfo = $payment->getAdditionalInformation() ?? [];
+                        $additionalInfo['psq_refund_id'] = $refundResponse["id"];
+                        $payment->setAdditionalInformation($additionalInfo);
+                    } else {
+                        $this->logger->warning('PSQ Payments: refund ID not present on refund API response for payment.', ['transaction_id' => $transactionId]);
                     }
-                    $additionalInfo['psq_refund_id'] = $refundResponse["id"];
-
-                    $payment->setAdditionalInformation($additionalInfo);
 				}
 			}
 		} catch (\Exception $e) {
