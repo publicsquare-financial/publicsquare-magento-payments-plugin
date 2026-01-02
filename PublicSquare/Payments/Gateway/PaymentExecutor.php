@@ -269,11 +269,20 @@ class PaymentExecutor
 					])->getResponse();
 					$payment->setIsTransactionClosed(1);
 				} else {
-					$this->paymentRefundFactory->create([
+					$refundResponse = $this->paymentRefundFactory->create([
 						'paymentId' => $transactionId,
 						'amount' => $amount
-					])->getResponse();
+					])->getResponseData();
 					$payment->setIsTransactionClosed(1);
+
+                    // Capture the refund id and save it in the additional data JSON column.
+                    $additionalInfo = $payment->getAdditionalInformation();
+                    if($additionalInfo == null) {
+                        $additionalInfo = [];
+                    }
+                    $additionalInfo['psq_refund_id'] = $refundResponse["id"];
+
+                    $payment->setAdditionalInformation($additionalInfo);
 				}
 			}
 		} catch (\Exception $e) {
