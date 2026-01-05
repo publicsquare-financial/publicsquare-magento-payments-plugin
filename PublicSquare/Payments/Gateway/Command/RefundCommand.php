@@ -42,12 +42,22 @@ class RefundCommand implements CommandInterface
 
         try
         {
-            $this->paymentRefundFactory->create([
+            $apiCall = $this->paymentRefundFactory->create([
                 'paymentId' => $transactionId,
                 'amount' => $amount,
                 'externalId' => $order->getIncrementId() ?? ($order->getId() ?? "")
-            ])->getResponse();
-        }
+            ]);
+
+            $refundResponse = $apiCall->getResponseData();
+            error_log("Got refund response: " . json_encode($refundResponse));
+            // Capture the refund id and save it in the additional data JSON column.
+            if(isset($refundResponse['id'])) {
+                $additionalInfo = $payment->getAdditionalInformation() ?? [];
+                $additionalInfo['psq_refund_id'] = $refundResponse["id"];
+                $payment->setAdditionalInformation($additionalInfo);
+            } else {
+                $this->logger->warning('PSQ Payments: Refund ID not present on refund API response for payment.', ['transaction_id' => $transactionId]);
+            }        }
         catch (\Exception $e)
         {
             $this->logger->error('Refund failed', ['exception' => $e]);

@@ -1,0 +1,31 @@
+<?php
+/** @var $block PublicSquare/Payments/Block/Adminhtml/PaymentAdditionalInfoBlock */
+?>
+<section class="psq-container psq-admin-order__payment-additional-info admin__page-section">
+    <div class="psq-container__header admin__page-section-title">
+        <span class="psq-container__title-text title">Additional Payment Info</span>
+    </div>
+    <div class="psq-container__content admin__table-wrapper">
+        <table class="psq-table data-table admin__table-primary">
+            <thead class="psq-table__head">
+            <tr class="psq-table__row--headings headings">
+                <th class="psq-table__cell psq-table__cell--heading">Label</th>
+                <th class="psq-table__cell psq-table__cell--heading">Value</th>
+            </tr>
+            </thead>
+            <tbody class="psq-table__body even">
+            <?php foreach ($block->paymentAdditionalInfo() as $key => $value): ?>
+                <tr class="psq-table__row psq-table__row--<?php echo $escaper->escapeHtmlAttr($key); ?>">
+                    <td class="psq-table__cell psq-table__cell--label"><?php echo $escaper->escapeHtml(__($key)) ?></td>
+                    <td class="psq-table__cell"><?php
+                        if(is_array($value)) {
+                            $value = json_encode($value);
+                        }
+                        echo $escaper->escapeHtml($value) ;
+                        ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</section>

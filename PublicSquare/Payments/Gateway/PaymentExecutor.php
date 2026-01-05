@@ -264,25 +264,20 @@ class PaymentExecutor
 
 			if ($transactionId && str_starts_with($transactionId, "pmt_") && $amount) {
 				if ($status == \PublicSquare\Payments\Api\ApiRequestAbstract::REQUIRES_CAPTURE_STATUS) {
-					$this->paymentCancelFactory->create([
+                    $this->logger->info('PSQ Payments: Canceling payment');
+
+                    $this->paymentCancelFactory->create([
 						'paymentId' => $transactionId,
 					])->getResponse();
 					$payment->setIsTransactionClosed(1);
 				} else {
-					$refundResponse = $this->paymentRefundFactory->create([
+                    $this->logger->info('PSQ Payments: Refunding payment');
+                    $refundResponse = $this->paymentRefundFactory->create([
 						'paymentId' => $transactionId,
 						'amount' => $amount
 					])->getResponseData();
-					$payment->setIsTransactionClosed(1);
 
-                    // Capture the refund id and save it in the additional data JSON column.
-                    if(isset($refundResponse['id'])) {
-                        $additionalInfo = $payment->getAdditionalInformation() ?? [];
-                        $additionalInfo['psq_refund_id'] = $refundResponse["id"];
-                        $payment->setAdditionalInformation($additionalInfo);
-                    } else {
-                        $this->logger->warning('PSQ Payments: refund ID not present on refund API response for payment.', ['transaction_id' => $transactionId]);
-                    }
+                    $payment->setIsTransactionClosed(1);
 				}
 			}
 		} catch (\Exception $e) {
