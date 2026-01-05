@@ -1,11 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Deploying Magento sample data (IT) using compose.yaml..."
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${DIR}/.." >/dev/null 2>&1 && pwd )"
+MAGENTO_DIR="${1:-$ROOT_DIR/magento-install}"
+# Keep CLI signature aligned with other IT scripts (version/host unused here but accepted).
+DEFAULT_MAGENTO_VERSION="2.4.8-p3"
+MAGENTO_VERSION="${MAGENTO_VERSION:-${2:-$DEFAULT_MAGENTO_VERSION}}"
+MAGENTO_HOST="${3:-magento.test}"
+
+# Ensure Magento IT install exists
+if [[ ! -d "${MAGENTO_DIR}" || ! -x "${MAGENTO_DIR}/bin/cli" ]]; then
+  echo "Magento IT installation not found in '${MAGENTO_DIR}'."
+  echo "Run './bin/it-up' and './bin/it-install' first to create and configure the stack."
+  exit 1
+fi
+
+echo "Deploying Magento sample data (IT) using Magento install at '${MAGENTO_DIR}'..."
+cd "${MAGENTO_DIR}"
+
 ./bin/cli bin/magento sampledata:deploy
 ./bin/cli bin/magento setup:upgrade
+./bin/cli bin/magento indexer:reindex
 ./bin/cli bin/magento cache:flush
 
 echo "Sample data deployed."
-
-
