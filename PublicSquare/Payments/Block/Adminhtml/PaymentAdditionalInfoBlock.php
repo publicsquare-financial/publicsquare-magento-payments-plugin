@@ -2,27 +2,55 @@
 
 namespace PublicSquare\Payments\Block\Adminhtml;
 
-class PaymentAdditionalInfoBlock extends
-    \Magento\Sales\Block\Adminhtml\Order\View\Tab\Info
+use Magento\Backend\Block\Template;
+use Magento\Sales\Model\ResourceModel\Order;
+
+class PaymentAdditionalInfoBlock extends Template
 {
     private array $whitelist = [
         'psq_refund_id',
         'psq_settlement_id',
     ];
+    protected $_coreRegistry = null;
 
-    private array $labels = [
-        'psq_refund_id' => 'Refund ID',
-        'psq_settlement_id' => 'Settlement ID',
-    ];
+    public function __construct(\Magento\Backend\Block\Template\Context $context,
+                                \Magento\Framework\Registry             $registry,
+                                array                                   $data = [])
+    {
+        parent::__construct($context, $data);
+        $this->_coreRegistry = $registry;
+    }
+
+    function getOrder()
+    {
+        $viewType = $this->getData('viewType');
+        $order = null;
+        switch ($viewType) {
+            case 'order':
+                $order = $this->_coreRegistry->registry('current_order');
+                break;
+            case 'creditmemo':
+                $order = $this->_coreRegistry->registry('current_creditmemo')->getOrder();
+                break;
+            case 'invoice':
+                $order = $this->_coreRegistry->registry('current_invoice')->getOrder();
+                break;
+            default:
+                $this->_logger->warning('PublicSquare: No view type set for PaymentAdditionalInfoBlock! Defaulting to order view type.');
+                return $this->_coreRegistry->registry('current_order');
+        }
+        $this->_logger->info('PublicSquare: Got order for view type: ' . $viewType, ['order' => $order, 'viewType' => $viewType]);
+        return $order;
+    }
 
     function paymentAdditionalInfo(): array
     {
         return array_filter(
-            ($this->getOrder()->getPayment() ? $this->getOrder()->getPayment()->getAdditionalInformation() : []) ?? [],
+            ($this->getOrder() && $this->getOrder()->getPayment() ? $this->getOrder()->getPayment()->getAdditionalInformation() : []) ?? [],
             function ($value, $key) {
                 return in_array($key, $this->whitelist, false);
             },
-            ARRAY_FILTER_USE_BOTH
+            ARRAY_FILTER_USE_BOTH,
         );
     }
 

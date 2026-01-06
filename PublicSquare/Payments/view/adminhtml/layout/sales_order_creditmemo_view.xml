@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright 2013 Adobe
+ * All Rights Reserved.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="PublicSquare_Payments::styles.css"/>
+    </head>
+    <body>
+        <!--<referenceBlock name="sales_creditmemo_view">-->
+        <referenceBlock name="form">
+
+            <block name="order_payment_additional"
+                   class="PublicSquare\Payments\Block\Adminhtml\PaymentAdditionalInfoBlock"
+                   template="PublicSquare_Payments::admin/payment-additional-info.phtml">
+                <arguments>
+                    <argument name="viewType" xsi:type="string">creditmemo</argument>
+                </arguments>
+            </block>
+
+        </referenceBlock>
+
+        <!--</referenceBlock>-->
+    </body>
+</page>
