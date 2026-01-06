@@ -7,14 +7,9 @@ This file provides guidance for agentic coding assistants (like opencode) workin
 Use these commands to set up the development environment, install dependencies, and prepare the Magento site.
 
 ### Docker and Magento Setup
-- **Full Setup with Keys**: `make setup PUBLICSQUARE_PUBLIC_KEY PUBLICSQUARE_SECRET_KEY` - Installs Magento, configures Docker, and sets up the payment plugin.
-- **Docker Compose**: `make docker-compose` - Manages containers; supports both v1 (`docker-compose`) and v2 (`docker compose`) with custom configs.
-- **Start Containers**: `make start` - Starts all project containers.
-- **Stop Containers**: `make stop` - Stops project containers; `make stopall` stops all running containers.
-- **Fix Permissions/Ownership**: `make fixperms` / `make fixowns` - Corrects filesystem permissions and ownership within containers.
-- **Domain/SSL Setup**: `make setup-domain DOMAIN` / `make setup-ssl DOMAIN` - Configures domain and generates SSL certificates.
-- **Composer Auth**: `make setup-composer-auth` - Sets up authentication for Composer dependencies.
-- **Verify Installation**: `make verify` - Downloads latest Magento, installs plugins, and sets up custom domain.
+- **Full Setup with Keys**: `make it-complete-build PUBLICSQUARE_PUBLIC_KEY PUBLICSQUARE_SECRET_KEY` - Installs Magento, configures Docker, and sets up the payment plugin.
+- **Start Containers**: `make it-up` - Starts all project containers.
+- **Stop Containers**: `make it-down` - Stops project containers; `make stopall` stops all running containers.
 
 ### Dependencies
 - **Install Composer Deps**: `composer install --prefer-dist --no-progress --no-interaction --no-suggest` - Installs PHP dependencies.
@@ -26,9 +21,7 @@ Use these commands to set up the development environment, install dependencies, 
 The project uses PHPUnit for unit tests and Codeception for acceptance/integration tests. Run tests locally before committing.
 
 ### Unit Tests
-- **Run All Unit Tests**: `make unit-test` - Executes PHPUnit on `tests/unit/` using `tests/unit/phpunit.xml`.
-- **Verbose Output**: `make unit-test-verbose` - Runs with `--testdox` for readable test output.
-- **Single Test**: `php vendor/bin/phpunit -c tests/unit/phpunit.xml --filter TestClass::testMethod` - Runs a specific test method.
+- **Run All Unit Tests**: `make it-verify` - Executes PHPUnit on `tests/unit/` using `tests/unit/phpunit.xml`.
 - **Coverage**: Add `--coverage-html tests/_output/coverage` for HTML coverage reports.
 
 ### Integration/Acceptance Tests
@@ -48,7 +41,7 @@ GitHub Actions (`.github/workflows/test.yml`) automates:
 - Runs `php vendor/bin/codecept run -f` for full acceptance tests.
 - Uploads test artifacts on failure.
 
-Always run `make unit-test` and `make it-test` locally before pushing.
+Always run `make it-verify` and `make it-test` locally before pushing.
 
 ## Linting and Code Quality
 
@@ -120,10 +113,17 @@ Follow PSR-12 for PHP standards. The codebase is mostly consistent; adhere to th
 - Dependency injection: Explicit assignments (e.g., `$this->checkoutSession = $checkoutSession;`).
 - No constructor property promotion.
 
+### Translatable Strings and UI Labels
+- All UI labels, messages, and user-facing strings must use Magento's translation function `__()`.
+- Example: `__('Payment failed')` instead of `'Payment failed'`.
+- Use placeholders for dynamic content: `__('Welcome, %1', $customerName)`.
+- Ensure strings are added to CSV translation files if custom.
+- Avoid concatenating strings; use sprintf or placeholders.
+- Test translations by switching locale in admin.
+
 ### Other Patterns
 - Access modifiers: Always explicit (`public`, `private`, `protected`).
 - Static methods: Sparingly (e.g., utility functions).
-- Translated strings: For user-facing text (`__(...)`).
 - Avoid inconsistencies: Match existing file styles.
 
 ### Examples
