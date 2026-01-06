@@ -182,6 +182,13 @@ No .cursorrules or .cursor/rules/ files found. No .github/copilot-instructions.m
 - **Testing**: Write tests for new features; ensure 100% coverage for critical paths.
 - **Commits**: Use conventional commits (e.g., "feat: add payment method"); run tests/lints pre-commit.
 - **Performance**: Avoid N+1 queries; use caching where appropriate.
+- **Escaping User-Generated Content**:
+  - **Server-side (PHP/PHTML)**: Always escape user-generated content before HTML output using Magento's escaper or `htmlspecialchars()`. Example: `echo $escaper->escapeHtml($userInput);` or `htmlspecialchars($userInput, ENT_QUOTES);`.
+  - **PHTML Templates**: Escape variables in templates to prevent XSS. Example: `<p><?php echo $escaper->escapeHtml($userComment); ?></p>`.
+  - **HTML**: For dynamic HTML insertion, escape on server-side before rendering; avoid client-side insertion of raw user data.
+  - **JavaScript**: Never insert user data into HTML via `innerHTML`; use `textContent`, `setAttribute`, or libraries like DOMPurify. Example: `element.textContent = userInput;`.
+  - **Knockout (KO) Templates**: Use safe bindings like `text` instead of `html` for user data; escape data in observables. Example: `<span data-bind="text: userMessage"></span>` (not `html: userMessage`).
+  - Combine with input validation; test with malicious input (e.g., `<script>` tags).
 - **Documentation**: Update PHPDoc for public APIs; comment complex logic.
 
 For feedback or updates, see https://github.com/sst/opencode/issues.</content>
