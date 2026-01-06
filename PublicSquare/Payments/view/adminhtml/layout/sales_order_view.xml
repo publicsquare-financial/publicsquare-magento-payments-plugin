@@ -8,7 +8,11 @@
             <referenceContainer name="payment_additional_info">
                 <block name="psq.payment.additionalInfo"
                         class="PublicSquare\Payments\Block\Adminhtml\PaymentAdditionalInfoBlock"
-                       template="PublicSquare_Payments::admin/payment-additional-info.phtml" />
+                       template="PublicSquare_Payments::admin/payment-additional-info.phtml">
+                    <arguments>
+                        <argument name="viewType" xsi:type="string">order</argument>
+                    </arguments>
+                </block>
             </referenceContainer>
 
         </referenceBlock>
