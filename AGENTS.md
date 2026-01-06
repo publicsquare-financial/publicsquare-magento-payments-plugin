@@ -120,6 +120,8 @@ Follow PSR-12 for PHP standards. The codebase is mostly consistent; adhere to th
 - Ensure strings are added to CSV translation files if custom.
 - Avoid concatenating strings; use sprintf or placeholders.
 - Test translations by switching locale in admin.
+- For client-side (JavaScript), use Magento's `mage/translate` in RequireJS modules.
+- Example: `define(['mage/translate'], function ($) { $('#message').text($.mage.__('Order completed')); });`
 
 ### Other Patterns
 - Access modifiers: Always explicit (`public`, `private`, `protected`).
