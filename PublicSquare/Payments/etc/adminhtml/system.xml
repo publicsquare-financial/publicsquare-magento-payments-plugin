@@ -26,7 +26,7 @@
                     <frontend_model>PublicSquare\Payments\Block\Adminhtml\System\Config\Form\Field\Label</frontend_model>
                 </field>
                 <field id="active" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
-                    <label>Enabled</label>  
+                    <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="title" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
@@ -117,6 +117,15 @@ This feature must also be enabled in the PSQ Portal under Settings → Features 
                         <field id="dynamic_descriptor_enabled">1</field>
                     </depends>
                     <validate>validate-length minimum-length-1 maximum-length-13</validate>
+                </field>
+                <field id="webhook_id" translate="label" type="text" sortOrder="23" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Webhook ID</label>
+                    <comment><![CDATA[The PublicSquare Webhook ID to subscribe to]]></comment>
+                </field>
+                <field id="webhook_key" translate="label" type="obscure" sortOrder="24" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Webhook ID</label>
+                    <comment><![CDATA[The PublicSquare Webhook Key used to verify request signatures. Base64 encoded RSA key.]]></comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
             </group>
         </section>

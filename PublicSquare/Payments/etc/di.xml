@@ -146,4 +146,19 @@
     <type name="Magento\Quote\Model\Quote\Payment">
         <plugin name="PublicSquarePaymentsQuotePayment" type="PublicSquare\Payments\Plugins\QuotePaymentPlugin" />
     </type>
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="psq" xsi:type="object">PublicSquare\Payments\Cli\PsqCli</item>
+
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="sensitive" xsi:type="array">
+                <item name="payment/publicsquare_payments/webhook-key" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

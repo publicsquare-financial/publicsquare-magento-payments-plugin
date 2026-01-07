@@ -1,0 +1,180 @@
+<?php
+
+namespace PublicSquare\Payments\Controller;
+
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Framework\App\RequestInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Api\TransactionRepositoryInterface;
+use Magento\Sales\Api\Data\TransactionInterface;
+use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\FilterBuilder;
+use PublicSquare\Payments\Helper\Config;
+use Psr\Log\LoggerInterface;
+use \phpseclib3\Crypt\PublicKeyLoader;
+use \phpseclib3\Crypt\RSA;
+
+class Webhook implements HttpPostActionInterface, CsrfAwareActionInterface
+{
+    /**
+     * @var Config
+     */
+    private Config $config;
+
+    /**
+     * @var LoggerInterface
+     */
+    private LoggerInterface $logger;
+
+    /**
+     * @var OrderRepositoryInterface
+     */
+    private OrderRepositoryInterface $orderRepository;
+
+    /**
+     * @var TransactionRepositoryInterface
+     */
+    private TransactionRepositoryInterface $transactionRepository;
+
+    /**
+     * @var SearchCriteriaBuilder
+     */
+    private SearchCriteriaBuilder $searchCriteriaBuilder;
+
+    /**
+     * @var FilterBuilder
+     */
+    private FilterBuilder $filterBuilder;
+
+    private RequestInterface                     $request;
+
+    public function __construct(
+        Config $config,
+        LoggerInterface $logger,
+        OrderRepositoryInterface $orderRepository,
+        TransactionRepositoryInterface $transactionRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        FilterBuilder $filterBuilder,
+        RequestInterface                     $request,
+    ) {
+        $this->config = $config;
+        $this->logger = $logger;
+        $this->orderRepository = $orderRepository;
+        $this->transactionRepository = $transactionRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->filterBuilder = $filterBuilder;
+        $this->request = $request;
+    }
+
+    public function execute()
+    {
+        $body = $this->request->getContent();
+        $signature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
+
+        if (!$this->verifySignature($body, $signature)) {
+            $this->logger->error('PSQ Webhook: Invalid signature');
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid signature']);
+            return;
+        }
+
+        $event = json_decode($body, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->logger->error('PSQ Webhook: Invalid JSON');
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid JSON']);
+            return;
+        }
+
+        $eventType = $event['event_type'] ?? '';
+        if ($eventType === 'settlement:update') {
+            $this->handleSettlementUpdate($event['entity']);
+        } else {
+            $this->logger->info('PSQ Webhook: Unhandled event type', ['event_type' => $eventType]);
+        }
+
+        echo json_encode(['success' => true]);
+    }
+
+    private function verifySignature(string $body, string $signature): bool
+    {
+        $secret = $this->config->getWebhookSecret();
+        if (!$secret) {
+            $this->logger->error('PSQ Webhook: Webhook secret not configured');
+            return false;
+        }
+
+        $decodedSignature = base64_decode($signature);
+        $decodedKey = base64_decode($secret);
+
+        $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n" .
+            chunk_split(base64_encode($decodedKey), 64, "\n") .
+            "-----END PUBLIC KEY-----\n";
+
+        try {
+            $rsa = PublicKeyLoader::load($publicKeyPem);
+            $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
+            $verified = $rsa->verify($body, $decodedSignature);
+        } catch (\Exception $e) {
+            $this->logger->error('PSQ Webhook: Invalid public key or verification error', ['exception' => $e->getMessage()]);
+            return false;
+        }
+
+        return $verified;
+    }
+
+    private function handleSettlementUpdate(array $settlement): void
+    {
+        $settlementId = $settlement['id'] ?? '';
+        $paymentId = $settlement['payment']['id'] ?? '';
+
+        if (!$settlementId || !$paymentId) {
+            $this->logger->error('PSQ Webhook: Missing settlement or payment ID', ['settlement' => $settlement]);
+            return;
+        }
+
+        try {
+            // Find transaction by payment ID
+            $filters = [
+                $this->filterBuilder->setField('txn_id')->setValue($paymentId)->create()
+            ];
+            $criteria = $this->searchCriteriaBuilder->addFilters($filters)->create();
+            $transactions = $this->transactionRepository->getList($criteria)->getItems();
+
+            if (empty($transactions)) {
+                $this->logger->error('PSQ Webhook: Transaction not found for payment ID', ['payment_id' => $paymentId]);
+                return;
+            }
+
+            $transaction = reset($transactions);
+            $orderId = $transaction->getOrderId();
+            $order = $this->orderRepository->get($orderId);
+            $payment = $order->getPayment();
+
+            // Update additional information
+            $additionalInfo = $payment->getAdditionalInformation() ?? [];
+            $additionalInfo['psq_settlement_id'] = $settlementId;
+            $payment->setAdditionalInformation($additionalInfo);
+
+            // Save the order
+            $this->orderRepository->save($order);
+
+            $this->logger->info('PSQ Webhook: Settlement ID saved', ['settlement_id' => $settlementId, 'order_id' => $orderId]);
+        } catch (\Exception $e) {
+            $this->logger->error('PSQ Webhook: Error handling settlement update', ['exception' => $e->getMessage(), 'settlement' => $settlement]);
+        }
+    }
+
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
+    {
+        return null;
+    }
+
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return false;
+    }
+}
