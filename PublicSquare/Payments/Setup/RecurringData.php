@@ -32,7 +32,7 @@ class RecurringData implements InstallDataInterface
         try {
             $this->logger->info('Running on module version: ' . $context->getVersion());
             $setup->startSetup();
-            $this->webhookAutoConfig->ensureWebhookInstalled();
+            $this->webhookAutoConfig->ensureWebhookInstalled(null);
             $this->logger->info('Install successful');
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());

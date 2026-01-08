@@ -43,7 +43,7 @@ class WebhookAutoConfig
     /**
      * @throws \Exception
      */
-    public function ensureWebhookInstalled(OutputInterface|null $output = null): void
+    public function ensureWebhookInstalled(OutputInterface|null $output): void
     {
         $this->logger->debug('Checking if webhook is configured.');
         $output?->writeln('Checking if webhook is configured.');
@@ -84,7 +84,7 @@ class WebhookAutoConfig
             $webhookId = $existingWebhookId;
             $webhookKey = $webhook['key'];
         } else {
-            $webhookUrl = $this->urlBuilder->getUrl('publicSquare-payments/webhook/index');
+            $webhookUrl = rtrim($this->urlBuilder->getUrl('publicSquare-payments/webhook/index'), '/');
             $this->logger->info('PublicSquare: Creating new webhook url ' . $webhookUrl);
 
             $webhook = $client->createWebhook($privateKey, $webhookUrl);
