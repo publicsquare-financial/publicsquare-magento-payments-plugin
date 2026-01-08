@@ -1,23 +1,22 @@
 <?php
 
-namespace PublicSquare\Payments\Controller;
+namespace PublicSquare\Payments\Controller\Webhook;
 
+use Magento\Framework\Api\FilterBuilder;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
-use Magento\Sales\Api\Data\TransactionInterface;
-use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
-use Magento\Framework\Api\FilterBuilder;
-use PublicSquare\Payments\Helper\Config;
+use phpseclib3\Crypt\PublicKeyLoader;
+use phpseclib3\Crypt\RSA;
 use Psr\Log\LoggerInterface;
-use \phpseclib3\Crypt\PublicKeyLoader;
-use \phpseclib3\Crypt\RSA;
+use PublicSquare\Payments\Helper\Config;
+use PublicSquare\Payments\Logger\Logger;
 
-class Webhook implements HttpPostActionInterface, CsrfAwareActionInterface
+class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 {
     /**
      * @var Config
@@ -27,7 +26,7 @@ class Webhook implements HttpPostActionInterface, CsrfAwareActionInterface
     /**
      * @var LoggerInterface
      */
-    private LoggerInterface $logger;
+    private Logger $logger;
 
     /**
      * @var OrderRepositoryInterface
@@ -53,7 +52,7 @@ class Webhook implements HttpPostActionInterface, CsrfAwareActionInterface
 
     public function __construct(
         Config $config,
-        LoggerInterface $logger,
+        Logger $logger,
         OrderRepositoryInterface $orderRepository,
         TransactionRepositoryInterface $transactionRepository,
         SearchCriteriaBuilder $searchCriteriaBuilder,
@@ -61,7 +60,7 @@ class Webhook implements HttpPostActionInterface, CsrfAwareActionInterface
         RequestInterface                     $request,
     ) {
         $this->config = $config;
-        $this->logger = $logger;
+        $this->logger = $logger->withName('PSQ:Webhook');
         $this->orderRepository = $orderRepository;
         $this->transactionRepository = $transactionRepository;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
@@ -72,10 +71,11 @@ class Webhook implements HttpPostActionInterface, CsrfAwareActionInterface
     public function execute()
     {
         $body = $this->request->getContent();
+        $this->logger->debug('Webhook invoked');
         $signature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
 
         if (!$this->verifySignature($body, $signature)) {
-            $this->logger->error('PSQ Webhook: Invalid signature');
+            $this->logger->warning('PSQ Webhook: Invalid signature');
             http_response_code(400);
             echo json_encode(['error' => 'Invalid signature']);
             return;
@@ -90,12 +90,14 @@ class Webhook implements HttpPostActionInterface, CsrfAwareActionInterface
         }
 
         $eventType = $event['event_type'] ?? '';
+        $this->logger->info('Processing event type: ', ['event_type' => $eventType]);
         if ($eventType === 'settlement:update') {
             $this->handleSettlementUpdate($event['entity']);
         } else {
             $this->logger->info('PSQ Webhook: Unhandled event type', ['event_type' => $eventType]);
         }
 
+        http_response_code(200);
         echo json_encode(['success' => true]);
     }
 
@@ -130,6 +132,7 @@ class Webhook implements HttpPostActionInterface, CsrfAwareActionInterface
     {
         $settlementId = $settlement['id'] ?? '';
         $paymentId = $settlement['payment']['id'] ?? '';
+        $this->logger->info('Processing settlement id: ' . $settlementId . 'for Payment ID: ' . $paymentId);
 
         if (!$settlementId || !$paymentId) {
             $this->logger->error('PSQ Webhook: Missing settlement or payment ID', ['settlement' => $settlement]);

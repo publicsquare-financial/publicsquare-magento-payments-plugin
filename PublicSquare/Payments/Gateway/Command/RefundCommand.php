@@ -25,11 +25,12 @@ class RefundCommand implements CommandInterface
     public function __construct(PaymentRefundFactory $paymentRefundFactory, TransactionRepositoryInterface $transactionRepository, \PublicSquare\Payments\Logger\Logger $logger,) {
         $this->paymentRefundFactory = $paymentRefundFactory;
         $this->transactionRepository = $transactionRepository;
-        $this->logger = $logger;
+        $this->logger = $logger->withName('PSQ:RefundCommand');
     }
 
     public function execute(array $commandSubject)
     {
+        $this->logger->debug('Refund command started');
         $payment = $commandSubject['payment']->getPayment();
         $order = $payment->getOrder();
         $amount = $commandSubject['amount'] * 100;
@@ -49,12 +50,13 @@ class RefundCommand implements CommandInterface
             ]);
 
             $refundResponse = $apiCall->getResponseData();
-            error_log("Got refund response: " . json_encode($refundResponse));
+            $this->logger->info("Got refund response: ", $refundResponse);
             // Capture the refund id and save it in the additional data JSON column.
             if(isset($refundResponse['id'])) {
                 $additionalInfo = $payment->getAdditionalInformation() ?? [];
                 $additionalInfo['psq_refund_id'] = $refundResponse["id"];
                 $payment->setAdditionalInformation($additionalInfo);
+                $this->logger->info('Updated order payment additional info with refund id', ['refundId' => $refundResponse['id']]);
             } else {
                 $this->logger->warning('PSQ Payments: Refund ID not present on refund API response for payment.', ['transaction_id' => $transactionId]);
             }        }

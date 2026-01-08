@@ -10,10 +10,10 @@ class PSQCurlClient
     private Logger $logger;
     private string $baseUrl;
 
-    function __construct(string $baseUrl = "https://api.publicsquare.com")
+    function __construct(Logger $logger, string $baseUrl = "https://api.publicsquare.com")
     {
         $this->baseUrl = $baseUrl;
-        $this->logger = new Logger('PSQ:CurlClient');
+        $this->logger = $logger->withName('PSQ:CurlClient');
     }
 
 
@@ -42,11 +42,12 @@ class PSQCurlClient
 
         ]);
         try {
+            $this->logger->debug('Creating webhook for url: ' . $webhookUrl);
             $response = curl_exec($req);
             $responseBody = json_decode($response, true);
             return $responseBody;
         } catch (\Exception $err) {
-            $this->logger->error( 'Error creating webhook: ' . $err->getMessage());
+            $this->logger->warning( 'Failed to create webhook: ' . $err->getMessage());
             throw $err;
         } finally {
             curl_close($req);
@@ -67,9 +68,10 @@ class PSQCurlClient
             'X-API-KEY: ' . $privateKey,
         ]);
         try {
+            $this->logger->debug('GET webhook ID: ' . $webhookId);
             $response = curl_exec($req);
             $responseBody = json_decode($response, true);
-            $this->logger->info('Retrieved webhook with id: ' . $responseBody['id']);
+            $this->logger->info('Retrieved webhook with ID: ' . $responseBody['id']);
             return $responseBody;
         } catch (\Exception $err) {
             $this->logger->error( 'Error getting webhook with id [' . $webhookId . ']: ' . $err->getMessage());
