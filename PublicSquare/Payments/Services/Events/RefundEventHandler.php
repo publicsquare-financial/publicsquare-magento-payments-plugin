@@ -1,7 +1,7 @@
 <?php
 
 namespace PublicSquare\Payments\Services\Events;
-
+use PublicSquare\Payments\Api\Constants;
 use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -86,7 +86,7 @@ class RefundEventHandler implements PSQEventHandler
 
             // Update additional information
             $additionalInfo = $payment?->getAdditionalInformation() ?? [];
-            $additionalInfo[REFUND_ID_KEY] = $refundId;
+            $additionalInfo[Constants::REFUND_ID_KEY] = $refundId;
             $payment?->setAdditionalInformation($additionalInfo);
 
             // Save the order

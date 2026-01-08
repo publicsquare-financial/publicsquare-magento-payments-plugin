@@ -4,12 +4,13 @@ namespace PublicSquare\Payments\Block\Adminhtml;
 
 use Magento\Backend\Block\Template;
 use Magento\Sales\Model\ResourceModel\Order;
+use PublicSquare\Payments\Api\Constants;
 
 class PaymentAdditionalInfoBlock extends Template
 {
     private array $whitelist = [
-        'psq_refund_id',
-        'psq_settlement_id',
+        Constants::SETTLEMENT_ID_KEY,
+        Constants::REFUND_ID_KEY,
     ];
     protected $_coreRegistry = null;
 

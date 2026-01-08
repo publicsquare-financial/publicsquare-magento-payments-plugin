@@ -6,6 +6,7 @@ use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
+use PublicSquare\Payments\Api\Constants;
 use PublicSquare\Payments\Logger\Logger;
 
 class SettlementUpdateEventHandler implements PSQEventHandler
@@ -84,7 +85,7 @@ class SettlementUpdateEventHandler implements PSQEventHandler
 
             // Update additional information
             $additionalInfo = $payment?->getAdditionalInformation() ?? [];
-            $additionalInfo['psq_settlement_id'] = $settlementId;
+            $additionalInfo[Constants::SETTLEMENT_ID_KEY] = $settlementId;
             $payment?->setAdditionalInformation($additionalInfo);
 
             // Save the order

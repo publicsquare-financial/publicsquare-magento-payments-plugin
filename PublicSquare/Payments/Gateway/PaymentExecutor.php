@@ -10,6 +10,7 @@ use PublicSquare\Payments\Api\Authenticated\PaymentCaptureFactory;
 use PublicSquare\Payments\Api\Authenticated\PaymentCancelFactory;
 use PublicSquare\Payments\Api\Authenticated\PaymentUpdateFactory;
 use PublicSquare\Payments\Api\Authenticated\PaymentRefundFactory;
+use PublicSquare\Payments\Api\Constants;
 use PublicSquare\Payments\Logger\Logger;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
@@ -280,7 +281,7 @@ class PaymentExecutor
                     // Capture the refund id and save it in the additional data JSON column.
                     if(isset($refundResponse['id'])) {
                         $additionalInfo = $payment->getAdditionalInformation() ?? [];
-                        $additionalInfo['psq_refund_id'] = $refundResponse["id"];
+                        $additionalInfo[Constants::REFUND_ID_KEY] = $refundResponse["id"];
                         $payment->setAdditionalInformation($additionalInfo);
                         $this->logger->info('Updated order payment additional info with refund id', ['refundId' => $refundResponse['id']]);
                     } else {

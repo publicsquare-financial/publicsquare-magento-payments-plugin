@@ -7,6 +7,7 @@ use PublicSquare\Payments\Api\Authenticated\PaymentRefundFactory;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Command\CommandException;
+use PublicSquare\Payments\Api\Constants;
 
 class RefundCommand implements CommandInterface
 {
@@ -53,7 +54,7 @@ class RefundCommand implements CommandInterface
             // Capture the refund id and save it in the additional data JSON column.
             if (isset($refundResponse['id'])) {
                 $additionalInfo = $payment->getAdditionalInformation() ?? [];
-                $additionalInfo['psq_refund_id'] = $refundResponse["id"];
+                $additionalInfo[Constants::REFUND_ID_KEY] = $refundResponse["id"];
                 $payment->setAdditionalInformation($additionalInfo);
                 $this->logger->info('Updated order payment additional info with refund id', ['refundId' => $refundResponse['id']]);
             } else {
