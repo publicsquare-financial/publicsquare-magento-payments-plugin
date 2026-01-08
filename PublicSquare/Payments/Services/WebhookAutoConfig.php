@@ -7,7 +7,6 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use PublicSquare\Payments\Api\Authenticated\PSQCurlClient;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
@@ -19,7 +18,6 @@ class WebhookAutoConfig
     private ConfigInterface $resourceConfig;
     private EncryptorInterface $encryptor;
     private ScopeConfigInterface $scopeConfig;
-    private StoreManagerInterface $storeManager;
     private UrlInterface $urlBuilder;
 
     public function __construct(
@@ -27,14 +25,12 @@ class WebhookAutoConfig
         ConfigInterface       $resourceConfig,
         ScopeConfigInterface  $scopeConfig,
         EncryptorInterface    $encryptor,
-        StoreManagerInterface $storeManager,
         UrlInterface          $urlBuilder,
     )
     {
         $this->logger = $logger ?? new Logger('PSQ:WebhookAutoConfig');
         $this->resourceConfig = $resourceConfig;
         $this->encryptor = $encryptor;
-        $this->storeManager = $storeManager;
         $this->scopeConfig = $scopeConfig;
         $this->urlBuilder = $urlBuilder;
 

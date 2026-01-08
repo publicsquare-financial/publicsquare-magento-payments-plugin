@@ -2,22 +2,20 @@
 
 namespace PublicSquare\Payments\Controller\Webhook;
 
-use Magento\Framework\Api\FilterBuilder;
-use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Encryption\Encryptor;
-use Magento\Sales\Api\OrderRepositoryInterface;
-use Magento\Sales\Api\TransactionRepositoryInterface;
+use Magento\Framework\Phrase;
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Crypt\RSA;
 use Psr\Log\LoggerInterface;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
-use Magento\Framework\Controller\Result\JsonFactory;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use PublicSquare\Payments\Services\Events\RefundEventHandler;
+use PublicSquare\Payments\Services\Events\SettlementUpdateEventHandler;
 
 class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 {
@@ -30,88 +28,82 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
      * @var LoggerInterface
      */
     private Logger $logger;
-
-    /**
-     * @var OrderRepositoryInterface
-     */
-    private OrderRepositoryInterface $orderRepository;
-
-    /**
-     * @var TransactionRepositoryInterface
-     */
-    private TransactionRepositoryInterface $transactionRepository;
-
-    /**
-     * @var SearchCriteriaBuilder
-     */
-    private SearchCriteriaBuilder $searchCriteriaBuilder;
-
-    /**
-     * @var FilterBuilder
-     */
-    private FilterBuilder $filterBuilder;
-
     private RequestInterface $request;
     private JsonFactory $jsonResultFactory;
     private Encryptor $encryptor;
+    private SettlementUpdateEventHandler $settlementUpdateEventHandler;
+    private RefundEventHandler $refundEventHandler;
 
     public function __construct(
-        Config                         $config,
-        Logger                         $logger,
-        OrderRepositoryInterface       $orderRepository,
-        TransactionRepositoryInterface $transactionRepository,
-        SearchCriteriaBuilder          $searchCriteriaBuilder,
-        FilterBuilder                  $filterBuilder,
-        RequestInterface               $request,
-        JsonFactory                    $jsonResultFactory,
-        Encryptor                      $encryptor,
+        Config                       $config,
+        Logger                       $logger,
+        RequestInterface             $request,
+        JsonFactory                  $jsonResultFactory,
+        Encryptor                    $encryptor,
+        SettlementUpdateEventHandler $settlementUpdateEventHandler,
+        RefundEventHandler           $refundEventHandler,
     )
     {
         $this->config = $config;
         $this->logger = $logger->withName('PSQ:Webhook');
-        $this->orderRepository = $orderRepository;
-        $this->transactionRepository = $transactionRepository;
-        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-        $this->filterBuilder = $filterBuilder;
         $this->request = $request;
         $this->jsonResultFactory = $jsonResultFactory;
         $this->encryptor = $encryptor;
+        $this->settlementUpdateEventHandler = $settlementUpdateEventHandler;
+        $this->refundEventHandler = $refundEventHandler;
 
     }
 
-    public function execute()
+    public function execute(): \Magento\Framework\Controller\Result\Json|\Magento\Framework\Controller\ResultInterface|\Magento\Framework\App\ResponseInterface
     {
         $result = $this->jsonResultFactory->create();
+        try {
 
-        $body = $this->request->getContent();
-        $this->logger->debug('Webhook invoked');
-        $signature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
+            $body = $this->request->getContent();
+            $this->logger->debug('Webhook invoked');
+            $signature = $this->request->getHeader('X-Signature') ?: '';
 
-        if (!$this->verifySignature($body, $signature)) {
-            $this->logger->warning('PSQ Webhook: Invalid signature');
-            $result->setStatusHeader(400);
-            $result->setData(['error' => 'Invalid signature']);
-            return $result;
+
+            if (!$this->verifySignature($body, $signature)) {
+                $this->logger->warning('PSQ Webhook: Invalid signature');
+                $result->setStatusHeader(400);
+                $result->setData(['error' => 'Invalid signature']);
+                return $result;
+            }
+
+            $event = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->logger->error('PSQ Webhook: Invalid JSON');
+                $result->setStatusHeader(400);
+                $result->setData(['error' => 'Invalid JSON']);
+                return $result;
+            }
+
+            $eventType = $event['event_type'] ?? '';
+            $this->logger->info('Processing event type: ', [
+                'id' => $event['id'],
+                'event_type' => $eventType,
+                'entity_id' => $event['entity_id'],
+                'entity_type' => $event['entity_type'],
+            ]);
+            switch ($eventType) {
+                case 'settlement:update':
+                    $this->settlementUpdateEventHandler->handleEvent($event);
+                    break;
+                case 'refund:update':
+                    $this->refundEventHandler->handleEvent($event);
+                    break;
+                default:
+                    $this->logger->info('PSQ Webhook: Unhandled event type', ['event_type' => $eventType]);
+            }
+            $result->setStatusHeader(200);
+            $result->setData(['success' => true]);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage(), ['exception' => $e]);
+            $result->setStatusHeader(500);
+            $result->setData(['error' => $e->getMessage()]);
         }
 
-        $event = json_decode($body, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $this->logger->error('PSQ Webhook: Invalid JSON');
-            $result->setStatusHeader(400);
-            $result->setData(['error' => 'Invalid JSON']);
-            return $result;
-        }
-
-        $eventType = $event['event_type'] ?? '';
-        $this->logger->info('Processing event type: ', ['event_type' => $eventType]);
-        if ($eventType === 'settlement:update') {
-            $this->handleSettlementUpdate($event['entity']);
-        } else {
-            $this->logger->info('PSQ Webhook: Unhandled event type', ['event_type' => $eventType]);
-        }
-
-        $result->setStatusHeader(200);
-        $result->setJsonData(['success' => true]);
         return $result;
     }
 
@@ -143,56 +135,15 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         return $verified;
     }
 
-    private function handleSettlementUpdate(array $settlement): void
-    {
-        $settlementId = $settlement['id'] ?? '';
-        $paymentId = $settlement['payment']['id'] ?? '';
-        $this->logger->info('Processing settlement id: ' . $settlementId . 'for Payment ID: ' . $paymentId);
-
-        if (!$settlementId || !$paymentId) {
-            $this->logger->error('PSQ Webhook: Missing settlement or payment ID', ['settlement' => $settlement]);
-            return;
-        }
-
-        try {
-            // Find transaction by payment ID
-            $filters = [
-                $this->filterBuilder->setField('txn_id')->setValue($paymentId)->create(),
-            ];
-            $criteria = $this->searchCriteriaBuilder->addFilters($filters)->create();
-            $transactions = $this->transactionRepository->getList($criteria)->getItems();
-
-            if (empty($transactions)) {
-                $this->logger->error('PSQ Webhook: Transaction not found for payment ID', ['payment_id' => $paymentId]);
-                return;
-            }
-
-            $transaction = reset($transactions);
-            $orderId = $transaction->getOrderId();
-            $order = $this->orderRepository->get($orderId);
-            $payment = $order->getPayment();
-
-            // Update additional information
-            $additionalInfo = $payment->getAdditionalInformation() ?? [];
-            $additionalInfo['psq_settlement_id'] = $settlementId;
-            $payment->setAdditionalInformation($additionalInfo);
-
-            // Save the order
-            $this->orderRepository->save($order);
-
-            $this->logger->info('Settlement ID saved', ['settlement_id' => $settlementId, 'order_id' => $orderId]);
-        } catch (\Exception $e) {
-            $this->logger->error('Error handling settlement update', ['exception' => $e, 'settlement' => $settlement] );
-        }
-    }
 
     public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
     {
-        return new InvalidRequestException($this->jsonResultFactory->create(), 'Failed request verification');
+        return new InvalidRequestException($this->jsonResultFactory->create(), [new Phrase('Failed request verification')]);
     }
 
     public function validateForCsrf(RequestInterface $request): ?bool
     {
+        // not a csrfMagento seems to require implementing the CSRF interface
         $signature = $this->request->getHeader('X-Signature') ?: '';
         $body = $request->getContent();
         return $this->verifySignature($body, $signature);
