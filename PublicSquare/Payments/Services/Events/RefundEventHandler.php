@@ -1,16 +1,16 @@
 <?php
 
 namespace PublicSquare\Payments\Services\Events;
+use Monolog\Logger;
 use PublicSquare\Payments\Api\Constants;
 use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
-use PublicSquare\Payments\Logger\Logger;
 
 class RefundEventHandler implements PSQEventHandler
 {
-    private Logger|\Monolog\Logger $logger;
+    private Logger $logger;
     private OrderRepositoryInterface $orderRepository;
     private TransactionRepositoryInterface $transactionRepository;
     private SearchCriteriaBuilder $searchCriteriaBuilder;
