@@ -134,7 +134,7 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
      * @param null $scopeCode
      * @return string
      */
-    public function getWebhookSecret(
+    public function getWebhookKey(
         $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
         $scopeCode = null,
     ): string

@@ -8,6 +8,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Encryption\Encryptor;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use phpseclib3\Crypt\PublicKeyLoader;
@@ -52,6 +53,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 
     private RequestInterface $request;
     private JsonFactory $jsonResultFactory;
+    private Encryptor $encryptor;
 
     public function __construct(
         Config                         $config,
@@ -62,6 +64,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         FilterBuilder                  $filterBuilder,
         RequestInterface               $request,
         JsonFactory                    $jsonResultFactory,
+        Encryptor                      $encryptor,
     )
     {
         $this->config = $config;
@@ -72,6 +75,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         $this->filterBuilder = $filterBuilder;
         $this->request = $request;
         $this->jsonResultFactory = $jsonResultFactory;
+        $this->encryptor = $encryptor;
 
     }
 
@@ -113,14 +117,15 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 
     private function verifySignature(string $body, string $signature): bool
     {
-        $secret = $this->config->getWebhookSecret();
-        if (!$secret) {
-            $this->logger->error('PSQ Webhook: Webhook secret not configured');
+        $encryptedWebhookKey = $this->config->getWebhookKey();
+        if (!$encryptedWebhookKey) {
+            $this->logger->error('Webhook secret not configured');
             return false;
         }
+        $webhookKey = $this->encryptor->decrypt($encryptedWebhookKey);
 
         $decodedSignature = base64_decode($signature);
-        $decodedKey = base64_decode($secret);
+        $decodedKey = base64_decode($webhookKey);
 
         $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n" .
             chunk_split(base64_encode($decodedKey), 64, "\n") .
@@ -175,9 +180,9 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
             // Save the order
             $this->orderRepository->save($order);
 
-            $this->logger->info('PSQ Webhook: Settlement ID saved', ['settlement_id' => $settlementId, 'order_id' => $orderId]);
+            $this->logger->info('Settlement ID saved', ['settlement_id' => $settlementId, 'order_id' => $orderId]);
         } catch (\Exception $e) {
-            $this->logger->error('PSQ Webhook: Error handling settlement update', ['exception' => $e->getMessage(), 'settlement' => $settlement]);
+            $this->logger->error('Error handling settlement update', ['exception' => $e, 'settlement' => $settlement] );
         }
     }
 
