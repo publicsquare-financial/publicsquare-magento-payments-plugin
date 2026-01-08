@@ -30,9 +30,10 @@ class RecurringData implements InstallDataInterface
     public function install(ModuleDataSetupInterface $setup, ModuleContextInterface $context): void
     {
         try {
-            $this->logger->info('PublicSquare: Recurring install script running on ' . $context->getVersion());
+            $this->logger->info('Running on module version: ' . $context->getVersion());
             $setup->startSetup();
             $this->webhookAutoConfig->ensureWebhookInstalled();
+            $this->logger->info('Install successful');
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         } finally {

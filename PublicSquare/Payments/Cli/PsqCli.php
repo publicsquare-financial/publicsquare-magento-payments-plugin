@@ -44,7 +44,7 @@ class PsqCli extends Command
         $configureWebhooksArg = $input->getArgument('configure-webhooks');
         if ($configureWebhooksArg) {
             $output->writeln('PublicSquare: Ensure webhooks configured...');
-            $this->webhookAutoConfig->ensureWebhookInstalled();
+            $this->webhookAutoConfig->ensureWebhookInstalled($output);
             $output->writeln('PublicSquare: Webhooks configured');
         }
         return 1;

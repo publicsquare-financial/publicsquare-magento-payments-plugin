@@ -11,6 +11,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use PublicSquare\Payments\Api\Authenticated\PSQCurlClient;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class WebhookAutoConfig
 {
@@ -27,7 +28,7 @@ class WebhookAutoConfig
         ScopeConfigInterface  $scopeConfig,
         EncryptorInterface    $encryptor,
         StoreManagerInterface $storeManager,
-        UrlInterface $urlBuilder,
+        UrlInterface          $urlBuilder,
     )
     {
         $this->logger = $logger ?? new Logger('PSQ:WebhookAutoConfig');
@@ -38,20 +39,27 @@ class WebhookAutoConfig
         $this->urlBuilder = $urlBuilder;
 
     }
+
     /**
      * @throws \Exception
      */
-    public function ensureWebhookInstalled(): void
+    public function ensureWebhookInstalled(OutputInterface|null $output): void
     {
+        $this->logger->debug('Checking if webhook is configured.');
+        $output?->writeln('Checking if webhook is configured.');
         $webhookKey = $this->scopeConfig->getValue(Config::PUBLICSQUARE_WEBHOOK_KEY);
         $webhookId = $this->scopeConfig->getValue(Config::PUBLICSQUARE_WEBHOOK_ID);
         if (!$webhookKey || !$webhookId) {
-            $this->logger->info('PublicSquare: Installing webhooks...');
+            $this->logger->info('Installing webhooks...');
+            $output?->writeln('Installing webhooks...');
             $this->setupWebhooks($webhookId);
+        } else {
+            $this->logger->info('Webhook with id [' . $webhookId . '] already installed.');
+            $output?->writeln('Webhook with id [' . $webhookId . '] already installed.');
         }
-        // Successfully installed OR already installed...
-        $this->logger->info('PublicSquare: Webhooks installed.');
+
     }
+
     /**
      * @throws \Exception
      */
@@ -77,10 +85,10 @@ class WebhookAutoConfig
             $webhookKey = $webhook['key'];
         } else {
             $webhookUrl = $this->urlBuilder->getUrl('publicSquare-payments/webhook/index');
-
+            $this->logger->info('PublicSquare: Creating new webhook url ' . $webhookUrl);
 
             $webhook = $client->createWebhook($privateKey, $webhookUrl);
-            $this->logger->info('PublicSquare: Created webhook.', ['webhookId' => $webhook['id']]);
+            $this->logger->info('PublicSquare: Created webhook.', ['webhookId' => $webhook['id'], 'webhookUrl' => $webhookUrl]);
 
             $webhookId = $webhook['id'];
             $webhookKey = $webhook['key'];
@@ -104,5 +112,6 @@ class WebhookAutoConfig
             Config::PUBLICSQUARE_WEBHOOK_ID,
             $webhookId,
         );
+        $this->logger->info('PublicSquare: Webhook configuration updated successfully.');
     }
 }
