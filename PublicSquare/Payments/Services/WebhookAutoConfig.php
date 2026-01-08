@@ -67,15 +67,16 @@ class WebhookAutoConfig
     {
         $client = new PSQCurlClient($this->logger);
 
-        $privateKey = $this->scopeConfig->getValue(
+        $encryptedPrivateKey = $this->scopeConfig->getValue(
             Config::PUBLICSQUARE_API_SECRET_KEY,
             ScopeInterface::SCOPE_STORE,
             null,
         );
-        if (!$privateKey) {
+        if (!$encryptedPrivateKey) {
             $this->logger->warning('PublicSquare: Private Key not set. Will not be able to connect webhooks until the private key is configured.');
             return;
         }
+        $privateKey = $this->encryptor->decrypt($encryptedPrivateKey);
 
         if ($existingWebhookId) {
             $this->logger->info('PublicSquare: Found webhook id' . $existingWebhookId . ' in config. Attempting to lookup key.');
@@ -84,7 +85,7 @@ class WebhookAutoConfig
             $webhookId = $existingWebhookId;
             $webhookKey = $webhook['key'];
         } else {
-            $webhookUrl = rtrim($this->urlBuilder->getUrl('publicSquare-payments/webhook/index'), '/');
+            $webhookUrl = rtrim($this->urlBuilder->getUrl('publicsquare-payments/webhook/index'), '/');
             $this->logger->info('PublicSquare: Creating new webhook url ' . $webhookUrl);
 
             $webhook = $client->createWebhook($privateKey, $webhookUrl);
