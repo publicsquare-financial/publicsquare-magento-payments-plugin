@@ -157,7 +157,7 @@
     <type name="Magento\Config\Model\Config\TypePool">
         <arguments>
             <argument name="sensitive" xsi:type="array">
-                <item name="payment/publicsquare_payments/webhook-key" xsi:type="string">1</item>
+                <item name="payment/publicsquare_payments/webhook_key" xsi:type="string">1</item>
             </argument>
         </arguments>
     </type>

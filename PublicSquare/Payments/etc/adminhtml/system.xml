@@ -123,7 +123,7 @@ This feature must also be enabled in the PSQ Portal under Settings → Features 
                     <comment><![CDATA[The PublicSquare Webhook ID to subscribe to]]></comment>
                 </field>
                 <field id="webhook_key" translate="label" type="obscure" sortOrder="24" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
-                    <label>Webhook ID</label>
+                    <label>Webhook Key</label>
                     <comment><![CDATA[The PublicSquare Webhook Key used to verify request signatures. Base64 encoded RSA key.]]></comment>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
