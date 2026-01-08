@@ -37,12 +37,14 @@ class RefundEventHandler implements PSQEventHandler
      */
     public function handleEvent(array $event): void
     {
-        $refund = $event['refund'] ?? null;
+        $eventId = $event['id'];
+        $refund = $event['entity'] ?? null;
         $refundId = $refund['id'] ?? '';
         $paymentId = $refund['payment_id'] ?? '';
         $this->logger->info(
             'Processing refund:',
             [
+                'event_id' => $eventId,
                 'id' => $refundId,
                 'payment_id' => $paymentId,
                 'status' => $refund['status'] ?? '',
@@ -55,6 +57,7 @@ class RefundEventHandler implements PSQEventHandler
             $this->logger->error(
                 'PSQ Webhook: Missing refund or payment ID',
                 [
+                    'event_id' => $eventId,
                     'id' => $refundId,
                     'payment_id' => $paymentId,
                 ],
@@ -71,7 +74,7 @@ class RefundEventHandler implements PSQEventHandler
             $transactions = $this->transactionRepository->getList($criteria)->getItems();
 
             if (empty($transactions)) {
-                $this->logger->error('Transaction not found for payment ID', ['payment_id' => $paymentId]);
+                $this->logger->error('Transaction not found for payment ID', ['payment_id' => $paymentId, 'event_id' => $eventId,]);
                 // TODO should this throw?
                 return;
             }
@@ -89,9 +92,9 @@ class RefundEventHandler implements PSQEventHandler
             // Save the order
             $this->orderRepository->save($order);
 
-            $this->logger->info('Refund ID saved', ['refund_id' => $refundId, 'order_id' => $orderId]);
+            $this->logger->info('Refund ID saved', ['refund_id' => $refundId, 'order_id' => $orderId, 'event_id' => $eventId,]);
         } catch (\Exception $e) {
-            $this->logger->error('Error handling refund update', ['exception' => $e, 'event_id' => $event['id']]);
+            $this->logger->error('Error handling refund update', ['exception' => $e, 'event_id' => $eventId]);
             throw $e;
         }
     }

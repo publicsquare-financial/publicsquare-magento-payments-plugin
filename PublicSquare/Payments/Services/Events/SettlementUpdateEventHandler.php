@@ -58,6 +58,7 @@ class SettlementUpdateEventHandler implements PSQEventHandler
             $this->logger->error('Missing settlement or payment ID', ['settlement' => $settlement,
                 'event_id' => $eventId,
             ]);
+            // TODO: Should this throw?
             return;
         }
 
