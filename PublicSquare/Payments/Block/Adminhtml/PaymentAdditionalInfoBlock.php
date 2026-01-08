@@ -21,7 +21,7 @@ class PaymentAdditionalInfoBlock extends Template
         $this->_coreRegistry = $registry;
     }
 
-    function getOrder()
+    public function getOrder()
     {
         $viewType = $this->getData('viewType');
         $order = null;
@@ -39,14 +39,20 @@ class PaymentAdditionalInfoBlock extends Template
                 $this->_logger->warning('PublicSquare: No view type set for PaymentAdditionalInfoBlock! Defaulting to order view type.');
                 return $this->_coreRegistry->registry('current_order');
         }
-        $this->_logger->info('PublicSquare: Got order for view type: ' . $viewType, ['order' => $order, 'viewType' => $viewType]);
+        $this->_logger->info(
+            'PublicSquare: Got order for view type: ' . $viewType,
+            [
+                'order' => $order?->getId(),
+                'viewType' => $viewType,
+            ],
+        );
         return $order;
     }
 
     function paymentAdditionalInfo(): array
     {
         return array_filter(
-            ($this->getOrder() && $this->getOrder()->getPayment() ? $this->getOrder()->getPayment()->getAdditionalInformation() : []) ?? [],
+            $this->getOrder()?->getPayment()?->getAdditionalInformation() ?? [],
             function ($value, $key) {
                 return in_array($key, $this->whitelist, false);
             },

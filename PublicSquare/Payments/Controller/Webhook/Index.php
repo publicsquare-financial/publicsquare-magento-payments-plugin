@@ -193,7 +193,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 
     public function validateForCsrf(RequestInterface $request): ?bool
     {
-        $signature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
+        $signature = $this->request->getHeader('X-Signature') ?: '';
         $body = $request->getContent();
         return $this->verifySignature($body, $signature);
     }

@@ -47,7 +47,7 @@ class PsqCli extends Command
             $this->webhookAutoConfig->ensureWebhookInstalled($output);
             $output->writeln('PublicSquare: Webhooks configured');
         }
-        return 1;
+        return Command::SUCCESS;
     }
 
 }

@@ -2,7 +2,6 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
-use Aws\finspace\Exception\finspaceException;
 use PublicSquare\Payments\Logger\Logger;
 
 class PSQCurlClient
@@ -10,7 +9,7 @@ class PSQCurlClient
     private Logger $logger;
     private string $baseUrl;
 
-    function __construct(Logger $logger, string $baseUrl = "https://api.publicsquare.com")
+    public function __construct(Logger $logger, string $baseUrl = "https://api.publicsquare.com")
     {
         $this->baseUrl = $baseUrl;
         $this->logger = $logger->withName('PSQ:CurlClient');
@@ -45,6 +44,10 @@ class PSQCurlClient
             $this->logger->debug('Creating webhook for url: ' . $webhookUrl);
             $response = curl_exec($req);
             $responseBody = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->logger->error('Failed to decode createWebhook response', ['response' => $response]);
+                throw new \Exception('Failed to decode API response.');
+            }
             return $responseBody;
         } catch (\Exception $err) {
             $this->logger->warning( 'Failed to create webhook: ' . $err->getMessage());
@@ -71,6 +74,10 @@ class PSQCurlClient
             $this->logger->debug('GET webhook ID: ' . $webhookId);
             $response = curl_exec($req);
             $responseBody = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->logger->error('Failed to decode createWebhook response', ['response' => $response]);
+                throw new \Exception('Failed to decode API response.');
+            }
             $this->logger->info('Retrieved webhook with ID: ' . $responseBody['id']);
             return $responseBody;
         } catch (\Exception $err) {

@@ -123,7 +123,7 @@ class PaymentExecutor
 		$this->paymentTokenRepository = $paymentTokenRepository;
 		$this->tokenManagement = $tokenManagement;
 		$this->encryptor = $encryptor;
-		$this->logger = $logger;
+		$this->logger = $logger->withName('PSQ:PaymentExecutor');
 		$this->transactionRepository = $transactionRepository;
 		$this->paymentCaptureFactory = $paymentCaptureFactory;
 		$this->paymentCancelFactory = $paymentCancelFactory;
@@ -271,17 +271,27 @@ class PaymentExecutor
 					])->getResponse();
 					$payment->setIsTransactionClosed(1);
 				} else {
-                    $this->logger->info('PSQ Payments: Refunding payment');
+                    $this->logger->info('Refunding payment');
                     $refundResponse = $this->paymentRefundFactory->create([
 						'paymentId' => $transactionId,
 						'amount' => $amount
 					])->getResponseData();
+                    $this->logger->info("Got refund response: ", $refundResponse);
+                    // Capture the refund id and save it in the additional data JSON column.
+                    if(isset($refundResponse['id'])) {
+                        $additionalInfo = $payment->getAdditionalInformation() ?? [];
+                        $additionalInfo['psq_refund_id'] = $refundResponse["id"];
+                        $payment->setAdditionalInformation($additionalInfo);
+                        $this->logger->info('Updated order payment additional info with refund id', ['refundId' => $refundResponse['id']]);
+                    } else {
+                        $this->logger->warning('Refund ID not present on refund API response for payment.', ['transaction_id' => $transactionId]);
+                    }
 
                     $payment->setIsTransactionClosed(1);
 				}
 			}
 		} catch (\Exception $e) {
-			$this->logger->error("PSQ Payments update from observer failed", [
+			$this->logger->error("Update from observer failed", [
 				"error" => $e->getMessage(),
 			]);
 			$this->throwUserFriendlyException($e);
@@ -293,7 +303,7 @@ class PaymentExecutor
 		try {
 			$this->executeCancel($commandSubject);
 		} catch (\Exception $e) {
-			$this->logger->error("PSQ Payments attempted to cancel payment, but failed", [
+			$this->logger->error("Attempted to cancel payment, but failed", [
 				"error" => $e->getMessage(),
 			]);
 		}

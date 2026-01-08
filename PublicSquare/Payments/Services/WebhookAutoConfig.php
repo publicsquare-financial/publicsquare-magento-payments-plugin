@@ -82,7 +82,7 @@ class WebhookAutoConfig
             // fetch existing webhook key
             $webhook = $client->getWebhook($privateKey, $existingWebhookId);
             $webhookId = $existingWebhookId;
-            $webhookKey = $webhook['key'];
+            $webhookKey = $webhook['key'] ?? null;
         } else {
             $webhookUrl = rtrim($this->urlBuilder->getUrl('publicsquare-payments/webhook/index'), '/');
             $this->logger->info('PublicSquare: Creating new webhook url ' . $webhookUrl);
@@ -90,8 +90,8 @@ class WebhookAutoConfig
             $webhook = $client->createWebhook($privateKey, $webhookUrl);
             $this->logger->info('PublicSquare: Created webhook.', ['webhookId' => $webhook['id'], 'webhookUrl' => $webhookUrl]);
 
-            $webhookId = $webhook['id'];
-            $webhookKey = $webhook['key'];
+            $webhookId = $webhook['id'] ?? null;
+            $webhookKey = $webhook['key'] ?? null;
         }
 
         // validate and save
