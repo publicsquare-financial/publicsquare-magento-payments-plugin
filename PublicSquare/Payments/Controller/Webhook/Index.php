@@ -15,6 +15,8 @@ use phpseclib3\Crypt\RSA;
 use Psr\Log\LoggerInterface;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
+use Magento\Framework\Controller\Result\JsonFactory;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 {
@@ -48,17 +50,20 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
      */
     private FilterBuilder $filterBuilder;
 
-    private RequestInterface                     $request;
+    private RequestInterface $request;
+    private JsonFactory $jsonResultFactory;
 
     public function __construct(
-        Config $config,
-        Logger $logger,
-        OrderRepositoryInterface $orderRepository,
+        Config                         $config,
+        Logger                         $logger,
+        OrderRepositoryInterface       $orderRepository,
         TransactionRepositoryInterface $transactionRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
-        FilterBuilder $filterBuilder,
-        RequestInterface                     $request,
-    ) {
+        SearchCriteriaBuilder          $searchCriteriaBuilder,
+        FilterBuilder                  $filterBuilder,
+        RequestInterface               $request,
+        JsonFactory                    $jsonResultFactory,
+    )
+    {
         $this->config = $config;
         $this->logger = $logger->withName('PSQ:Webhook');
         $this->orderRepository = $orderRepository;
@@ -66,27 +71,31 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->filterBuilder = $filterBuilder;
         $this->request = $request;
+        $this->jsonResultFactory = $jsonResultFactory;
+
     }
 
     public function execute()
     {
+        $result = $this->jsonResultFactory->create();
+
         $body = $this->request->getContent();
         $this->logger->debug('Webhook invoked');
         $signature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
 
         if (!$this->verifySignature($body, $signature)) {
             $this->logger->warning('PSQ Webhook: Invalid signature');
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid signature']);
-            return;
+            $result->setStatusHeader(400);
+            $result->setData(['error' => 'Invalid signature']);
+            return $result;
         }
 
         $event = json_decode($body, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->logger->error('PSQ Webhook: Invalid JSON');
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid JSON']);
-            return;
+            $result->setStatusHeader(400);
+            $result->setData(['error' => 'Invalid JSON']);
+            return $result;
         }
 
         $eventType = $event['event_type'] ?? '';
@@ -97,8 +106,9 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
             $this->logger->info('PSQ Webhook: Unhandled event type', ['event_type' => $eventType]);
         }
 
-        http_response_code(200);
-        echo json_encode(['success' => true]);
+        $result->setStatusHeader(200);
+        $result->setJsonData(['success' => true]);
+        return $result;
     }
 
     private function verifySignature(string $body, string $signature): bool
@@ -142,7 +152,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         try {
             // Find transaction by payment ID
             $filters = [
-                $this->filterBuilder->setField('txn_id')->setValue($paymentId)->create()
+                $this->filterBuilder->setField('txn_id')->setValue($paymentId)->create(),
             ];
             $criteria = $this->searchCriteriaBuilder->addFilters($filters)->create();
             $transactions = $this->transactionRepository->getList($criteria)->getItems();
@@ -173,11 +183,13 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 
     public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
     {
-        return null;
+        return new InvalidRequestException($this->jsonResultFactory->create(), 'Failed request verification');
     }
 
     public function validateForCsrf(RequestInterface $request): ?bool
     {
-        return false;
+        $signature = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
+        $body = $request->getContent();
+        return $this->verifySignature($body, $signature);
     }
 }

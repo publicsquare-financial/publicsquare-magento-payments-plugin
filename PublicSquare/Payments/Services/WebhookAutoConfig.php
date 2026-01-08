@@ -76,7 +76,7 @@ class WebhookAutoConfig
             $webhookId = $existingWebhookId;
             $webhookKey = $webhook['key'];
         } else {
-            $webhookUrl = $this->urlBuilder->getUrl('PublicSquare_Payments/Webhook/Index');
+            $webhookUrl = $this->urlBuilder->getUrl('publicSquare-payments/webhook/index');
 
 
             $webhook = $client->createWebhook($privateKey, $webhookUrl);
