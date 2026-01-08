@@ -43,7 +43,7 @@ class WebhookAutoConfig
     /**
      * @throws \Exception
      */
-    public function ensureWebhookInstalled(OutputInterface|null $output): void
+    public function ensureWebhookInstalled(OutputInterface|null $output = null): void
     {
         $this->logger->debug('Checking if webhook is configured.');
         $output?->writeln('Checking if webhook is configured.');
