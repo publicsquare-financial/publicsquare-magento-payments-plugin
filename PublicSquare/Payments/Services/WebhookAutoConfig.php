@@ -7,7 +7,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Store\Model\ScopeInterface;
-use PublicSquare\Payments\Api\Authenticated\PSQCurlClient;
+use PublicSquare\Payments\Api\Authenticated\WebhookClient;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,15 +19,15 @@ class WebhookAutoConfig
     private EncryptorInterface $encryptor;
     private ScopeConfigInterface $scopeConfig;
     private UrlInterface $urlBuilder;
-    private PSQCurlClient $client;
+    private WebhookClient $client;
 
     public function __construct(
-        Logger|null           $logger,
-        ConfigInterface       $resourceConfig,
-        ScopeConfigInterface  $scopeConfig,
-        EncryptorInterface    $encryptor,
-        UrlInterface          $urlBuilder,
-        PSQCurlClient         $client,
+        Logger|null          $logger,
+        ConfigInterface      $resourceConfig,
+        ScopeConfigInterface $scopeConfig,
+        EncryptorInterface   $encryptor,
+        UrlInterface         $urlBuilder,
+        WebhookClient        $client,
     )
     {
         $this->logger = $logger ?? new Logger('PSQ:WebhookAutoConfig');
@@ -78,14 +78,14 @@ class WebhookAutoConfig
         if ($existingWebhookId) {
             $this->logger->info('PublicSquare: Found webhook id' . $existingWebhookId . ' in config. Attempting to lookup key.');
             // fetch existing webhook key
-            $webhook = $this->client->getWebhook($privateKey, $existingWebhookId);
+            $webhook = $this->client->getWebhook($existingWebhookId);
             $webhookId = $existingWebhookId;
             $webhookKey = $webhook['key'] ?? null;
         } else {
             $webhookUrl = rtrim($this->urlBuilder->getUrl('publicsquare-payments/webhook/index'), '/');
             $this->logger->info('PublicSquare: Creating new webhook url ' . $webhookUrl);
 
-            $webhook = $this->client->createWebhook($privateKey, $webhookUrl);
+            $webhook = $this->client->createWebhook($webhookUrl);
             $this->logger->info('PublicSquare: Created webhook.', ['webhookId' => $webhook['id'], 'webhookUrl' => $webhookUrl]);
 
             $webhookId = $webhook['id'] ?? null;

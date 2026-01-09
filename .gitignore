@@ -14,3 +14,4 @@ tests/_output
 .phpunit.cache/
 tests/**/.phpunit.result.cache
 magento-install/
+*.private.*

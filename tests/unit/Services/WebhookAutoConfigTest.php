@@ -35,7 +35,7 @@ class WebhookAutoConfigTest extends TestCase
             $this->scopeConfig,
             $this->encryptor,
             $this->urlBuilder,
-            $this->createMock(\PublicSquare\Payments\Api\Authenticated\PSQCurlClient::class)
+            $this->createMock(\PublicSquare\Payments\Api\Authenticated\WebhookClient::class)
         );
     }
 
