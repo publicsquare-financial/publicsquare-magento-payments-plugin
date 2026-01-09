@@ -191,5 +191,26 @@ No .cursorrules or .cursor/rules/ files found. No .github/copilot-instructions.m
   - Combine with input validation; test with malicious input (e.g., `<script>` tags).
 - **Documentation**: Update PHPDoc for public APIs; comment complex logic.
 
+## Unit Test Stubs for Magento Classes
+
+When writing unit tests that require mocking Magento or third-party classes not available in the test environment, create stub interfaces/classes in `tests/unit/stubs/` following this pattern:
+
+- **Directory Structure**: Mirror the namespace, e.g., `Magento/Framework/App/Config/ScopeConfigInterface.php`
+- **Content**: Simple interface or class with method signatures used in tests. For interfaces, include only the relevant methods.
+- **Autoloading**: Add to `composer.json` `autoload-dev` section to map namespaces to stub directories.
+- **Example**:
+  ```php
+  <?php
+  namespace Magento\Framework\App\Config;
+
+  interface ScopeConfigInterface
+  {
+      public function getValue($path, $scopeType = null, $scopeCode = null);
+  }
+  ```
+- **Usage**: This allows PHPUnit to mock interfaces/classes without requiring the full Magento framework in unit tests.
+
+Update autoload mappings and regenerate autoload when adding new stubs.
+
 For feedback or updates, see https://github.com/sst/opencode/issues.</content>
 <parameter name="filePath">/Users/btilford/Projects/publicsq/payments/publicsquare-magento-payments-plugin/AGENTS.md

@@ -2,6 +2,11 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
+use Laminas\Http\Client;
+use Laminas\Http\Request;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Model\ScopeInterface;
+use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
 
 class PSQCurlClient
@@ -9,9 +14,15 @@ class PSQCurlClient
     private Logger $logger;
     private string $baseUrl;
 
-    public function __construct(Logger $logger, string $baseUrl = "https://api.publicsquare.com")
-    {
-        $this->baseUrl = $baseUrl;
+    public function __construct(
+        Logger $logger,
+        ScopeConfigInterface $scopeConfig
+    ) {
+        $this->baseUrl = $scopeConfig->getValue(
+            Config::PUBLICSQUARE_API_BASE_URL,
+            ScopeInterface::SCOPE_STORE,
+            null
+        ) ?? "https://api.publicsquare.com";
         $this->logger = $logger->withName('PSQ:CurlClient');
     }
 
@@ -21,7 +32,9 @@ class PSQCurlClient
      */
     public function createWebhook(string $privateKey, string $webhookUrl): array
     {
-        $req = curl_init($this->baseUrl . '/webhooks');
+        $client = new Client();
+        $client->setUri($this->baseUrl . '/webhooks');
+        $client->setMethod(Request::METHOD_POST);
 
         $body = json_encode([
             'url' => $webhookUrl,
@@ -30,30 +43,26 @@ class PSQCurlClient
                 'refund:update',
             ],
         ]);
-        curl_setopt($req, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($req, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($req, CURLOPT_POSTFIELDS, $body);
-        curl_setopt($req, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Content-Length: ' . strlen($body),
-            'Accept: application/json',
-            'X-API-KEY: ' . $privateKey,
 
+        $client->setRawBody($body);
+        $client->setHeaders([
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'X-API-KEY' => $privateKey,
         ]);
+
         try {
             $this->logger->debug('Creating webhook for url: ' . $webhookUrl);
-            $response = curl_exec($req);
-            $responseBody = json_decode($response, true);
+            $response = $client->send();
+            $responseBody = json_decode($response->getBody(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logger->error('Failed to decode createWebhook response', ['response' => $response]);
+                $this->logger->error('Failed to decode createWebhook response', ['response' => $response->getBody()]);
                 throw new \Exception('Failed to decode API response.');
             }
             return $responseBody;
         } catch (\Exception $err) {
-            $this->logger->warning( 'Failed to create webhook: ' . $err->getMessage());
+            $this->logger->warning('Failed to create webhook: ' . $err->getMessage());
             throw $err;
-        } finally {
-            curl_close($req);
         }
     }
 
@@ -62,29 +71,28 @@ class PSQCurlClient
      */
     public function getWebhook(string $privateKey, string $webhookId): array
     {
-        $req = curl_init($this->baseUrl . '/webhooks/' . $webhookId);
+        $client = new Client();
+        $client->setUri($this->baseUrl . '/webhooks/' . $webhookId);
+        $client->setMethod(Request::METHOD_GET);
 
-
-        curl_setopt($req, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($req, CURLOPT_HTTPHEADER, [
-            'Accept: application/json',
-            'X-API-KEY: ' . $privateKey,
+        $client->setHeaders([
+            'Accept' => 'application/json',
+            'X-API-KEY' => $privateKey,
         ]);
+
         try {
             $this->logger->debug('GET webhook ID: ' . $webhookId);
-            $response = curl_exec($req);
-            $responseBody = json_decode($response, true);
+            $response = $client->send();
+            $responseBody = json_decode($response->getBody(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logger->error('Failed to decode createWebhook response', ['response' => $response]);
+                $this->logger->error('Failed to decode getWebhook response', ['response' => $response->getBody()]);
                 throw new \Exception('Failed to decode API response.');
             }
             $this->logger->info('Retrieved webhook with ID: ' . $responseBody['id']);
             return $responseBody;
         } catch (\Exception $err) {
-            $this->logger->error( 'Error getting webhook with id [' . $webhookId . ']: ' . $err->getMessage());
+            $this->logger->error('Error getting webhook with id [' . $webhookId . ']: ' . $err->getMessage());
             throw $err;
-        } finally {
-            curl_close($req);
         }
     }
 }

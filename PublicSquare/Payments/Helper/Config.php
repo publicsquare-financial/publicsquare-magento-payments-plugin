@@ -25,6 +25,7 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
     const PUBLICSQUARE_ACTIVE_CONFIG_PATH = 'payment/publicsquare_payments/active';
     const PUBLICSQUARE_TITLE_CONFIG_PATH = 'payment/publicsquare_payments/title';
     const PUBLICSQUARE_ENVIRONMENT = 'payment/publicsquare_payments/environment';
+    const PUBLICSQUARE_API_BASE_URL = 'payment/publicsquare_payments/publicsquare_api_base_url';
     const PUBLICSQUARE_API_PUBLIC_KEY = 'payment/publicsquare_payments/publicsquare_api_public_key';
     const PUBLICSQUARE_API_SECRET_KEY = 'payment/publicsquare_payments/publicsquare_api_secret_key';
     const PUBLICSQUARE_SECURITY_TYPE = 'payment/publicsquare_payments/security_type';

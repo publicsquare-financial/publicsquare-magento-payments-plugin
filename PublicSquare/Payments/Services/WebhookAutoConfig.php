@@ -19,6 +19,7 @@ class WebhookAutoConfig
     private EncryptorInterface $encryptor;
     private ScopeConfigInterface $scopeConfig;
     private UrlInterface $urlBuilder;
+    private PSQCurlClient $client;
 
     public function __construct(
         Logger|null           $logger,
@@ -26,6 +27,7 @@ class WebhookAutoConfig
         ScopeConfigInterface  $scopeConfig,
         EncryptorInterface    $encryptor,
         UrlInterface          $urlBuilder,
+        PSQCurlClient         $client,
     )
     {
         $this->logger = $logger ?? new Logger('PSQ:WebhookAutoConfig');
@@ -33,6 +35,7 @@ class WebhookAutoConfig
         $this->encryptor = $encryptor;
         $this->scopeConfig = $scopeConfig;
         $this->urlBuilder = $urlBuilder;
+        $this->client = $client;
 
     }
 
@@ -61,7 +64,6 @@ class WebhookAutoConfig
      */
     public function setupWebhooks(string|null $existingWebhookId): void
     {
-        $client = new PSQCurlClient($this->logger);
 
         $privateKey = $this->scopeConfig->getValue(
             Config::PUBLICSQUARE_API_SECRET_KEY,
@@ -76,14 +78,14 @@ class WebhookAutoConfig
         if ($existingWebhookId) {
             $this->logger->info('PublicSquare: Found webhook id' . $existingWebhookId . ' in config. Attempting to lookup key.');
             // fetch existing webhook key
-            $webhook = $client->getWebhook($privateKey, $existingWebhookId);
+            $webhook = $this->client->getWebhook($privateKey, $existingWebhookId);
             $webhookId = $existingWebhookId;
             $webhookKey = $webhook['key'] ?? null;
         } else {
             $webhookUrl = rtrim($this->urlBuilder->getUrl('publicsquare-payments/webhook/index'), '/');
             $this->logger->info('PublicSquare: Creating new webhook url ' . $webhookUrl);
 
-            $webhook = $client->createWebhook($privateKey, $webhookUrl);
+            $webhook = $this->client->createWebhook($privateKey, $webhookUrl);
             $this->logger->info('PublicSquare: Created webhook.', ['webhookId' => $webhook['id'], 'webhookUrl' => $webhookUrl]);
 
             $webhookId = $webhook['id'] ?? null;

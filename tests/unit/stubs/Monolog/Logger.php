@@ -24,6 +24,10 @@ class Logger
         array_push($this->messages, $args);
         print_r($args);
     }
+    function warning(...$args) {
+        array_push($this->messages, $args);
+        print_r($args);
+    }
     function withName(string $name) {
         $named = clone $this;
         $named->name = $name;
