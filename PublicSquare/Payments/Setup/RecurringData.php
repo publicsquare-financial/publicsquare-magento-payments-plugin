@@ -31,9 +31,22 @@ class RecurringData implements InstallDataInterface
     {
         try {
             $this->logger->info('Running on module version: ' . $context->getVersion());
+            $version = $context->getVersion();
             $setup->startSetup();
-            $this->webhookAutoConfig->ensureWebhookInstalled(null);
+            if($version) {
+                $this->webhookAutoConfig->ensureWebhookInstalled(null);
+            } else {
+                // If magento is installing with the plugin we need to skip webhook configuration until after
+                // the plugin is configured with an api key etc...
+                //
+                // Either running 'bin/magento setup:install' a 2nd time or running 'bin/magento psq configure-webhooks'
+                // after the initial install will work.
+                //
+                // Alternatively the webhook id and/or key can be set within the admin ui for the plugin.
+                $this->logger->warning('Skipping webhook configuration during initial install. Run bin/magento psq configure-webhooks after installation.');
+            }
             $this->logger->info('Install successful');
+
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
         } finally {

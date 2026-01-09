@@ -50,7 +50,7 @@ class PaymentAdditionalInfoBlock extends Template
         return $order;
     }
 
-    function paymentAdditionalInfo(): array
+    public function paymentAdditionalInfo(): array
     {
         return array_filter(
             $this->getOrder()?->getPayment()?->getAdditionalInformation() ?? [],
