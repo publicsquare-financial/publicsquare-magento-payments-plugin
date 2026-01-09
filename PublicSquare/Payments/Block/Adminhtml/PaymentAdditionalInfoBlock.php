@@ -61,7 +61,7 @@ class PaymentAdditionalInfoBlock extends Template
         );
     }
 
-    function isVisible(): bool
+    public function isVisible(): bool
     {
         return count($this->paymentAdditionalInfo()) > 0;
     }

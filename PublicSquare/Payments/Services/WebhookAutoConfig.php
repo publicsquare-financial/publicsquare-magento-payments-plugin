@@ -71,22 +71,22 @@ class WebhookAutoConfig
             null,
         );
         if (!$privateKey) {
-            $this->logger->warning('PublicSquare: Private Key not set. Will not be able to connect webhooks until the private key is configured.');
+            $this->logger->warning('Private Key not set. Will not be able to connect webhooks until the private key is configured.');
             return;
         }
 
         if ($existingWebhookId) {
-            $this->logger->info('PublicSquare: Found webhook id' . $existingWebhookId . ' in config. Attempting to lookup key.');
+            $this->logger->info('Found webhook id [' . $existingWebhookId . '] in config. Attempting to lookup key.');
             // fetch existing webhook key
             $webhook = $this->client->getWebhook($existingWebhookId);
             $webhookId = $existingWebhookId;
             $webhookKey = $webhook['key'] ?? null;
         } else {
             $webhookUrl = rtrim($this->urlBuilder->getUrl('publicsquare-payments/webhook/index'), '/');
-            $this->logger->info('PublicSquare: Creating new webhook url ' . $webhookUrl);
+            $this->logger->info('Creating new webhook url ' . $webhookUrl);
 
             $webhook = $this->client->createWebhook($webhookUrl);
-            $this->logger->info('PublicSquare: Created webhook.', ['webhookId' => $webhook['id'], 'webhookUrl' => $webhookUrl]);
+            $this->logger->info('Created webhook.', ['webhookId' => $webhook['id'], 'webhookUrl' => $webhookUrl]);
 
             $webhookId = $webhook['id'] ?? null;
             $webhookKey = $webhook['key'] ?? null;
@@ -94,12 +94,12 @@ class WebhookAutoConfig
 
         // validate and save
         if (!$webhookId) {
-            $this->logger->warning('PublicSquare: Missing webhook id.');
-            throw new \RuntimeException('PublicSquare: Missing webhook id.');
+            $this->logger->warning('Missing webhook id.');
+            throw new \RuntimeException('Missing webhook id.');
         }
         if (!$webhookKey) {
-            $this->logger->warning('PublicSquare: Missing webhook key.');
-            throw new \RuntimeException('PublicSquare: Missing webhook key.');
+            $this->logger->warning('Missing webhook key.');
+            throw new \RuntimeException('Missing webhook key.');
         }
 
         $this->resourceConfig->saveConfig(
@@ -110,6 +110,6 @@ class WebhookAutoConfig
             Config::PUBLICSQUARE_WEBHOOK_ID,
             $webhookId,
         );
-        $this->logger->info('PublicSquare: Webhook configuration updated successfully.');
+        $this->logger->info('Webhook configuration updated successfully.');
     }
 }

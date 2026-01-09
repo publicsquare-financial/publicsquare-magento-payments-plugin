@@ -82,7 +82,7 @@ class IndexTest extends TestCase
         $result->expects($this->once())->method('setStatusHeader'); // Allow any status due to signature issues
         $result->expects($this->once())->method('setData');
 
-        $this->settlementUpdateEventHandler->expects($this->never())->method('handleEvent');
+        $this->settlementUpdateEventHandler->expects($this->once())->method('handleEvent');
 
         $response = $this->controller->execute();
         $this->assertSame($result, $response);
@@ -108,7 +108,7 @@ class IndexTest extends TestCase
         $result->expects($this->once())->method('setStatusHeader');
         $result->expects($this->once())->method('setData');
 
-        $this->refundEventHandler->expects($this->never())->method('handleEvent');
+        $this->refundEventHandler->expects($this->once())->method('handleEvent');
 
         $response = $this->controller->execute();
         $this->assertSame($result, $response);

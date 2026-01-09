@@ -72,12 +72,6 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
             }
 
             $event = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logger->error('PSQ Webhook: Invalid JSON');
-                $result->setStatusHeader(400);
-                $result->setData(['error' => 'Invalid JSON']);
-                return $result;
-            }
 
             $eventType = $event['event_type'] ?? '';
             $this->logger->info('Processing event type: ', [
