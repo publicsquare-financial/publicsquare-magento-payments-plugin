@@ -2,6 +2,7 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
+use http\Exception\RuntimeException;
 use Laminas\Http\Client;
 use Laminas\Http\Request;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -13,7 +14,7 @@ class WebhookClient
 {
     private Logger $logger;
     private string $baseUrl;
-    private string $privateKey;
+    private string|null $privateKey;
 
     public function __construct(
         Logger $logger,
@@ -30,12 +31,19 @@ class WebhookClient
         $this->logger = $logger->withName('PSQ:WebhookClient');
     }
 
+    private function configurationRequired(): void {
+        if(empty($this->privateKey)) {
+            $this->logger->warning('Missing secret key for PublicSquare APIs');
+            throw new RuntimeException('Private key not configured');
+        }
+    }
 
     /**
      * @throws \Exception
      */
     public function createWebhook(string $webhookUrl): array
     {
+        $this->configurationRequired();
         $client = new Client();
         $client->setUri($this->baseUrl . '/webhooks');
         $client->setMethod(Request::METHOD_POST);
@@ -75,6 +83,7 @@ class WebhookClient
      */
     public function getWebhook(string $webhookId): array
     {
+        $this->configurationRequired();
         $client = new Client();
         $client->setUri($this->baseUrl . '/webhooks/' . $webhookId);
         $client->setMethod(Request::METHOD_GET);

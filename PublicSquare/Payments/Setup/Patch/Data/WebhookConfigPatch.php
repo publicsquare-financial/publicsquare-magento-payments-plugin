@@ -24,7 +24,7 @@ class WebhookConfigPatch implements DataPatchInterface
 
     public static function getDependencies()
     {
-        // TODO: Implement getDependencies() method.
+        return [];
     }
 
     public function getAliases()

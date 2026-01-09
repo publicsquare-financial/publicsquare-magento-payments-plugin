@@ -8,8 +8,7 @@
     "AFL-3.0"
   ],
   "require": {
-    "magento/module-vault": "*",
-    "ext-curl": "*"
+    "magento/module-vault": "*"
   },
   "repositories": [
     {
