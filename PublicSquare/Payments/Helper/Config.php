@@ -25,6 +25,7 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
     const PUBLICSQUARE_ACTIVE_CONFIG_PATH = 'payment/publicsquare_payments/active';
     const PUBLICSQUARE_TITLE_CONFIG_PATH = 'payment/publicsquare_payments/title';
     const PUBLICSQUARE_ENVIRONMENT = 'payment/publicsquare_payments/environment';
+    const PUBLICSQUARE_API_BASE_URL = 'payment/publicsquare_payments/publicsquare_api_base_url';
     const PUBLICSQUARE_API_PUBLIC_KEY = 'payment/publicsquare_payments/publicsquare_api_public_key';
     const PUBLICSQUARE_API_SECRET_KEY = 'payment/publicsquare_payments/publicsquare_api_secret_key';
     const PUBLICSQUARE_SECURITY_TYPE = 'payment/publicsquare_payments/security_type';
@@ -34,6 +35,8 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
     const PUBLICSQUARE_CARD_TYPES = 'payment/publicsquare_payments/card_types';
     const PUBLICSQUARE_PAYMENT_ACTION = 'payment/publicsquare_payments/payment_action';
     const PUBLICSQUARE_LOGGING_CONFIG_PATH = 'payment/publicsquare_payments/debug';
+    const PUBLICSQUARE_WEBHOOK_KEY = 'payment/publicsquare_payments/webhook_key';
+    const PUBLICSQUARE_WEBHOOK_ID = 'payment/publicsquare_payments/webhook_id';
     const PUBLICSQUARE_CARD_IMAGES_BASE_PATH = 'https://assets.publicsquare.com/sc/web/assets/images/cards/';
     const PUBLICSQUARE_CUSTOMER_LOOKUP = 'payment/publicsquare_payments/customer_lookup';
     const PUBLICSQUARE_CARD_INPUT_CUSTOMIZATION = 'payment/publicsquare_payments/card_input_customization';
@@ -124,6 +127,22 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
         return (string)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_API_SECRET_KEY, $scopeType, $scopeCode);
     } //end getSecretAPIKey()
+
+    /**
+     * Get webhook secret
+     *
+     * @param string $scopeType
+     * @param null $scopeCode
+     * @return string
+     */
+    public function getWebhookKey(
+        $scopeType = \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+        $scopeCode = null,
+    ): string
+    {
+        return (string)$this->scopeConfig
+            ->getValue(self::PUBLICSQUARE_WEBHOOK_KEY, $scopeType, $scopeCode);
+    } //end getWebhookSecret()
 
     /**
      * Get publicsquare payment method sort order

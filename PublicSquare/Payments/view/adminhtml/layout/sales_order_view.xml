@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="PublicSquare_Payments::styles.css"/>
+    </head>
+    <body>
+        <referenceBlock name="order_tab_info">
+            <referenceContainer name="payment_additional_info">
+                <block name="psq.payment.additionalInfo"
+                        class="PublicSquare\Payments\Block\Adminhtml\PaymentAdditionalInfoBlock"
+                       template="PublicSquare_Payments::admin/payment-additional-info.phtml">
+                    <arguments>
+                        <argument name="viewType" xsi:type="string">order</argument>
+                    </arguments>
+                </block>
+            </referenceContainer>
+
+        </referenceBlock>
+    </body>
+</page>

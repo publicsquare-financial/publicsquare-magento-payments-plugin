@@ -32,7 +32,7 @@ class PaymentRefund extends \PublicSquare\Payments\Api\ApiRequestAbstract
         string $paymentId,
         string | null $externalId = null
     ) {
-        parent::__construct($clientFactory, $configHelper, $logger);
+        parent::__construct($clientFactory, $configHelper, $logger->withName('PSQ:PaymentRefund'));
         $this->requestData = [
             "amount" => $amount,
             "payment_id" => $paymentId
@@ -62,6 +62,11 @@ class PaymentRefund extends \PublicSquare\Payments\Api\ApiRequestAbstract
         return \Laminas\Http\Request::METHOD_POST;
     }//end getMethod()
 
+    /**
+     * @throws ApiDeclinedResponseException
+     * @throws ApiFailedResponseException
+     * @throws ApiRejectedResponseException
+     */
     protected function validateResponse(mixed $data): bool
     {
         $status = $data["status"] ?? "";
