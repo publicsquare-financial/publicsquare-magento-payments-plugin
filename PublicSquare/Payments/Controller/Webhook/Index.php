@@ -101,7 +101,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         return $result;
     }
 
-    private function verifySignature(string $body, string $signature): bool
+    protected function verifySignature(string $body, string $signature): bool
     {
         $encryptedWebhookKey = $this->config->getWebhookKey();
         if (!$encryptedWebhookKey) {
