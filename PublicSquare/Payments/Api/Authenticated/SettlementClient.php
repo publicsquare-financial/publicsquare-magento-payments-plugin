@@ -2,7 +2,6 @@
 
 namespace PublicSquare\Payments\Api\Authenticated;
 
-use http\Exception\RuntimeException;
 use Laminas\Http\Client;
 use Laminas\Http\Request;
 use Magento\Framework\App\Config\ScopeConfigInterface;
@@ -33,7 +32,7 @@ class SettlementClient
     private function configurationRequired(): void {
         if(empty($this->privateKey)) {
             $this->logger->warning('Missing secret key for PublicSquare APIs');
-            throw new RuntimeException('Private key not configured');
+            throw new \RuntimeException('Private key not configured');
         }
     }
 

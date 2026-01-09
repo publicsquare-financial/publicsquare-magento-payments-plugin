@@ -4,17 +4,15 @@ namespace PublicSquare\Payments\Test\Unit\Services\Events;
 
 use Magento\Framework\Api\Filter;
 use Magento\Framework\Api\FilterBuilder;
-use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Quote\Api\Data\PaymentInterface;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Api\Data\TransactionSearchResultInterface;
-use Magento\Sales\Api\Data\TransactionSearchResultInterfaceFactory;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use PHPUnit\Framework\TestCase;
-use PublicSquare\Payments\Api\Constants;
 use PublicSquare\Payments\Logger\Logger;
 use PublicSquare\Payments\Services\Events\RefundEventHandler;
 
