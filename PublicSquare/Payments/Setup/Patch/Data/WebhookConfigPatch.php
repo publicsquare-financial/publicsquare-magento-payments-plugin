@@ -36,7 +36,7 @@ class WebhookConfigPatch implements DataPatchInterface
     {
         try {
             $this->logger->info('Data patch running');
-            $this->webhookAutoConfig->ensureWebhookInstalled(null);
+            // $this->webhookAutoConfig->ensureWebhookInstalled(null);
             $this->logger->info('Install successful');
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage(), $e->getTrace());
