@@ -6,8 +6,8 @@ use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\UrlInterface;
-use Magento\Store\Model\ScopeInterface;
 use PublicSquare\Payments\Api\Authenticated\WebhookClient;
+use PublicSquare\Payments\Api\Constants;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -64,17 +64,6 @@ class WebhookAutoConfig
      */
     public function setupWebhooks(string|null $existingWebhookId): void
     {
-
-        $privateKey = $this->scopeConfig->getValue(
-            Config::PUBLICSQUARE_API_SECRET_KEY,
-            ScopeInterface::SCOPE_STORE,
-            null,
-        );
-        if (!$privateKey) {
-            $this->logger->warning('Private Key not set. Will not be able to connect webhooks until the private key is configured.');
-            return;
-        }
-
         if ($existingWebhookId) {
             $this->logger->info('Found webhook id [' . $existingWebhookId . '] in config. Attempting to lookup key.');
             // fetch existing webhook key
@@ -83,13 +72,22 @@ class WebhookAutoConfig
             $webhookKey = $webhook['key'] ?? null;
         } else {
             $webhookUrl = rtrim($this->urlBuilder->getUrl('publicsquare-payments/webhook/index'), '/');
-            $this->logger->info('Creating new webhook url ' . $webhookUrl);
+            // prevent creating duplicate webhooks in PSQ account
+            $existing = $this->findExistingForUrl($webhookUrl);
+            if ($existing) {
+                $webhookId = $existing['id'];
+                $webhookKey = $existing['key'];
+            } else {
+                $this->logger->info('Creating new webhook url ' . $webhookUrl);
 
-            $webhook = $this->client->createWebhook($webhookUrl);
-            $this->logger->info('Created webhook.', ['webhookId' => $webhook['id'], 'webhookUrl' => $webhookUrl]);
+                $webhook = $this->client->createWebhook($webhookUrl);
+                $this->logger->info('Created webhook.', ['webhookId' => $webhook['id'], 'webhookUrl' => $webhookUrl]);
 
-            $webhookId = $webhook['id'] ?? null;
-            $webhookKey = $webhook['key'] ?? null;
+                $webhookId = $webhook['id'] ?? null;
+                $webhookKey = $webhook['key'] ?? null;
+            }
+
+
         }
 
         // validate and save
@@ -111,5 +109,34 @@ class WebhookAutoConfig
             $webhookId,
         );
         $this->logger->info('Webhook configuration updated successfully.');
+    }
+
+    private function findExistingForUrl(string $webhookUrl, int $page = 1): array|null
+    {
+        try {
+            $response = $this->client->search($page, 100);
+            $pagination = $response['pagination'];
+            $items = $response['data'];
+            foreach ($items as $item) {
+                // Forcing the 2 events to match since in this flow the Magento config got
+                // disconnected, has no webhook id, and it's safer to create a new webhook
+                // than modify an existing one. We might want to change that behavior at
+                // some later date to further prevent duplicate webhooks.
+                $containsRefundEvent = in_array(Constants::WEBHOOK_EVENT_REFUND_UPDATED, $item['event_types'], true);
+                $containsStlmntEvent = in_array(Constants::WEBHOOK_EVENT_SETTLEMENT_UPDATED, $item['event_types'], true);
+                $urlsMatch = $webhookUrl === ($item['url'] || '');
+                if ($urlsMatch && $containsStlmntEvent && $containsRefundEvent) {
+                    $this->logger->info('Found existing webhook for url:[' . $webhookUrl . '] with id:[' . $item['id'] . '].');
+                    return $item;
+                }
+            }
+            if ($page < 10 && $page < $pagination['total_pages']) {
+                return $this->findExistingForUrl($webhookUrl, $page + 1);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Error searching webhooks', ['exception' => $e]);
+            return null;
+        }
+        return null;
     }
 }

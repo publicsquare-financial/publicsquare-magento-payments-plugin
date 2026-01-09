@@ -16,6 +16,9 @@ Use these commands to set up the development environment, install dependencies, 
 - **Magento CLI**: `make magento COMMAND` - Runs Magento CLI commands (e.g., `make magento setup:upgrade`).
 - **Cache Clean**: `make cache-clean` - Accesses cache-clean CLI for clearing caches.
 
+### Development Environment Notes
+- In development, the directory `./magento-install` contains the Magento instance and source code to run the application. However, this code is runtime-only and **nothing under this directory should be edited or modified in any way**. This directory can be used for reference only.
+
 ## Testing Commands
 
 The project uses PHPUnit for unit tests and Codeception for acceptance/integration tests. Run tests locally before committing.

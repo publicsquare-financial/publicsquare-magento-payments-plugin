@@ -2,8 +2,9 @@
 
 namespace Magento\Framework\Encryption;
 
-class Encryptor
+interface Encryptor
 {
-    public function encrypt($data) {}
-    public function decrypt($data) {}
+    public function encrypt($data);
+
+    public function decrypt($data);
 }
