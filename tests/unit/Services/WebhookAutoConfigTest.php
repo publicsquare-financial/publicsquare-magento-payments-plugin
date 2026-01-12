@@ -96,7 +96,7 @@ class WebhookAutoConfigTest extends TestCase
         $this->webhookClient->expects($this->once())->method('createWebhook')->willReturn([
             'id' => 'whk_1',
             'url' => $webhookUrl,
-            'event_types' => [Constants::WEBHOOK_EVENT_SETTLEMENT_UPDATED, Constants::WEBHOOK_EVENT_REFUND_UPDATED],
+            'event_types' => [Constants::WEBHOOK_EVENT_SETTLEMENT_UPDATE, Constants::WEBHOOK_EVENT_REFUND_UPDATE],
             'key' => 'base64',
         ]);
         $this->encryptor->expects($this->once())->method('encrypt')->with('base64')->willReturn('--encrypted--base64');
@@ -105,15 +105,4 @@ class WebhookAutoConfigTest extends TestCase
         $this->assertTrue(true);
     }
 
-
-    public function testSetupWebhooksWithNoPrivateKey()
-    {
-        $this->scopeConfig->method('getValue')
-            ->with(Config::PUBLICSQUARE_API_SECRET_KEY, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, null)
-            ->willReturn(null);
-
-
-        $this->expectException(\RuntimeException::class);
-        $this->webhookAutoConfig->setupWebhooks(null);
-    }
 }

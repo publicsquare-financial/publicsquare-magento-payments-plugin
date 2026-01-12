@@ -122,8 +122,8 @@ class WebhookAutoConfig
                 // disconnected, has no webhook id, and it's safer to create a new webhook
                 // than modify an existing one. We might want to change that behavior at
                 // some later date to further prevent duplicate webhooks.
-                $containsRefundEvent = in_array(Constants::WEBHOOK_EVENT_REFUND_UPDATED, $item['event_types'], true);
-                $containsStlmntEvent = in_array(Constants::WEBHOOK_EVENT_SETTLEMENT_UPDATED, $item['event_types'], true);
+                $containsRefundEvent = in_array(Constants::WEBHOOK_EVENT_REFUND_UPDATE, $item['event_types'], true);
+                $containsStlmntEvent = in_array(Constants::WEBHOOK_EVENT_SETTLEMENT_UPDATE, $item['event_types'], true);
                 $urlsMatch = $webhookUrl === ($item['url'] ?? '');
                 if ($urlsMatch && $containsStlmntEvent && $containsRefundEvent) {
                     $this->logger->info('Found existing webhook for url:[' . $webhookUrl . '] with id:[' . $item['id'] . '].');

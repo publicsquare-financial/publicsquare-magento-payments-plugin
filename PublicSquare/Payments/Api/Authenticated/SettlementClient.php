@@ -13,7 +13,7 @@ class SettlementClient
 {
     private Logger $logger;
     private string $baseUrl;
-    private  string $privateKey;
+    private  string|null $privateKey;
 
     public function __construct(
         Logger $logger,

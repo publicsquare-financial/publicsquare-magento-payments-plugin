@@ -9,6 +9,7 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Phrase;
 use Psr\Log\LoggerInterface;
+use PublicSquare\Payments\Api\Constants;
 use PublicSquare\Payments\Logger\Logger;
 use PublicSquare\Payments\Services\Events\RefundEventHandler;
 use PublicSquare\Payments\Services\Events\SettlementUpdateEventHandler;
@@ -73,10 +74,10 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
                 'entity_type' => $event['entity_type'],
             ]);
             switch ($eventType) {
-                case 'settlement:update':
+                case Constants::WEBHOOK_EVENT_SETTLEMENT_UPDATE:
                     $this->settlementUpdateEventHandler->handleEvent($event);
                     break;
-                case 'refund:update':
+                case Constants::WEBHOOK_EVENT_REFUND_UPDATE:
                     $this->refundEventHandler->handleEvent($event);
                     break;
                 default:

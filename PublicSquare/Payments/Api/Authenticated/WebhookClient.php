@@ -6,6 +6,7 @@ use Laminas\Http\Client;
 use Laminas\Http\Request;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
+use PublicSquare\Payments\Api\Constants;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
 
@@ -82,8 +83,8 @@ class WebhookClient
         $body = json_encode([
             'url' => $webhookUrl,
             'event_types' => [
-                'settlement:update',
-                'refund:update',
+                Constants::WEBHOOK_EVENT_REFUND_UPDATE,
+                Constants::WEBHOOK_EVENT_SETTLEMENT_UPDATE,
             ],
         ], JSON_THROW_ON_ERROR);
 

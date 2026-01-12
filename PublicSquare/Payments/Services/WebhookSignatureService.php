@@ -3,6 +3,8 @@
 namespace PublicSquare\Payments\Services;
 
 use Magento\Framework\Encryption\Encryptor;
+use phpseclib3\Crypt\PublicKeyLoader;
+use phpseclib3\Crypt\RSA;
 use PublicSquare\Payments\Helper\Config;
 use Monolog\Logger;
 
