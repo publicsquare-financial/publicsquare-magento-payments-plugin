@@ -1,6 +1,6 @@
 <?php
 
-namespace PublicSquare\Payments\Test\Unit\Services;
+namespace Magento\Services;
 
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;

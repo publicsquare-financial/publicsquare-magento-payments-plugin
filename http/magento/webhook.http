@@ -1,0 +1,381 @@
+### POST settlement update
+< ./sign-req.js
+POST {{magentoBase}}/publicsquare-payments/webhook/index
+Content-Type: application/json
+Accept: application/json
+X-Signature: {{SIG}}
+
+{
+  "id": "event_1",
+  "event_type": "settlement:update",
+  "entity_id": "stl_BGDLZjBLAgNbyqCzJxchSoh5k",
+  "entity_type": "Settlement",
+  "entity": {
+    "id": "stl_BGDLZjBLAgNbyqCzJxchSoh5k",
+    "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+    "environment": "production",
+    "status": "succeeded",
+    "transaction_id": "trx_95rvMJvAVeG68W4NtLdfkN3LG",
+    "debit_amount": 1500,
+    "debit_count": 3,
+    "credit_amount": 500,
+    "credit_count": 1,
+    "total_count": 4,
+    "amount": 1000,
+    "currency": "USD",
+    "settled_at": "2024-06-30T00:00:00.000Z",
+    "transaction": {
+      "id": "trx_95rvMJvAVeG68W4NtLdfkN3LG",
+      "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+      "environment": "production",
+      "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+      "status": "succeeded",
+      "amount": 10000,
+      "fee_amount": 360,
+      "net_amount": 9640,
+      "currency": "USD",
+      "type_id": "pmt_2YKewBonG4tgk12MheY3PiHDy",
+      "type": "payment",
+      "settlement_id": "stl_BGDLZjBLAgNbyqCzJxchSoh5k",
+      "processor": "nuvei",
+      "processor_id": "7110000000010554769",
+      "acquirer_id": "2630000240513800",
+      "transfer_item_id": "trnf_7yFLQWACr3DYDSz1xpoEAVfdq",
+      "payment": {
+        "id": "pmt_2YKewBonG4tgk12MheY3PiHDy",
+        "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+        "environment": "production",
+        "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+        "status": "succeeded",
+        "declined_reason": "Card lost/stolen",
+        "transaction_id": "trx_95rvMJvAVeG68W4NtLdfkN3LG",
+        "amount": 9500,
+        "amount_capturable": 10000,
+        "amount_charged": 10000,
+        "amount_refunded": 500,
+        "refunded": false,
+        "currency": "USD",
+        "payment_method": {
+          "card": {
+            "id": "card_8PajTnDVrviEJ8zYJDALFQm5t",
+            "cardholder_name": "John Smith",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "fingerprint": "CC2XvyoohnqecEq4r3FtXv6MdCx4TbaW1UUTdCCN5MNL",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "bank_account": {
+            "id": "ba_7Ay5mcUXAxwrN6wQEQUVEHBCJ",
+            "status": "verified",
+            "account_holder_name": "John Doe",
+            "account_holder_type": "individual",
+            "account_type": "individual",
+            "routing_number": "123456789",
+            "account_number_last4": "1011"
+          },
+          "apple_pay": {
+            "id": "appl_Aw3U2eESBnq6DoYEFn8qaSMrA",
+            "token_type": "dpan",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "google_pay": {
+            "id": "ggl_Aw3U2eESBnq6DoYEFn8qaSMrA",
+            "token_type": "card",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "fingerprint": "CC2XvyoohnqecEq4r3FtXv6MdCx4TbaW1UUTdCCN5MNL",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "account_balance": {
+            "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+            "account_name": "Test Company, LLC"
+          }
+        },
+        "customer": {
+          "id": "cus_7Ay5mcUXAxwrN6wQEQUVEHBCJ",
+          "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+          "business_name": "Awesome Company, LLC",
+          "first_name": "John",
+          "last_name": "Smith",
+          "government_identifier_last4": "9642",
+          "email": "john.smith@email.com",
+          "phone": "+15554829347"
+        },
+        "billing_details": {
+          "address_line_1": "111 Colorado Ave.",
+          "address_line_2": "Apt 403",
+          "city": "Des Moines",
+          "state": "IA",
+          "postal_code": "51111",
+          "country": "US"
+        },
+        "shipping_address": {
+          "address_line_1": "111 Colorado Ave.",
+          "address_line_2": "Apt 403",
+          "city": "Des Moines",
+          "state": "IA",
+          "postal_code": "51111",
+          "country": "US"
+        },
+        "fraud_details": {
+          "decision": "accept",
+          "rules": [
+            {
+              "rule_engine": "nuvei",
+              "rule_id": "1287",
+              "rule_description": "Stolen card"
+            }
+          ]
+        },
+        "dynamic_descriptor": {
+          "merchant_name": "Test Corporation",
+          "merchant_contact": "+15552604982"
+        },
+        "device_information": {
+          "browser_family": "Mobile Safari",
+          "os_family": "iOS",
+          "device_family": "iPhone",
+          "ip_address": "192.168.1.1",
+          "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3"
+        },
+        "recurring": {
+          "initial_payment_id": "pmt_2YKewBonG4tgk12MheY3PiHDy"
+        },
+        "created_at": "2024-06-30T01:02:29.212Z",
+        "modified_at": "2024-06-30T01:02:29.212Z"
+      },
+      "payout": {
+        "id": "pyt_24NFPd3jSZFTxiaH9UwjuqNdP",
+        "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+        "environment": "production",
+        "external_id": "1268ce56-a4b5-43fa-8526-a500fc2140bb",
+        "status": "succeeded",
+        "declined_reason": "Card lost/stolen",
+        "transaction_id": "trx_6QgmXzQzk3S5K5EsR3DfEiMRj",
+        "amount": 9500,
+        "currency": "USD",
+        "payment_method": {
+          "card": {
+            "id": "card_8PajTnDVrviEJ8zYJDALFQm5t",
+            "cardholder_name": "John Smith",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "fingerprint": "CC2XvyoohnqecEq4r3FtXv6MdCx4TbaW1UUTdCCN5MNL",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "bank_account": {
+            "id": "ba_7Ay5mcUXAxwrN6wQEQUVEHBCJ",
+            "status": "verified",
+            "account_holder_name": "John Doe",
+            "account_holder_type": "individual",
+            "account_type": "individual",
+            "routing_number": "123456789",
+            "account_number_last4": "1011"
+          },
+          "apple_pay": {
+            "id": "appl_Aw3U2eESBnq6DoYEFn8qaSMrA",
+            "token_type": "dpan",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "google_pay": {
+            "id": "ggl_Aw3U2eESBnq6DoYEFn8qaSMrA",
+            "token_type": "card",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "fingerprint": "CC2XvyoohnqecEq4r3FtXv6MdCx4TbaW1UUTdCCN5MNL",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "account_balance": {
+            "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+            "account_name": "Test Company, LLC"
+          }
+        },
+        "customer": {
+          "id": "cus_7Ay5mcUXAxwrN6wQEQUVEHBCJ",
+          "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+          "business_name": "Awesome Company, LLC",
+          "first_name": "John",
+          "last_name": "Smith",
+          "government_identifier_last4": "9642",
+          "email": "john.smith@email.com",
+          "phone": "+15554829347"
+        },
+        "billing_details": {
+          "address_line_1": "111 Colorado Ave.",
+          "address_line_2": "Apt 403",
+          "city": "Des Moines",
+          "state": "IA",
+          "postal_code": "51111",
+          "country": "US"
+        },
+        "dynamic_descriptor": {
+          "merchant_name": "Test Corporation",
+          "merchant_contact": "+15552604982"
+        },
+        "device_information": {
+          "browser_family": "Mobile Safari",
+          "os_family": "iOS",
+          "device_family": "iPhone",
+          "ip_address": "192.168.1.1",
+          "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3"
+        },
+        "created_at": "2024-06-30T01:02:29.212Z",
+        "modified_at": "2024-06-30T01:02:29.212Z"
+      },
+      "refund": {
+        "id": "rfd_2YKewBonG4tgk12MheY3PiHDy",
+        "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+        "environment": "production",
+        "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+        "status": "succeeded",
+        "transaction_id": "trx_95rvMJvAVeG68W4NtLdfkN3LG",
+        "payment_id": "pmt_2YKewBonG4tgk12MheY3PiHDy",
+        "amount": 500,
+        "currency": "USD",
+        "reason": "Refunding shipping",
+        "declined_reason": "Suspected fraud",
+        "device_information": {
+          "browser_family": "Mobile Safari",
+          "os_family": "iOS",
+          "device_family": "iPhone",
+          "ip_address": "192.168.1.1",
+          "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 5_1_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9B206 Safari/7534.48.3"
+        },
+        "created_at": "2024-06-30T01:02:29.212Z",
+        "modified_at": "2024-06-30T01:02:29.212Z"
+      },
+      "payment_transfer": {
+        "id": "trnf_7yFLQWACr3DYDSz1xpoEAVfdq",
+        "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+        "environment": "production",
+        "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+        "status": "succeeded",
+        "payment_id": "pmt_2YKewBonG4tgk12MheY3PiHDy",
+        "transaction_id": "trx_95rvMJvAVeG68W4NtLdfkN3LG",
+        "total_amount": 10000,
+        "currency": "USD",
+        "created_at": "2024-06-30T01:02:29.212Z",
+        "modified_at": "2024-06-30T01:02:29.212Z",
+        "items": [
+          {
+            "id": "trfi_7yFLQWACr3DYDSz1xpoEAVfdq",
+            "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+            "amount": 10000,
+            "transfer_fee": 100,
+            "seller_account_id": "acc_8ooQs32UCdriBvrHnVWbTmJbY"
+          }
+        ]
+      },
+      "refund_transfer": {
+        "id": "trnf_7yFLQWACr3DYDSz1xpoEAVfdq",
+        "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+        "environment": "production",
+        "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+        "status": "succeeded",
+        "refund_id": "rfd_2YKewBonG4tgk12MheY3PiHDy",
+        "payment_transfer_id": "trnf_7yFLQWACr3DYDSz1xpoEAVfdq",
+        "transaction_id": "trx_95rvMJvAVeG68W4NtLdfkN3LG",
+        "total_amount": 10000,
+        "currency": "USD",
+        "created_at": "2024-06-30T01:02:29.212Z",
+        "modified_at": "2024-06-30T01:02:29.212Z",
+        "items": [
+          {
+            "id": "trfi_4iarm41gZ1qyxDoGfEEMXyryJ",
+            "payment_transfer_item_id": "trfi_7yFLQWACr3DYDSz1xpoEAVfdq",
+            "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+            "amount": 10000,
+            "transfer_fee": 100,
+            "seller_account_id": "acc_8ooQs32UCdriBvrHnVWbTmJbY"
+          }
+        ]
+      },
+      "balance_transfer": {
+        "id": "trnf_2YKewBonG4tgk12MheY3PiHDy",
+        "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+        "environment": "production",
+        "external_id": "e797ef3c-b586-4333-af90-7168d8427d85",
+        "transaction_id": "trx_95rvMJvAVeG68W4NtLdfkN3LG",
+        "payment_method": {
+          "card": {
+            "id": "card_8PajTnDVrviEJ8zYJDALFQm5t",
+            "cardholder_name": "John Smith",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "fingerprint": "CC2XvyoohnqecEq4r3FtXv6MdCx4TbaW1UUTdCCN5MNL",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "bank_account": {
+            "id": "ba_7Ay5mcUXAxwrN6wQEQUVEHBCJ",
+            "status": "verified",
+            "account_holder_name": "John Doe",
+            "account_holder_type": "individual",
+            "account_type": "individual",
+            "routing_number": "123456789",
+            "account_number_last4": "1011"
+          },
+          "apple_pay": {
+            "id": "appl_Aw3U2eESBnq6DoYEFn8qaSMrA",
+            "token_type": "dpan",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "google_pay": {
+            "id": "ggl_Aw3U2eESBnq6DoYEFn8qaSMrA",
+            "token_type": "card",
+            "last4": "4242",
+            "exp_month": "12",
+            "exp_year": "2025",
+            "fingerprint": "CC2XvyoohnqecEq4r3FtXv6MdCx4TbaW1UUTdCCN5MNL",
+            "brand": "visa",
+            "avs_code": "Y",
+            "cvv2_reply": "M"
+          },
+          "account_balance": {
+            "account_id": "acc_B518niGwGYKzig6vtrRVZGGGV",
+            "account_name": "Test Company, LLC"
+          }
+        },
+        "status": "succeeded",
+        "type": "invoice",
+        "amount": 10000,
+        "currency": "USD",
+        "created_at": "2024-06-30T01:02:29.212Z",
+        "modified_at": "2024-06-30T01:02:29.212Z"
+      },
+      "created_at": "2024-06-30T01:02:29.212Z",
+      "modified_at": "2024-06-30T01:02:29.212Z"
+    },
+    "created_at": "2024-06-30T01:02:29.212Z",
+    "modified_at": "2024-06-30T01:02:29.212Z"
+  }
+}

@@ -61,6 +61,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
                 $this->logger->warning('PSQ Webhook: Invalid signature');
                 $result->setStatusHeader(400);
                 $result->setData(['error' => 'Invalid signature']);
+                $this->logger->error('Invalid signature');
                 return $result;
             }
 
@@ -102,8 +103,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
     public function validateForCsrf(RequestInterface $request): ?bool
     {
         // not a csrfMagento seems to require implementing the CSRF interface
-        $signature = $this->request->getHeader('X-Signature') ?: '';
-        $body = $request->getContent();
-        return $this->webhookSignatureService->verify($signature, $body);
+        // the signature does get validated...
+        return true;
     }
 }

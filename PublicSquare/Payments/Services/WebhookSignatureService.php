@@ -6,7 +6,7 @@ use Magento\Framework\Encryption\Encryptor;
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Crypt\RSA;
 use PublicSquare\Payments\Helper\Config;
-use Monolog\Logger;
+use PublicSquare\Payments\Logger\Logger;
 
 class WebhookSignatureService
 {
@@ -34,17 +34,16 @@ class WebhookSignatureService
         }
         $webhookKey = $this->encryptor->decrypt($encryptedWebhookKey);
 
-        $decodedSignature = base64_decode($signature);
         $decodedKey = base64_decode($webhookKey);
 
         $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n" .
-            chunk_split(base64_encode($decodedKey), 64, "\n") .
+            chunk_split($decodedKey, 64, "\n") .
             "-----END PUBLIC KEY-----\n";
 
         try {
             $rsa = PublicKeyLoader::load($publicKeyPem);
-            $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
-            $verified = $rsa->verify($body, $decodedSignature);
+            // $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
+            $verified = $rsa->verify($body, $signature);
         } catch (\Exception $e) {
             $this->logger->error('PSQ Webhook: Invalid public key or verification error', ['exception' => $e->getMessage()]);
             return false;

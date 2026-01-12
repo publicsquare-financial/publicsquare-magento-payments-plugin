@@ -149,7 +149,7 @@
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="psq" xsi:type="object">PublicSquare\Payments\Cli\PsqConfigureWebhooksCommand</item>
+                <item name="psq:configure-webhooks" xsi:type="object">PublicSquare\Payments\Cli\PsqConfigureWebhooksCommand</item>
 
             </argument>
         </arguments>
