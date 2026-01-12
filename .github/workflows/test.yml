@@ -1,7 +1,21 @@
 name: Test
 on: push
 jobs:
-  test:
+  unit-tests:
+    runs-on: ubuntu-22.04
+    name: Run phpunit tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: php-actions/composer@v6
+        name: Install composer dependencies
+      - uses: php-actions/phpunit@v4
+        with:
+          configuration: "tests/unit/phpunit.xml"
+          php_extensions: "xdebug"
+          #args: "--coverage-clover ./coverage.xml"
+
+  acceptance-tests:
     runs-on: selenium
     name: Build and test codeception tests
     permissions:
