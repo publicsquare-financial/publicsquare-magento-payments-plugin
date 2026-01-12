@@ -37,7 +37,9 @@ class WebhookSignatureServiceTest extends TestCase
             'id' => 'event_1',
             'event_type' => 'test',
         ], JSON_THROW_ON_ERROR);
+        $pk = $pk->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
         $signature = $pk->sign($body);
+
 
 
         self::assertTrue($this->webhookSignatureService->verify(body: $body, signature:
@@ -60,6 +62,8 @@ class WebhookSignatureServiceTest extends TestCase
             'event_type' => 'test',
         ], JSON_THROW_ON_ERROR);
         $pk2 = RSA::createKey(2048);
+        $pk2 = $pk2->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
+
         $signature = $pk2->sign($body);
 
 
