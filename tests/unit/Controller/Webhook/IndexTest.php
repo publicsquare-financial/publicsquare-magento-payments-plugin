@@ -5,56 +5,42 @@ namespace PublicSquare\Payments\Test\Unit\Controller\Webhook;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Encryption\Encryptor;
 use PHPUnit\Framework\TestCase;
-use phpseclib3\Crypt\PublicKeyLoader;
-use phpseclib3\Crypt\RSA;
 use PublicSquare\Payments\Controller\Webhook\Index;
-use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
 use PublicSquare\Payments\Services\Events\RefundEventHandler;
 use PublicSquare\Payments\Services\Events\SettlementUpdateEventHandler;
+use PublicSquare\Payments\Services\WebhookSignatureService;
 
 class IndexTest extends TestCase
 {
-    private Config $config;
     private Logger $logger;
     private RequestInterface $request;
     private JsonFactory $jsonFactory;
-    private Encryptor $encryptor;
     private SettlementUpdateEventHandler $settlementUpdateEventHandler;
     private RefundEventHandler $refundEventHandler;
+
+    private WebhookSignatureService $webhookSignatureService;
+
     private Index $controller;
     protected function setUp(): void
     {
-        $this->config = $this->createMock(Config::class);
         $this->logger = $this->createMock(Logger::class);
         $this->logger->method('withName')->willReturn($this->logger);
         $this->request = $this->createMock(RequestInterface::class);
         $this->jsonFactory = $this->createMock(JsonFactory::class);
-        $this->encryptor = $this->createMock(Encryptor::class);
         $this->settlementUpdateEventHandler = $this->createMock(SettlementUpdateEventHandler::class);
         $this->refundEventHandler = $this->createMock(RefundEventHandler::class);
+        $this->webhookSignatureService = $this->createMock(WebhookSignatureService::class);
 
-        $this->controller = $this->getMockBuilder(Index::class)
-            ->setConstructorArgs([
-                $this->config,
-                $this->logger,
-                $this->request,
-                $this->jsonFactory,
-                $this->encryptor,
-                $this->settlementUpdateEventHandler,
-                $this->refundEventHandler
-            ])
-            ->onlyMethods(['verifySignature'])
-            ->getMock();
-    }
-
-    private function generateSignature(string $body): string
-    {
-        $rsa = $this->privateKey->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
-        $signature = $rsa->sign($body);
-        return base64_encode($signature);
+        $this->controller = new Index(
+            logger: $this->logger,
+            request: $this->request,
+            jsonResultFactory: $this->jsonFactory,
+            settlementUpdateEventHandler: $this->settlementUpdateEventHandler,
+            refundEventHandler: $this->refundEventHandler,
+            webhookSignatureService: $this->webhookSignatureService
+        );
     }
 
     public function testExecuteSettlementUpdate()
@@ -69,7 +55,7 @@ class IndexTest extends TestCase
         $this->request->method('getContent')->willReturn($body);
         $this->request->method('getHeader')->with('X-Signature')->willReturn($signature);
 
-        $this->controller->method('verifySignature')->willReturn(true);
+        $this->webhookSignatureService->method('verify')->willReturn(true);
 
         $result = $this->createMock(Json::class);
         $this->jsonFactory->method('create')->willReturn($result);
@@ -95,7 +81,7 @@ class IndexTest extends TestCase
         $this->request->method('getContent')->willReturn($body);
         $this->request->method('getHeader')->with('X-Signature')->willReturn($signature);
 
-        $this->controller->method('verifySignature')->willReturn(true);
+        $this->webhookSignatureService->method('verify')->willReturn(true);
 
         $result = $this->createMock(Json::class);
         $this->jsonFactory->method('create')->willReturn($result);
@@ -117,7 +103,7 @@ class IndexTest extends TestCase
         $this->request->method('getContent')->willReturn($body);
         $this->request->method('getHeader')->with('X-Signature')->willReturn($signature);
 
-        $this->controller->method('verifySignature')->willReturn(false);
+        $this->webhookSignatureService->method('verify')->willReturn(false);
 
         $result = $this->createMock(Json::class);
         $this->jsonFactory->method('create')->willReturn($result);
@@ -136,10 +122,9 @@ class IndexTest extends TestCase
         $this->request->method('getContent')->willReturn($body);
         $this->request->method('getHeader')->with('X-Signature')->willReturn($signature);
 
-        $this->config->method('getWebhookKey')->willReturn('encrypted_key');
-        $this->encryptor->method('decrypt')->with('encrypted_key')->willReturn($this->webhookKey);
 
         $result = $this->createMock(Json::class);
+        $this->webhookSignatureService->method('verify')->willReturn(true);
         $this->jsonFactory->method('create')->willReturn($result);
         $result->expects($this->once())->method('setStatusHeader');
         $result->expects($this->once())->method('setData');
@@ -160,7 +145,7 @@ class IndexTest extends TestCase
         $this->request->method('getContent')->willReturn($body);
         $this->request->method('getHeader')->with('X-Signature')->willReturn($signature);
 
-        $this->controller->method('verifySignature')->willReturn(true);
+        $this->webhookSignatureService->method('verify')->willReturn(true);
 
         $result = $this->createMock(Json::class);
         $this->jsonFactory->method('create')->willReturn($result);
@@ -185,8 +170,7 @@ class IndexTest extends TestCase
         $this->request->method('getContent')->willReturn($body);
         $this->request->method('getHeader')->with('X-Signature')->willReturn($signature);
 
-        $this->config->method('getWebhookKey')->willReturn('encrypted_key');
-        $this->encryptor->method('decrypt')->with('encrypted_key')->willReturn($this->webhookKey);
+        $this->webhookSignatureService->method('verify')->willReturn(true);
 
         $result = $this->createMock(Json::class);
         $this->jsonFactory->method('create')->willReturn($result);
