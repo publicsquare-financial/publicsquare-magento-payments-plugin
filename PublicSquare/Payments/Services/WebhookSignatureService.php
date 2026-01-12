@@ -11,39 +11,40 @@ use PublicSquare\Payments\Logger\Logger;
 class WebhookSignatureService
 {
 
-    private Encryptor $encryptor;
     private Config $config;
 
     private Logger $logger;
 
     public function __construct(
-        Encryptor $encryptor,
         Config $config,
         Logger $logger,
     ) {
-        $this->encryptor = $encryptor;
         $this->config = $config;
         $this->logger = $logger->withName('PSQ:WebhookSignatureService');
     }
 
     public function verify(string $signature, string $body): bool {
-        $encryptedWebhookKey = $this->config->getWebhookKey();
-        if (!$encryptedWebhookKey) {
+        $webhookKey = str_replace(['\n', ' '], '', $this->config->getWebhookKey());
+        if (!$webhookKey) {
             $this->logger->error('Webhook secret not configured');
             return false;
         }
-        $webhookKey = $this->encryptor->decrypt($encryptedWebhookKey);
 
-        $decodedKey = base64_decode($webhookKey);
-
-        $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n" .
-            chunk_split($decodedKey, 64, "\n") .
-            "-----END PUBLIC KEY-----\n";
 
         try {
+            if(str_contains('BEGIN PUBLIC KEY', $webhookKey)) {
+                $publicKeyPem = $webhookKey;
+            } else {
+                $publicKeyPem = "-----BEGIN PUBLIC KEY-----\r\n" .
+                    chunk_split($webhookKey, 64, "\r\n") .
+                    "-----END PUBLIC KEY-----\r\n";
+            }
+
+            $this->logger->debug('pubkey: ' . $publicKeyPem);
+            $this->logger->debug('signature: ' . $signature);
             $rsa = PublicKeyLoader::load($publicKeyPem);
-            // $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
-            $verified = $rsa->verify($body, $signature);
+            $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
+            $verified = $rsa->verify($body, base64_decode($signature));
         } catch (\Exception $e) {
             $this->logger->error('PSQ Webhook: Invalid public key or verification error', ['exception' => $e->getMessage()]);
             return false;

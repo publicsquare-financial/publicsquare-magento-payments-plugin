@@ -1,4 +1,6 @@
 ### POST settlement update
+# Note: this requires generating a keypair so that the js can sign with the private
+# key and then configuring magento with the public key.
 < ./sign-req.js
 POST {{magentoBase}}/publicsquare-payments/webhook/index
 Content-Type: application/json
