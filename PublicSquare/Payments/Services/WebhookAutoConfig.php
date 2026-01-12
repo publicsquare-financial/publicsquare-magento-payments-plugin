@@ -124,7 +124,7 @@ class WebhookAutoConfig
                 // some later date to further prevent duplicate webhooks.
                 $containsRefundEvent = in_array(Constants::WEBHOOK_EVENT_REFUND_UPDATED, $item['event_types'], true);
                 $containsStlmntEvent = in_array(Constants::WEBHOOK_EVENT_SETTLEMENT_UPDATED, $item['event_types'], true);
-                $urlsMatch = $webhookUrl === ($item['url'] || '');
+                $urlsMatch = $webhookUrl === ($item['url'] ?? '');
                 if ($urlsMatch && $containsStlmntEvent && $containsRefundEvent) {
                     $this->logger->info('Found existing webhook for url:[' . $webhookUrl . '] with id:[' . $item['id'] . '].');
                     return $item;

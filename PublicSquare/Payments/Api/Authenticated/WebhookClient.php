@@ -61,13 +61,7 @@ class WebhookClient
         try {
             $this->logger->debug('Search webhooks');
             $response = $client->send();
-            $responseBody = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logger->error('Failed to decode getWebhook response', ['response' => $response->getBody()]);
-                throw new \RuntimeException('Failed to decode API response.');
-            }
-            $this->logger->info('Retrieved webhook with ID: ' . $responseBody['id']);
-            return $responseBody;
+            return json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\Exception $err) {
             $this->logger->error('Error searching webhooks', ['exception' => $err]);
             throw $err;
@@ -103,12 +97,7 @@ class WebhookClient
         try {
             $this->logger->debug('Creating webhook for url: ' . $webhookUrl);
             $response = $client->send();
-            $responseBody = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logger->error('Failed to decode createWebhook response', ['response' => $response->getBody()]);
-                throw new \RuntimeException('Failed to decode API response.');
-            }
-            return $responseBody;
+            return json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\Exception $err) {
             $this->logger->warning('Failed to create webhook: ' . $err->getMessage());
             throw $err;
@@ -135,10 +124,7 @@ class WebhookClient
             $this->logger->debug('GET webhook ID: ' . $webhookId);
             $response = $client->send();
             $responseBody = json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logger->error('Failed to decode getWebhook response', ['response' => $response->getBody()]);
-                throw new \RuntimeException('Failed to decode API response.');
-            }
+
             $this->logger->info('Retrieved webhook with ID: ' . $responseBody['id']);
             return $responseBody;
         } catch (\Exception $err) {

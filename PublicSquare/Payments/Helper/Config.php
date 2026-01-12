@@ -142,7 +142,7 @@ class Config extends AbstractHelper implements ICardInputCustomizationJSON
     {
         return (string)$this->scopeConfig
             ->getValue(self::PUBLICSQUARE_WEBHOOK_KEY, $scopeType, $scopeCode);
-    } //end getWebhookSecret()
+    }
 
     /**
      * Get publicsquare payment method sort order

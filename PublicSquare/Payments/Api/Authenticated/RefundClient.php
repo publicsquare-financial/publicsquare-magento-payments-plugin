@@ -78,14 +78,9 @@ class RefundClient
             ]);
             $this->logger->debug('Refund search');
             $response = $client->send();
-            $responseBody = json_decode($response->getBody(), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logger->error('Failed to decode createWebhook response', ['response' => $response->getBody()]);
-                throw new \RuntimeException('Failed to decode API response.');
-            }
-            return $responseBody;
+            return json_decode($response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\Exception $err) {
-            $this->logger->warning('Failed to create webhook: ' . $err->getMessage());
+            $this->logger->warning('Failed search refunds: ' . $err->getMessage());
             throw $err;
         }
     }
