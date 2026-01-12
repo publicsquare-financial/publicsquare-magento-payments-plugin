@@ -40,6 +40,7 @@ class WebhookConfigPatch implements DataPatchInterface
             $this->logger->info('Install successful');
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage(), $e->getTrace());
+            $this->logger->info('Please run "bin/magento psq:configure-webhooks" after configuring the PublicSquare payments plugin with an api key.');
         }
     }
 }
