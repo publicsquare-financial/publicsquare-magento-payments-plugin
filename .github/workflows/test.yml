@@ -13,8 +13,7 @@ jobs:
           args: '--ignore-platform-req=ext-zip'
       - uses: php-actions/phpunit@v4
         with:
-          configuration: "tests/unit/phpunit.xml"
-          php_extensions: "xdebug"
+          configuration: "./tests/unit/phpunit.xml"
 
           #args: "--coverage-clover ./coverage.xml"
 
