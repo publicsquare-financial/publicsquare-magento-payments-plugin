@@ -9,11 +9,13 @@ jobs:
         uses: actions/checkout@v4
       - uses: php-actions/composer@v6
         name: Install composer dependencies
+        with:
+          args: '--ignore-platform-req=ext-zip'
       - uses: php-actions/phpunit@v4
         with:
           configuration: "tests/unit/phpunit.xml"
           php_extensions: "xdebug"
-          args: '--ignore-platform-req=ext-zip'
+
           #args: "--coverage-clover ./coverage.xml"
 
   acceptance-tests:
