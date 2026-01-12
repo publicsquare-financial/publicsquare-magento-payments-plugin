@@ -13,6 +13,7 @@ jobs:
         with:
           configuration: "tests/unit/phpunit.xml"
           php_extensions: "xdebug"
+          args: '--ignore-platform-req=ext-zip'
           #args: "--coverage-clover ./coverage.xml"
 
   acceptance-tests:
