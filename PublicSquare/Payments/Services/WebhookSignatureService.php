@@ -2,7 +2,6 @@
 
 namespace PublicSquare\Payments\Services;
 
-use Magento\Framework\Encryption\Encryptor;
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\Crypt\RSA;
 use PublicSquare\Payments\Helper\Config;
@@ -40,8 +39,7 @@ class WebhookSignatureService
                     "-----END PUBLIC KEY-----\r\n";
             }
 
-            $this->logger->debug('pubkey: ' . $publicKeyPem);
-            $this->logger->debug('signature: ' . $signature);
+
             $rsa = PublicKeyLoader::load($publicKeyPem);
             $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1)->withHash('sha256');
             $verified = $rsa->verify($body, base64_decode($signature));
