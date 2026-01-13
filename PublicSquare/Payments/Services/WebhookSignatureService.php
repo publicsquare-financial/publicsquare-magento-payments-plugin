@@ -33,7 +33,6 @@ class WebhookSignatureService
     }
 
     public function verify(string $signature, string $body): bool {
-        // $webhookKey = str_replace(['\n', ' '], '', $this->config->getWebhookKey());
         $webhookKey = $this->config->getWebhookKey();
         if (!$webhookKey) {
             // If we are receiving webhook requests but have not configured the key
@@ -50,7 +49,7 @@ class WebhookSignatureService
 
 
         try {
-            if(preg_match('^-+BEGIN\sPUBLIC\sKEY-+.*' , $webhookKey)) {
+            if(preg_match('/^-+BEGIN\sPUBLIC\sKEY-+.*$/' , $webhookKey)) {
                 $publicKeyPem = $webhookKey;
             } else {
                 $publicKeyPem = "-----BEGIN PUBLIC KEY-----\r\n" .
