@@ -75,8 +75,7 @@ class RefundEventHandler implements PSQEventHandler
 
             if (empty($transactions)) {
                 $this->logger->error('Transaction not found for payment ID', ['payment_id' => $paymentId, 'event_id' => $eventId,]);
-                // TODO should this throw?
-                return;
+                throw new \RuntimeException('Transaction not found for payment ID: ' . $paymentId);
             }
 
             $transaction = reset($transactions);
