@@ -5,6 +5,7 @@ namespace PublicSquare\Payments\Block\Adminhtml;
 use Magento\Backend\Block\Template;
 use Magento\Sales\Model\ResourceModel\Order;
 use PublicSquare\Payments\Api\Constants;
+use PublicSquare\Payments\Logger\Logger;
 
 class PaymentAdditionalInfoBlock extends Template
 {
@@ -16,10 +17,12 @@ class PaymentAdditionalInfoBlock extends Template
 
     public function __construct(\Magento\Backend\Block\Template\Context $context,
                                 \Magento\Framework\Registry             $registry,
+                                Logger $logger,
                                 array                                   $data = [])
     {
         parent::__construct($context, $data);
         $this->_coreRegistry = $registry;
+        $this->logger = $logger->withName('PSQ:AdditionalInfoBlock');
     }
 
     public function getOrder()
@@ -37,10 +40,10 @@ class PaymentAdditionalInfoBlock extends Template
                 $order = $this->_coreRegistry->registry('current_invoice')->getOrder();
                 break;
             default:
-                $this->_logger->warning('PublicSquare: No view type set for PaymentAdditionalInfoBlock! Defaulting to order view type.');
+                $this->logger->warning('PublicSquare: No view type set for PaymentAdditionalInfoBlock! Defaulting to order view type.');
                 return $this->_coreRegistry->registry('current_order');
         }
-        $this->_logger->info(
+        $this->logger->info(
             'PublicSquare: Got order for view type: ' . $viewType,
             [
                 'order' => $order?->getId(),

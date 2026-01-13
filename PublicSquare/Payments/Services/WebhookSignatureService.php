@@ -31,7 +31,7 @@ class WebhookSignatureService
 
 
         try {
-            if(str_contains('BEGIN PUBLIC KEY', $webhookKey)) {
+            if(preg_match('^-+BEGIN\sPUBLIC\sKEY-+.*' , $webhookKey)) {
                 $publicKeyPem = $webhookKey;
             } else {
                 $publicKeyPem = "-----BEGIN PUBLIC KEY-----\r\n" .

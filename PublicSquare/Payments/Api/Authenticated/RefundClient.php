@@ -13,7 +13,7 @@ class RefundClient
 {
     private Logger $logger;
     private string $baseUrl;
-    private  string $privateKey;
+    private  string|null $privateKey;
 
     public function __construct(
         Logger $logger,
@@ -61,7 +61,7 @@ class RefundClient
                         return false;
                     }
 
-                    if($value instanceof string || is_array($value)) {
+                    if(is_string($value) || is_array($value)) {
                         return !empty($value);
                     }
 

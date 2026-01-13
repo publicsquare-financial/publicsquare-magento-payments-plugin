@@ -62,7 +62,7 @@ class SettlementClient
                         return false;
                     }
 
-                    if($value instanceof string || is_array($value)) {
+                    if(is_string($value) || is_array($value)) {
                         return !empty($value);
                     }
 
