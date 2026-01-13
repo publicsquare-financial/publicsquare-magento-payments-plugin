@@ -8,6 +8,7 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\UrlInterface;
 use PublicSquare\Payments\Api\Authenticated\WebhookClient;
 use PublicSquare\Payments\Api\Constants;
+use PublicSquare\Payments\Exception\NotConfiguredException;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -93,11 +94,11 @@ class WebhookAutoConfig
         // validate and save
         if (!$webhookId) {
             $this->logger->warning('Missing webhook id.');
-            throw new \RuntimeException('Missing webhook id.');
+            throw new NotConfiguredException(Config::PUBLICSQUARE_WEBHOOK_ID, 'Webhook ID');
         }
         if (!$webhookKey) {
             $this->logger->warning('Missing webhook key.');
-            throw new \RuntimeException('Missing webhook key.');
+            throw new NotConfiguredException(Config::PUBLICSQUARE_WEBHOOK_KEY, 'Webhook Key');
         }
 
         $this->resourceConfig->saveConfig(

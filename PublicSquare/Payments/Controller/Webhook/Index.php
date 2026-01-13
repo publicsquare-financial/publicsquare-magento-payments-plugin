@@ -2,18 +2,25 @@
 
 namespace PublicSquare\Payments\Controller\Webhook;
 
+use Magento\AdminNotification\Model\ResourceModel\Inbox\CollectionFactory;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
+use Magento\Framework\Notification\NotifierInterface;
 use Magento\Framework\Phrase;
 use Psr\Log\LoggerInterface;
 use PublicSquare\Payments\Api\Constants;
+use PublicSquare\Payments\Exception\BadRequestException;
+use PublicSquare\Payments\Exception\ErrorNotifications;
+use PublicSquare\Payments\Exception\PSQException;
 use PublicSquare\Payments\Logger\Logger;
 use PublicSquare\Payments\Services\Events\RefundEventHandler;
 use PublicSquare\Payments\Services\Events\SettlementUpdateEventHandler;
 use PublicSquare\Payments\Services\WebhookSignatureService;
+use function __;
 
 class Index implements HttpPostActionInterface, CsrfAwareActionInterface
 {
@@ -28,6 +35,9 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
     private RefundEventHandler $refundEventHandler;
 
     private WebhookSignatureService $webhookSignatureService;
+    private RemoteAddress $remoteAddress;
+    private NotifierInterface $notifier;
+    private CollectionFactory $collectionFactory;
 
     public function __construct(
         Logger                       $logger,
@@ -35,7 +45,11 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         JsonFactory                  $jsonResultFactory,
         SettlementUpdateEventHandler $settlementUpdateEventHandler,
         RefundEventHandler           $refundEventHandler,
-        WebhookSignatureService        $webhookSignatureService,
+        WebhookSignatureService      $webhookSignatureService,
+        RemoteAddress                $remoteAddress,
+        NotifierInterface             $notifier,
+        CollectionFactory              $collectionFactory,
+
     )
     {
         $this->logger = $logger->withName('PSQ:Webhook');
@@ -44,7 +58,9 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         $this->settlementUpdateEventHandler = $settlementUpdateEventHandler;
         $this->refundEventHandler = $refundEventHandler;
         $this->webhookSignatureService = $webhookSignatureService;
-
+        $this->remoteAddress = $remoteAddress;
+        $this->notifier = $notifier;
+        $this->collectionFactory = $collectionFactory;
     }
 
     public function execute(): \Magento\Framework\Controller\Result\Json|\Magento\Framework\Controller\ResultInterface|\Magento\Framework\App\ResponseInterface
@@ -55,13 +71,28 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
             $body = $this->request->getContent();
             $this->logger->debug('Webhook invoked');
             $signature = $this->request->getHeader('X-Signature') ?: '';
+            if (!$signature) {
+                $this->logger->warning('Received unsigned request!', [
+                    'IP' => $this->remoteAddress->getRemoteAddress(),
+                    'Host' => $this->remoteAddress->getRemoteHost(),
+                ]);
+                $result->setStatusHeader(400);
+                return $result;
+            }
 
 
             if (!$this->webhookSignatureService->verify($signature, $body)) {
-                $this->logger->warning('PSQ Webhook: Invalid signature');
-                $result->setStatusHeader(400);
+                // Signature found and processed but did not pass verification
+                $result->setStatusHeader(401);
                 $result->setData(['error' => 'Invalid signature']);
                 $this->logger->error('Invalid signature');
+
+                $collection = $this->collectionFactory->create();
+                $exists = $collection->addFieldToFilter('title', ErrorNotifications::WEBHOOK_MISCONFIGURED)->addRemoveFilter()->getSize() > 0;
+                if (!$exists) {
+                    $description = 'Received invalid signature in the PublicSquare webhook. Verify the webhook configuration in the PublicSquare portal matches the plugin configuration in Stores > Configuration > Sales > Payment Methods > PublicSquare.';
+                    $this->notifier->addNotice(ErrorNotifications::WEBHOOK_MISCONFIGURED, $description);
+                }
                 return $result;
             }
 
@@ -83,9 +114,14 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
                     break;
                 default:
                     $this->logger->info('PSQ Webhook: Unhandled event type', ['event_type' => $eventType]);
+                    throw new BadRequestException('No handler found for event: [' . $event['id'] . '] with event_type: [' . $eventType . ']');
             }
             $result->setStatusHeader(200);
             $result->setData(['success' => true]);
+        } catch (PSQException $e) {
+            $this->logger->error($e->getMessage(), ['exception' => $e]);
+            $result->setStatusHeader($e->getPropagateHttpResponseCode());
+            $result->setData(['error' => $e->getMessage()]);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage(), ['exception' => $e]);
             $result->setStatusHeader(500);

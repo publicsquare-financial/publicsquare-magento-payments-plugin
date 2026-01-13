@@ -6,6 +6,7 @@ use Laminas\Http\Client;
 use Laminas\Http\Request;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
+use PublicSquare\Payments\Exception\NotConfiguredException;
 use PublicSquare\Payments\Helper\Config;
 use PublicSquare\Payments\Logger\Logger;
 
@@ -33,7 +34,7 @@ class RefundClient
     private function configurationRequired(): void {
         if(empty($this->privateKey)) {
             $this->logger->warning('Missing secret key for PublicSquare APIs');
-            throw new \RuntimeException('Private key not configured');
+            throw new NotConfiguredException(Config::PUBLICSQUARE_API_SECRET_KEY, 'PublicSquare Secret API key');
         }
     }
     /**

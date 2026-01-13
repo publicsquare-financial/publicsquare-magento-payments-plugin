@@ -13,6 +13,7 @@ use Magento\Sales\Api\Data\TransactionSearchResultInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use PHPUnit\Framework\TestCase;
+use PublicSquare\Payments\Exception\ResourceNotFoundException;
 use PublicSquare\Payments\Logger\Logger;
 use PublicSquare\Payments\Services\Events\RefundEventHandler;
 
@@ -165,11 +166,12 @@ class RefundEventHandlerTest extends TestCase
         $this->transactionRepository->method('getList')->willReturn($transactionSearchResults);
 
         $transactionSearchResults->method('getItems')->willReturn([]); // no transactions
-
-        $this->handler->handleEvent($event);
-
         $this->orderRepository->expects($this->never())
             ->method('save');
+        $this->expectException(ResourceNotFoundException::class);
+        $this->expectExceptionMessage('Resource type [Transaction] not found with identifier [pmt_1]!');
+        $this->handler->handleEvent($event);
+
     }
 
     function testExceptionHandling(): void

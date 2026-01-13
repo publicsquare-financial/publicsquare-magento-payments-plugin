@@ -15,6 +15,8 @@ use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use PublicSquare\Payments\Api\Constants;
+use PublicSquare\Payments\Exception\BadRequestException;
+use PublicSquare\Payments\Exception\ResourceNotFoundException;
 use PublicSquare\Payments\Logger\Logger;
 use PublicSquare\Payments\Services\Events\SettlementUpdateEventHandler;
 
@@ -126,6 +128,8 @@ class SettlementUpdateEventHandlerTest extends TestCase
             ],
         ];
 
+        $this->expectException(BadRequestException::class);
+        $this->expectExceptionMessage('Missing settlement: [] or payment: [pmt_1] in event:[test event] body.');
         $this->handler->handleEvent($event);
 
         $this->orderRepository->expects($this->never())
@@ -154,6 +158,8 @@ class SettlementUpdateEventHandlerTest extends TestCase
             ],
         ];
 
+        $this->expectException(BadRequestException::class);
+        $this->expectExceptionMessage('Missing settlement: [stl_1] or payment: [] in event:[test event] body.');
         $this->handler->handleEvent($event);
 
         $this->orderRepository->expects($this->never())
@@ -192,11 +198,14 @@ class SettlementUpdateEventHandlerTest extends TestCase
         $this->transactionRepository->method('getList')->willReturn($transactionSearchResults);
 
         $transactionSearchResults->method('getItems')->willReturn([]); // no transactions
-
-        $this->handler->handleEvent($event);
-
         $this->orderRepository->expects($this->never())
             ->method('save');
+
+        $this->expectException(ResourceNotFoundException::class);
+        $this->expectExceptionMessage('Resource type [Transaction] not found with identifier [pmt_1]!');
+        $this->handler->handleEvent($event);
+
+
     }
 
     function testExceptionHandling(): void

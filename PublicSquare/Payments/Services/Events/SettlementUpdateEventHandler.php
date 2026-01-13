@@ -7,6 +7,8 @@ use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use PublicSquare\Payments\Api\Constants;
+use PublicSquare\Payments\Exception\BadRequestException;
+use PublicSquare\Payments\Exception\ResourceNotFoundException;
 use PublicSquare\Payments\Logger\Logger;
 
 class SettlementUpdateEventHandler implements PSQEventHandler
@@ -59,7 +61,7 @@ class SettlementUpdateEventHandler implements PSQEventHandler
             $this->logger->error('Missing settlement or payment ID', ['settlement' => $settlement,
                 'event_id' => $eventId,
             ]);
-            throw new \RuntimeException('Missing settlement: [' . $settlementId . '] or payment: [' . $paymentId . '] for event:[' . $eventId . ']');
+            throw new BadRequestException('Missing settlement: [' . $settlementId . '] or payment: [' . $paymentId . '] in event:[' . $eventId . '] body.');
         }
 
         try {
@@ -74,7 +76,7 @@ class SettlementUpdateEventHandler implements PSQEventHandler
                 $this->logger->error('Transaction not found for payment ID', ['payment_id' => $paymentId,
                     'event_id' => $eventId,
                 ]);
-                return;
+                throw new ResourceNotFoundException($paymentId, 'Transaction');
             }
 
             $transaction = reset($transactions);

@@ -2,9 +2,13 @@
 
 namespace PublicSquare\Payments\Test\Unit\Controller\Webhook;
 
+use Magento\AdminNotification\Model\ResourceModel\Inbox\Collection;
+use Magento\AdminNotification\Model\ResourceModel\Inbox\CollectionFactory;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
+use Magento\Framework\Notification\NotifierInterface;
 use PHPUnit\Framework\TestCase;
 use PublicSquare\Payments\Controller\Webhook\Index;
 use PublicSquare\Payments\Logger\Logger;
@@ -22,7 +26,11 @@ class IndexTest extends TestCase
 
     private WebhookSignatureService $webhookSignatureService;
 
+    private NotifierInterface $notifier;
+    private CollectionFactory $collectionFactory;
+    private RemoteAddress $remoteAddress;
     private Index $controller;
+
     protected function setUp(): void
     {
         $this->logger = $this->createMock(Logger::class);
@@ -32,6 +40,9 @@ class IndexTest extends TestCase
         $this->settlementUpdateEventHandler = $this->createMock(SettlementUpdateEventHandler::class);
         $this->refundEventHandler = $this->createMock(RefundEventHandler::class);
         $this->webhookSignatureService = $this->createMock(WebhookSignatureService::class);
+        $this->notifier = $this->createMock(NotifierInterface::class);
+        $this->collectionFactory = $this->createMock(CollectionFactory::class);
+        $this->remoteAddress = $this->createMock(RemoteAddress::class);
 
         $this->controller = new Index(
             logger: $this->logger,
@@ -39,7 +50,10 @@ class IndexTest extends TestCase
             jsonResultFactory: $this->jsonFactory,
             settlementUpdateEventHandler: $this->settlementUpdateEventHandler,
             refundEventHandler: $this->refundEventHandler,
-            webhookSignatureService: $this->webhookSignatureService
+            webhookSignatureService: $this->webhookSignatureService,
+            notifier: $this->notifier,
+            collectionFactory: $this->collectionFactory,
+            remoteAddress: $this->remoteAddress,
         );
     }
 
@@ -48,7 +62,7 @@ class IndexTest extends TestCase
         $body = json_encode([
             'id' => 'event_123',
             'event_type' => 'settlement:update',
-            'entity' => ['id' => 'stl_1']
+            'entity' => ['id' => 'stl_1'],
         ]);
         $signature = 'dummy_signature';
 
@@ -74,7 +88,7 @@ class IndexTest extends TestCase
         $body = json_encode([
             'id' => 'event_456',
             'event_type' => 'refund:update',
-            'entity' => ['id' => 'rfd_1']
+            'entity' => ['id' => 'rfd_1'],
         ]);
         $signature = 'dummy_signature';
 
@@ -107,9 +121,16 @@ class IndexTest extends TestCase
 
         $result = $this->createMock(Json::class);
         $this->jsonFactory->method('create')->willReturn($result);
-        $result->expects($this->once())->method('setStatusHeader')->with(400);
+        $result->expects($this->once())->method('setStatusHeader')->with(401);
         $result->expects($this->once())->method('setData')->with(['error' => 'Invalid signature']);
 
+        $collection = $this->createMock(Collection::class);
+        $this->collectionFactory->method('create')->willReturn($collection);
+        $collection->method('addFieldToFilter')->willReturn($collection);
+        $collection->method('addRemoveFilter')->willReturn($collection);
+        $collection->method('getSize')->willReturn(0);
+
+        $this->notifier->expects(self::once())->method('addNotice');
         $response = $this->controller->execute();
         $this->assertSame($result, $response);
     }
@@ -138,7 +159,7 @@ class IndexTest extends TestCase
         $body = json_encode([
             'id' => 'event_789',
             'event_type' => 'unknown:event',
-            'entity' => ['id' => 'ent_1']
+            'entity' => ['id' => 'ent_1'],
         ]);
         $signature = 'dummy_signature';
 
@@ -149,9 +170,8 @@ class IndexTest extends TestCase
 
         $result = $this->createMock(Json::class);
         $this->jsonFactory->method('create')->willReturn($result);
-        $result->expects($this->once())->method('setStatusHeader')->with(200);
-        $result->expects($this->once())->method('setData')->with(['success' => true]);
-
+        $result->expects($this->once())->method('setStatusHeader')->with(400);
+        $result->expects($this->once())->method('setData');
 
 
         $response = $this->controller->execute();
@@ -163,7 +183,7 @@ class IndexTest extends TestCase
         $body = json_encode([
             'id' => 'event_999',
             'event_type' => 'settlement:update',
-            'entity' => ['id' => 'stl_1']
+            'entity' => ['id' => 'stl_1'],
         ]);
         $signature = 'dummy_signature';
 

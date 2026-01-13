@@ -6,6 +6,7 @@ use Magento\Framework\Api\FilterBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
+use PublicSquare\Payments\Exception\ResourceNotFoundException;
 use PublicSquare\Payments\Logger\Logger;
 
 class RefundEventHandler implements PSQEventHandler
@@ -75,7 +76,7 @@ class RefundEventHandler implements PSQEventHandler
 
             if (empty($transactions)) {
                 $this->logger->error('Transaction not found for payment ID', ['payment_id' => $paymentId, 'event_id' => $eventId,]);
-                throw new \RuntimeException('Transaction not found for payment ID: ' . $paymentId);
+                throw new ResourceNotFoundException($paymentId, 'Transaction');
             }
 
             $transaction = reset($transactions);
