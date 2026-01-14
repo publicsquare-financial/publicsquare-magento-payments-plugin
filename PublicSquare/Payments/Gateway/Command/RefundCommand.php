@@ -50,9 +50,9 @@ class RefundCommand implements CommandInterface
             ]);
 
             $refundResponse = $apiCall->getResponseData();
-            $this->logger->info("Got refund response: ", ['id' => $refundResponse['id']]);
             // Capture the refund id and save it in the additional data JSON column.
             if (isset($refundResponse['id'])) {
+                $this->logger->info('Got refund response: ', ['id' => $refundResponse['id']]);
                 $additionalInfo = $payment->getAdditionalInformation() ?? [];
                 $additionalInfo[Constants::REFUND_ID_KEY] = $refundResponse["id"];
                 $payment->setAdditionalInformation($additionalInfo);

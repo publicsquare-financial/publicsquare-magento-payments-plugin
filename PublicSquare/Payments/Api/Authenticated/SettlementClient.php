@@ -57,7 +57,7 @@ class SettlementClient
             $client = new Client();
             $client->setUri($this->baseUrl . '/settlements');
             $client->setMethod(Request::METHOD_GET);
-            $query = array_filter(
+            $queryParams = array_filter(
                 compact('settlement_id', 'include_type', 'start_dt', 'end_dt', 'status', 'query', 'page', 'size'),
                 static function ($value, $key) {
                     if($value === null) {
@@ -72,7 +72,7 @@ class SettlementClient
                 },
                 ARRAY_FILTER_USE_BOTH,
             );
-            $client->setParameterGet($query);
+            $client->setParameterGet($queryParams);
 
 
             $client->setHeaders([
