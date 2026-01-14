@@ -1,0 +1,12 @@
+### Get Webhooks
+# https://developers.publicsquare.com/api/accounts/get-all-webhook
+@page=1
+@size=10
+GET {{psqBaseUrl}}/webhooks
+    ?size={{size}}
+    &page={{page}}
+Accept: application/json
+X-Api-Key: {{psqApiKey}}
+
+
+###

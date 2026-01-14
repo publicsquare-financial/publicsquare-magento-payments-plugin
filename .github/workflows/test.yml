@@ -1,7 +1,20 @@
 name: Test
 on: push
 jobs:
-  test:
+  unit-tests:
+    runs-on: ubuntu-22.04
+    name: Run phpunit tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: php-actions/composer@v6
+        name: Install composer dependencies
+        with:
+          args: '--ignore-platform-req=ext-zip'
+      - name: Unit Test
+        run: make unit-test-verbose
+
+  acceptance-tests:
     runs-on: selenium
     name: Build and test codeception tests
     permissions:

@@ -1,0 +1,16 @@
+### Search Refunds
+# https://developers.publicsquare.com/api/financial/get-all-refunds
+@start_dt=2025-10-01:00:00.000Z
+@end_dt=2025-11-01:00:00.000Z
+@page=1
+@size=10
+GET {{psqBaseUrl}}/refunds
+    ?size={{size}}
+    &page={{page}}
+    &start_dt={{start_dt}}
+    &end_dt={{end_dt}}
+Accept: application/json
+X-Api-Key: {{psqApiKey}}
+
+
+###

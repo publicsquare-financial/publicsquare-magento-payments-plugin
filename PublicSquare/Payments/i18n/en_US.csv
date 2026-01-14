@@ -169,3 +169,5 @@ Currency,Currency
 "accept","Passed"
 "reject","Payment Blocked"
 "review","Needs Reviewed"
+"psq_refund_id","Refund ID"
+"psq_settlement_id","Settlement ID"

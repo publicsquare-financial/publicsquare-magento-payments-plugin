@@ -20,6 +20,24 @@ PublicSquare provides a software platform for retailers to access third-party pr
 * [if needed] re-deploy static view files:
 >`$> bin/magento setup:static-content:deploy`
 
+### Webhook Configuration
+
+**Automated Configuration**
+* [after v0.2.0 upgrade]
+```shell bash
+bin/magento psq:configure-webhook
+bin/magento cache:flush
+```
+
+**Manual Configuration** 
+
+1. In the [https://portal.publicsquare.com](PublicSquare Portal) create a new webhook under **Developer > Webhook** with the following properties:
+   * URL: `{magento.hostname}/publicsquare-payments/webhook/index`
+   * Event Types:
+     * refund:update
+     * settlement:update
+2. Enter the Webhook ID and Webhook Key in to the Magento Admin panel under: **Stores > Configuration > Sales > Payment Methods > PublicSquare**
+
 ### Docker Installation
 
 If you need a local installation of Magento2, the cleanest way is to use Docker. [This repo](https://github.com/markshust/docker-magento?tab=readme-ov-file#automated-setup-new-project) provides an out of the box installation with just a few commands.

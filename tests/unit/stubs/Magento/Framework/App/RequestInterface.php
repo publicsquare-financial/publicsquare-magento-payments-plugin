@@ -7,4 +7,6 @@ interface RequestInterface
 {
  function getPost(string $key);
  function getActionName(): string;
+ function getContent();
+ function getHeader($header);
 }

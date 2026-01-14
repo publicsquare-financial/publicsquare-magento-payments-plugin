@@ -1,7 +1,6 @@
 <?php
 namespace PublicSquare\Payments\Logger;
 
-use Monolog\Level;
 use Monolog\Logger;
 
 class Handler extends \Magento\Framework\Logger\Handler\Base
