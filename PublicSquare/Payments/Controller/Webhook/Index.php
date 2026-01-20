@@ -7,6 +7,7 @@ use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
 use Magento\Framework\Notification\NotifierInterface;
@@ -63,7 +64,7 @@ class Index implements HttpPostActionInterface, CsrfAwareActionInterface
         $this->collectionFactory = $collectionFactory;
     }
 
-    public function execute(): \Magento\Framework\Controller\Result\Json|\Magento\Framework\Controller\ResultInterface|\Magento\Framework\App\ResponseInterface
+    public function execute(): Json
     {
         $result = $this->jsonResultFactory->create();
         try {
