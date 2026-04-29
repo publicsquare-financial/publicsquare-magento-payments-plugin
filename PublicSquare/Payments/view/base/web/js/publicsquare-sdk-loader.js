@@ -1,21 +1,18 @@
 define([], function () {
   'use strict';
 
-  const DEFAULT_SDK_URL = 'https://js.publicsquare.com/';
+  var SDK_URL = 'https://js.publicsquare.com/v1.10.0/';
+  var DEFAULT_LOAD_TIMEOUT_MS = 15000;
 
-  let sdkLoadPromise = null;
-  let sdkReference = null;
+  var sdkLoadPromise = null;
+  var sdkReference = null;
 
-  function getConfiguredSdkUrl() {
-    const checkoutConfig = window.checkoutConfig;
-    const paymentConfig = checkoutConfig && checkoutConfig.payment && checkoutConfig.payment.publicsquare_payments;
-    const configuredUrl = paymentConfig && paymentConfig.checkoutScriptUrl;
-
-    if (typeof configuredUrl === 'string' && configuredUrl.trim()) {
-      return configuredUrl.trim();
+  function getLoadTimeoutMs() {
+    var override = window.publicsquareSdkLoadTimeoutMs;
+    if (typeof override === 'number' && override > 0) {
+      return override;
     }
-
-    return DEFAULT_SDK_URL;
+    return DEFAULT_LOAD_TIMEOUT_MS;
   }
 
   function normalizeSdkCandidate(candidate) {
@@ -30,16 +27,15 @@ define([], function () {
     return null;
   }
 
-  function resolveSdk(capturedModule) {
-    const candidates = [
-      capturedModule,
+  function resolveSdk(loadedModule) {
+    var candidates = [
+      loadedModule,
       window.publicsquarejs,
-      window.PublicSquare,
-      window.publicsquare,
+      window.PublicSquare
     ];
 
-    for (let index = 0; index < candidates.length; index += 1) {
-      const sdk = normalizeSdkCandidate(candidates[index]);
+    for (var i = 0; i < candidates.length; i += 1) {
+      var sdk = normalizeSdkCandidate(candidates[i]);
       if (sdk) {
         return sdk;
       }
@@ -48,58 +44,102 @@ define([], function () {
     return null;
   }
 
-  function runWithAmdGuard(executor) {
-    const hasOwnDefine = Object.prototype.hasOwnProperty.call(window, 'define');
-    const hasOwnRequire = Object.prototype.hasOwnProperty.call(window, 'require');
-    const originalDefine = window.define;
-    const originalRequire = window.require;
+  function getRequire() {
+    if (window.require) {
+      return window.require;
+    }
 
-    let capturedModule;
-    const guardedDefine = function (name, deps, factory) {
-      if (typeof name === 'function') {
-        capturedModule = name();
+    if (typeof require === 'function') {
+      return require;
+    }
+
+    return null;
+  }
+
+  function loadSdkModule() {
+    return new Promise(function (resolve, reject) {
+      var loaderRequire = getRequire();
+      if (!loaderRequire) {
+        reject(new Error('RequireJS is not available to load the PublicSquare SDK.'));
         return;
       }
 
-      if (Array.isArray(name) && typeof deps === 'function') {
-        capturedModule = deps();
-        return;
+      var timeoutMs = getLoadTimeoutMs();
+      var timeoutId = null;
+      var settled = false;
+
+      function cleanup() {
+        if (timeoutId !== null) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
       }
 
-      if (typeof name === 'string' && typeof deps === 'function') {
-        capturedModule = deps();
-        return;
+      function settle(fn) {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        cleanup();
+        fn();
       }
 
-      if (typeof name === 'string' && Array.isArray(deps) && typeof factory === 'function') {
-        capturedModule = factory();
+      function onLoaded(loadedModule) {
+        settle(function () {
+          var resolvedSdk = resolveSdk(loadedModule);
+          if (resolvedSdk) {
+            resolve(resolvedSdk);
+            return;
+          }
+          reject(new Error('PublicSquare SDK loaded, but no compatible global/module export was found.'));
+        });
       }
-    };
 
-    const restore = function () {
-      if (hasOwnDefine) {
-        window.define = originalDefine;
-      } else {
-        delete window.define;
+      function onError() {
+        settle(function () {
+          reject(new Error('Unable to load PublicSquare SDK script.'));
+        });
       }
 
-      if (hasOwnRequire) {
-        window.require = originalRequire;
-      } else {
-        delete window.require;
-      }
-    };
+      timeoutId = setTimeout(function () {
+        settle(function () {
+          reject(new Error('PublicSquare SDK load timed out after ' + timeoutMs + 'ms.'));
+        });
+      }, timeoutMs);
 
+      loaderRequire([SDK_URL], onLoaded, onError);
+    });
+  }
+
+  function runWithSdkAmdGuard(executor) {
+    var originalDefine = window.define;
+
+    if (typeof originalDefine !== 'function') {
+      return executor();
+    }
+
+    function guardedDefine() {
+      return originalDefine.apply(this, arguments);
+    }
+
+    // Keep AMD define available for Magento modules, but hide the AMD flag so
+    // SDK-injected UMD scripts attach their expected browser globals.
     window.define = guardedDefine;
-    window.require = undefined;
+
+    function restore() {
+      if (window.define === guardedDefine) {
+        window.define = originalDefine;
+      }
+    }
 
     try {
-      const result = executor(function () {
-        return capturedModule;
-      });
+      var result = executor();
 
       if (result && typeof result.then === 'function') {
-        return result.finally(restore);
+        return result.then(
+          function (value) { restore(); return value; },
+          function (error) { restore(); throw error; }
+        );
       }
 
       restore();
@@ -108,55 +148,6 @@ define([], function () {
       restore();
       throw error;
     }
-  }
-
-  function loadSdkScript(sdkUrl) {
-    return runWithAmdGuard(function (getCapturedModule) {
-      return new Promise(function (resolve, reject) {
-        const existingScript = Array.from(document.querySelectorAll('script'))
-          .find(function (script) {
-            return script.src === sdkUrl;
-          });
-
-        if (existingScript) {
-          const existingSdk = resolveSdk(getCapturedModule());
-          if (existingSdk) {
-            resolve(existingSdk);
-            return;
-          }
-
-          if (existingScript.readyState && existingScript.readyState !== 'loading') {
-            reject(new Error('PublicSquare SDK script exists, but no compatible export is available.'));
-            return;
-          }
-        }
-
-        const scriptTag = existingScript || document.createElement('script');
-
-        const onLoad = function () {
-          const resolvedSdk = resolveSdk(getCapturedModule());
-          if (resolvedSdk) {
-            resolve(resolvedSdk);
-            return;
-          }
-
-          reject(new Error('PublicSquare SDK loaded, but no compatible global/module export was found.'));
-        };
-
-        const onError = function () {
-          reject(new Error('Unable to load PublicSquare SDK script.'));
-        };
-
-        scriptTag.addEventListener('load', onLoad, { once: true });
-        scriptTag.addEventListener('error', onError, { once: true });
-
-        if (!existingScript) {
-          scriptTag.src = sdkUrl;
-          scriptTag.async = true;
-          (document.head || document.body).appendChild(scriptTag);
-        }
-      });
-    });
   }
 
   function ensureSdkLoaded() {
@@ -168,34 +159,39 @@ define([], function () {
       return sdkLoadPromise;
     }
 
-    const sdkUrl = getConfiguredSdkUrl();
-    sdkLoadPromise = loadSdkScript(sdkUrl).then(function (sdk) {
-      sdkReference = sdk;
-      return sdk;
-    });
+    sdkLoadPromise = loadSdkModule().then(
+      function (sdk) {
+        sdkReference = sdk;
+        return sdk;
+      },
+      function (error) {
+        sdkLoadPromise = null;
+        throw error;
+      }
+    );
 
     return sdkLoadPromise;
   }
 
-  const loader = {
+  var loader = {
     init: function (apiKey, options) {
       return ensureSdkLoaded().then(function (sdk) {
-        return runWithAmdGuard(function () {
+        return runWithSdkAmdGuard(function () {
           return Promise.resolve(sdk.init(apiKey, options)).then(function (initializedSdk) {
             sdkReference = initializedSdk || sdk;
             return initializedSdk;
           });
         });
       });
-    },
+    }
   };
 
   Object.defineProperty(loader, 'cards', {
     enumerable: true,
-    configurable: false,
+    configurable: true,
     get: function () {
       return sdkReference && sdkReference.cards;
-    },
+    }
   });
 
   return loader;

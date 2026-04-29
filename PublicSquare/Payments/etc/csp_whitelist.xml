@@ -27,6 +27,7 @@
                    <value id="bt-api" type="host">*.basistheory.com</value>
                    <value id="ld-api" type="host">*.launchdarkly.com</value>
                    <value id="dd-api" type="host">*.browser-intake-datadoghq.com</value>
+                   <value id="dd-logs-api" type="host">*.logs.datadoghq.com</value>
                </values>
         </policy>
         <policy id="img-src">
