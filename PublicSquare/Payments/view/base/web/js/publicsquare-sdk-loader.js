@@ -1,7 +1,7 @@
 define([], function () {
   'use strict';
 
-  const DEFAULT_SDK_URL = 'https://js.publicsquare.com/v1.10.0/';
+  const DEFAULT_SDK_URL = 'https://js.publicsquare.com/';
 
   let sdkLoadPromise = null;
   let sdkReference = null;
