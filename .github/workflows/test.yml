@@ -1,5 +1,9 @@
 name: Test
 on: push
+
+env:
+  GCP_PROJECT_ID: psqpayments-stg-plugins
+
 jobs:
   unit-tests:
     runs-on: ubuntu-22.04
@@ -44,8 +48,32 @@ jobs:
           ini-values: memory_limit=-1, date.timezone='UTC'
           coverage: xdebug
           tools: 'composer:v2'
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: psqpayments-shd-operations
+          workload_identity_provider: projects/50446899764/locations/global/workloadIdentityPools/psq-github/providers/psq-github
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+      - name: Load PublicSquare API keys from Secret Manager
+        shell: bash
+        run: |
+          PUBLICSQUARE_PUBLIC_KEY="$(gcloud secrets versions access latest --secret=psq-payments-publicsquare-api-key --project="$GCP_PROJECT_ID")"
+          PUBLICSQUARE_SECRET_KEY="$(gcloud secrets versions access latest --secret=psq-payments-publicsquare-api-secret --project="$GCP_PROJECT_ID")"
+
+          echo "::add-mask::$PUBLICSQUARE_PUBLIC_KEY"
+          echo "::add-mask::$PUBLICSQUARE_SECRET_KEY"
+
+          {
+            echo "PUBLICSQUARE_PUBLIC_KEY<<EOF"
+            echo "$PUBLICSQUARE_PUBLIC_KEY"
+            echo "EOF"
+            echo "PUBLICSQUARE_SECRET_KEY<<EOF"
+            echo "$PUBLICSQUARE_SECRET_KEY"
+            echo "EOF"
+          } >> "$GITHUB_ENV"
       - name: Docker compose
-        run: make setup ${{ secrets.PUBLICSQUARE_PUBLIC_KEY }} ${{ secrets.PUBLICSQUARE_SECRET_KEY }}
+        run: make setup "$PUBLICSQUARE_PUBLIC_KEY" "$PUBLICSQUARE_SECRET_KEY"
           
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
