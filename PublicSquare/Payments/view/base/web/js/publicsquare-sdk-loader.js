@@ -111,25 +111,87 @@ define([], function () {
     });
   }
 
-  function runWithSdkAmdGuard(executor) {
-    var originalDefine = window.define;
+  var amdGuardDepth = 0;
+  var amdGuardOriginalDefine = null;
+  var amdGuardOriginalAmd = null;
+  var amdGuardWrappedDefine = null;
 
-    if (typeof originalDefine !== 'function') {
-      return executor();
+  function isRequireJsScript(script) {
+    if (!script || typeof script.getAttribute !== 'function') {
+      return false;
     }
 
-    function guardedDefine() {
-      return originalDefine.apply(this, arguments);
-    }
+    return script.getAttribute('data-requiremodule') !== null ||
+      script.getAttribute('data-requirecontext') !== null;
+  }
 
-    // Keep AMD define available for Magento modules, but hide the AMD flag so
-    // SDK-injected UMD scripts attach their expected browser globals.
-    window.define = guardedDefine;
+  function installAmdGuard() {
+    if (amdGuardDepth === 0) {
+      var current = window.define;
+      if (typeof current === 'function') {
+        amdGuardOriginalDefine = current;
+        amdGuardOriginalAmd = current.amd;
 
-    function restore() {
-      if (window.define === guardedDefine) {
-        window.define = originalDefine;
+        var wrapped = function () {
+          return amdGuardOriginalDefine.apply(this, arguments);
+        };
+
+        // RequireJS-owned scripts (loaded via require([...])) carry
+        // data-requiremodule/data-requirecontext attributes. They keep seeing
+        // the original define.amd so AMD registration still works. Plain
+        // <script> tags injected by the SDK do not carry these attributes and
+        // see define.amd as undefined, which routes them through the UMD
+        // browser-global branch where they assign window.X = factory().
+        Object.defineProperty(wrapped, 'amd', {
+          configurable: true,
+          enumerable: true,
+          get: function () {
+            if (isRequireJsScript(document.currentScript)) {
+              return amdGuardOriginalAmd;
+            }
+            return undefined;
+          }
+        });
+
+        amdGuardWrappedDefine = wrapped;
+        window.define = wrapped;
       }
+    }
+
+    amdGuardDepth += 1;
+  }
+
+  function uninstallAmdGuard() {
+    if (amdGuardDepth <= 0) {
+      return;
+    }
+
+    amdGuardDepth -= 1;
+    if (amdGuardDepth !== 0) {
+      return;
+    }
+
+    if (amdGuardWrappedDefine !== null) {
+      if (window.define === amdGuardWrappedDefine) {
+        window.define = amdGuardOriginalDefine;
+      }
+
+      amdGuardOriginalDefine = null;
+      amdGuardOriginalAmd = null;
+      amdGuardWrappedDefine = null;
+    }
+  }
+
+  function runWithSdkAmdGuard(executor) {
+    installAmdGuard();
+
+    var released = false;
+    function release() {
+      if (released) {
+        return;
+      }
+      released = true;
+      uninstallAmdGuard();
     }
 
     try {
@@ -137,15 +199,15 @@ define([], function () {
 
       if (result && typeof result.then === 'function') {
         return result.then(
-          function (value) { restore(); return value; },
-          function (error) { restore(); throw error; }
+          function (value) { release(); return value; },
+          function (error) { release(); throw error; }
         );
       }
 
-      restore();
+      release();
       return result;
     } catch (error) {
-      restore();
+      release();
       throw error;
     }
   }
