@@ -58,7 +58,7 @@ class CheckoutTermsAndConditionsCest extends AcceptanceBase
                 'agreement_id' => $agreementId,
                 'store_id' => 1
             ]);
-            $I->runShellCommand('bin/magento cache:clean config');
+            $this->_runMagentoCommand($I, 'cache:clean config');
         }
     }
 
@@ -69,6 +69,6 @@ class CheckoutTermsAndConditionsCest extends AcceptanceBase
 
     private function _cleanup(AcceptanceTester $I)
     {
-        $I->runShellCommand('bin/magento cache:clean config');
+        $this->_runMagentoCommand($I, 'cache:clean config');
     }
 }

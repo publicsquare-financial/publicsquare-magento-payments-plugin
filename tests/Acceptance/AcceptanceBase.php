@@ -39,6 +39,18 @@ class AcceptanceBase
         $this->_getPastBrowserWarning($I);
     }
 
+    protected function _runMagentoCommand(AcceptanceTester $I, string $command): void
+    {
+        $I->runShellCommand(sprintf(
+            'bash -lc %s',
+            escapeshellarg(sprintf(
+                'if [ -x magento-install/bin/magento ]; then cd magento-install && ./bin/magento %s; else ./bin/magento %s; fi',
+                $command,
+                $command
+            ))
+        ));
+    }
+
     protected function _clickElementIfExists(AcceptanceTester $I, $selector): void
     {
         try {
@@ -86,11 +98,11 @@ class AcceptanceBase
     protected function _customerLogin(AcceptanceTester $I): void
     {
         $I->amOnPage('/customer/account/login');
-        // login page
-        $I->fillField('[type="email"]', 'roni_cost@example.com');
+        $I->waitForElementVisible('input[name="login[username]"]');
+        $I->fillField('input[name="login[username]"]', 'roni_cost@example.com');
         $password = new PasswordArgument('roni_cost3@example.com');
-        $I->fillField('[type="password"]', $password);
-        $I->click('.form-login .action.login.primary');
+        $I->fillField('input[name="login[password]"]', $password);
+        $I->click('.form.form-login .action.login.primary');
         $I->waitForText('My Account');
     }
 
@@ -112,16 +124,16 @@ class AcceptanceBase
 
         $this->_waitForLoading($I);
 
-        //$I->waitForElementVisible('#menu-magento-backend-stores a');
         $I->waitForElementClickable('#menu-magento-backend-stores a', 30);
         $I->click('#menu-magento-backend-stores a');
         $I->waitForText('Configuration');
         $I->waitForText('Terms and Conditions');
         $I->click('.submenu .item-system-config a');
         $I->waitForText('Country Options');
-        $I->click('#system_config_tabs div.config-nav-block:nth-child(5)');
+        $I->executeJS(
+            "document.querySelector('#system_config_tabs a[href*=\"/system_config/edit/section/payment/\"]').click();"
+        );
         $I->waitForText('Payment Methods');
-        $I->click('Payment Methods');
 
         // click on button.
         $I->click('#payment_us_publicsquare_payments-head');
@@ -225,7 +237,7 @@ class AcceptanceBase
         $I->selectOption('select[name="product[quantity_and_stock_status][is_in_stock]"]', 1);
         $I->click('Save');
         $this->_waitForLoading($I);
-        $I->runShellCommand('bin/magento indexer:reindex cataloginventory_stock');
+        $this->_runMagentoCommand($I, 'indexer:reindex cataloginventory_stock');
     }
 
     protected function _customerGoToAnOrder(AcceptanceTester $I, $doLogin=true): void
@@ -242,12 +254,12 @@ class AcceptanceBase
 
     protected function _addProductToCart(AcceptanceTester $I): void
     {
-        $I->amOnPage('/livingston-all-purpose-tight.html');
-        $I->waitForElement('.swatch-option.text');
-        $I->click('(//div[@class="swatch-option text"])[1]');
-        $I->click('div[data-option-label="Black"]');
+        $I->amOnPage('/joust-duffle-bag.html');
+        $I->waitForElementClickable('button[title="Add to Cart"]');
         $I->click('Add to Cart');
-        $I->waitForText('shopping cart');
+        $I->amOnPage('/checkout/cart/');
+        $I->waitForText('Shopping Cart');
+        $I->see('Joust Duffle Bag');
     }
 
     protected function _addVirtualProductToCart(AcceptanceTester $I): void
@@ -308,8 +320,7 @@ class AcceptanceBase
         $I->waitForElementClickable($firstRadio);
         $I->click($firstRadio);
         $I->click('Next');
-        $I->waitForText('Payment Method');
-        $I->waitForText('Order Total');
+        $I->waitForElementVisible('#checkout-step-payment', 30);
     }
 
     protected function _goToVirtualProductCheckout(AcceptanceTester $I) {
@@ -322,10 +333,24 @@ class AcceptanceBase
 
     protected function _goToCheckoutWhileLoggedIn(AcceptanceTester $I) {
         $I->amOnPage('/checkout');
+        $I->waitForElementNotVisible(".loading-mask", 60);
+        try {
+            $I->grabTextFrom('.new-address-popup>button.action-show-popup');
+        } catch (\Exception $e) {
+            $I->fillField('firstname', 'Billy');
+            $I->fillField('lastname', 'Bob');
+            $I->fillField('street[0]', '123 Main St');
+            $I->selectOption('select[name="country_id"]', 'US');
+            $I->selectOption('select[name="region_id"]', '15');
+            $I->fillField('city', 'Newark');
+            $I->fillField('postcode', '19711');
+            $I->fillField('telephone', '1234567890');
+        }
         $firstRadio = '.table-checkout-shipping-method tbody tr:nth-child(1) input[type="radio"]';
         $I->waitForElementClickable($firstRadio);
         $I->click($firstRadio);
         $I->click('Next');
+        $I->waitForElementVisible('#checkout-step-payment', 30);
     }
 
     protected function _makeSurePaymentMethodIsVisible(AcceptanceTester $I, $containerSelector = self::DEFAULT_CONTAINER_SELECTOR)
@@ -426,7 +451,9 @@ class AcceptanceBase
     {
         $this->_waitForLoading($I);
         $I->see('Payment Method');
-        $I->checkOption('.payment-methods input#publicsquare_payments_cc_vault_1');
+        $savedCardSelector = '.payment-methods input[id^="publicsquare_payments_cc_vault_"]';
+        $I->waitForElementVisible($savedCardSelector);
+        $I->checkOption($savedCardSelector);
         $submitButton = '.payment-method._active button[type="submit"]';
         $this->_waitForLoading($I);
         $I->waitForElementClickable($submitButton);
