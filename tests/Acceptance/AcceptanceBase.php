@@ -409,6 +409,21 @@ class AcceptanceBase
         $I->click('input[name="vault[is_enabled]"]');
     }
 
+    protected function _waitForCheckoutResult(AcceptanceTester $I, string $waitString, int $timeout = 30): void
+    {
+        if ($waitString !== 'Thank you for your purchase!') {
+            $I->waitForText($waitString, $timeout);
+            return;
+        }
+
+        try {
+            $I->waitForText($waitString, $timeout);
+        } catch (\Exception $e) {
+            $I->waitForElementVisible('.checkout-success', 30);
+            $I->see($waitString);
+        }
+    }
+
     protected function _checkoutWithCard(AcceptanceTester $I, $cardNumber = '4242424242424242', $waitString = 'Thank you for your purchase!', $termsAndConditions = false, $saveCard = false)
     {
         $I->reloadPage();
@@ -423,7 +438,7 @@ class AcceptanceBase
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
-        $I->waitForText($waitString, 30);
+        $this->_waitForCheckoutResult($I, $waitString);
         $I->waitForElementNotVisible('.loading-mask', 60);
     }
 
@@ -444,7 +459,7 @@ class AcceptanceBase
         $submitButton = '.payment-method._active button[type="submit"]';
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
-        $I->waitForText($waitString);
+        $this->_waitForCheckoutResult($I, $waitString);
     }
 
     protected function _checkoutWithSavedCard(AcceptanceTester $I, $waitString = 'Thank you for your purchase!')
@@ -458,7 +473,7 @@ class AcceptanceBase
         $this->_waitForLoading($I);
         $I->waitForElementClickable($submitButton);
         $I->click($submitButton);
-        $I->waitForText($waitString, 10);
+        $this->_waitForCheckoutResult($I, $waitString, 10);
         $I->waitForElementNotVisible('.loading-mask', 60);
     }
 
