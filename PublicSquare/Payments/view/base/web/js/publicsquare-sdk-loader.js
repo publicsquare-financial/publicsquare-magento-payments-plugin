@@ -241,7 +241,7 @@ define([], function () {
         return runWithSdkAmdGuard(function () {
           return Promise.resolve(sdk.init(apiKey, options)).then(function (initializedSdk) {
             sdkReference = initializedSdk || sdk;
-            return initializedSdk;
+            return sdkReference;
           });
         });
       });
