@@ -14,6 +14,7 @@ MAGENTO_HOST="${3:-magento.test}"
 # Common Magento paths
 MAGENTO_BIN="${MAGENTO_DIR}/bin/magento"
 MAGENTO_CLI="${MAGENTO_DIR}/bin/cli"
+MAGENTO_N98="${MAGENTO_DIR}/bin/n98-magerun2"
 MAGENTO_INIT="${MAGENTO_DIR}/bin/init"
 MAGENTO_RESTART="${MAGENTO_DIR}/bin/restart"
 MAGENTO_CREATE_USER="${MAGENTO_DIR}/bin/create-user"
@@ -123,10 +124,28 @@ echo "Disabling Two-Factor Auth for admin..."
   bin/magento module:disable Magento_AdminAdobeImsTwoFactorAuth Magento_TwoFactorAuth || true
 "${MAGENTO_CLI}" bin/magento cache:flush
 
+echo "Disabling Magento CAPTCHA for IT logins..."
+"${MAGENTO_CLI}" \
+  bin/magento config:set admin/captcha/enable 0 || true
+"${MAGENTO_CLI}" \
+  bin/magento config:set customer/captcha/enable 0 || true
+"${MAGENTO_CLI}" bin/magento cache:flush
+
 echo "Enabling Vault for saved cards..."
 "${MAGENTO_CLI}" \
   bin/magento config:set payment/publicsquare_payments_cc_vault/active 1 || true
 "${MAGENTO_CLI}" bin/magento cache:flush
+
+echo "Ensuring acceptance fixture customer exists..."
+if "${MAGENTO_N98}" customer:info roni_cost@example.com >/dev/null 2>&1; then
+  echo "Fixture customer already exists; skipping."
+else
+  "${MAGENTO_N98}" customer:create \
+    roni_cost@example.com \
+    roni_cost3@example.com \
+    Roni \
+    Cost
+fi
 
 echo "Disabling SMTP to avoid email send failures in IT..."
 "${MAGENTO_CLI}" \
